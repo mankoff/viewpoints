@@ -1,0 +1,9 @@
+(1) convert fl_flews over to cmake;
+(2) convert viewpoints over to cmake;
+(3) run cppcheck on viewpoint and flews;
+(4) run llvm static analyzer on the code;
+(5) bring over changes including ROOT reading;
+(6) attempt to build a simple JSON reader;
+(7) run cppcheck on the entire source code;
+
+
