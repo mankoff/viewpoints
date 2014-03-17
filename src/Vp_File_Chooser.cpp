@@ -571,11 +571,11 @@ void Vp_File_Chooser::directory( const char *directory_in)
 {
   // DIAGNOSTIC
   // cout << "Vp_File_Chooser::directory( \""
-  //      << ( directory_in == NULL ? "(null)" : directory_in)
+  //      << ( directory_in == nullptr ? "(null)" : directory_in)
   //      << "\")" << endl;
 
   // If no directory was specified, set it to the local directory
-  if( directory_in == NULL) directory_in = ".";
+  if( directory_in == nullptr) directory_in = ".";
 
   // For WIN32, see if the filename contains backslashes and if so, do a
   // cute loop through the string to convert backslashes to slashes.
@@ -870,7 +870,7 @@ void Vp_File_Chooser::filter( const char *pattern_in)
       char temp[ 1024];
       quote_pathname( temp, start, sizeof( temp));
       showChoice->add( temp);
-      if( strstr( start, "(*)") != NULL) doallfiles = 1;
+      if( strstr( start, "(*)") != nullptr) doallfiles = 1;
     }
   }
 
@@ -1191,7 +1191,7 @@ const char* Vp_File_Chooser::value( int index)
   const char *name;
   name = fileName->value();
   if( !( type_ & MULTI)) {
-    if( !name || !name[ 0]) return NULL;
+    if( !name || !name[ 0]) return nullptr;
     else return name;
   }
 
@@ -1218,7 +1218,7 @@ const char* Vp_File_Chooser::value( int index)
   }
 
   // If nothing was selected, return the contents of the filename field.
-  if( !name || !name[ 0]) return NULL;
+  if( !name || !name[ 0]) return nullptr;
   else return name;
 }
 
@@ -1228,12 +1228,12 @@ void Vp_File_Chooser::value( const char *filename_in)
 {
   // DIAGNOSTIC
   // cout << "Vp_File_Chooser::value( \""
-  //      << ( filename_in == NULL ? "(null)" : filename_in)
+  //      << ( filename_in == nullptr ? "(null)" : filename_in)
   //      << "\")" << endl;
 
-  // If the filename is NULL or empty, change the current directory to the
+  // If the filename is nullptr or empty, change the current directory to the
   // "My System" directory.
-  if( filename_in == NULL || !filename_in[ 0]) {
+  if( filename_in == nullptr || !filename_in[ 0]) {
     directory( filename_in);
     fileName->value( "");
     okButton->deactivate();
@@ -1258,7 +1258,7 @@ void Vp_File_Chooser::value( const char *filename_in)
   // display to that directory, otherwise change to current directory
   char pathname[ 1024];
   fl_filename_absolute( pathname, sizeof( pathname), filename_in);
-  if( ( slash = strrchr( pathname, '/')) != NULL) {
+  if( ( slash = strrchr( pathname, '/')) != nullptr) {
     if( !new_filename_isdir( pathname)) *slash++ = '\0';
     directory( pathname);
     if( *slash == '/') slash = pathname;
@@ -1322,7 +1322,7 @@ void Vp_File_Chooser::favoritesCB( Fl_Widget *pWidget)
   char name[ 32];
   char pathname[ 1024];
 
-  // If widget is NULL, load the favorites list...
+  // If widget is nullptr, load the favorites list...
   if( !pWidget) {
     favList->clear();
     favList->deselect();
@@ -1467,7 +1467,7 @@ void Vp_File_Chooser::update_favorites()
   // Get and display the home directory as a name in the favorites menu
   char menuname[ 2048];
   const char *home;
-  if( ( home = getenv( "HOME")) != NULL) {
+  if( ( home = getenv( "HOME")) != nullptr) {
     quote_pathname( menuname, home, sizeof(menuname));
     favoritesButton->add( menuname, FL_ALT + 'h', 0);
   }
@@ -1499,8 +1499,8 @@ void Vp_File_Chooser::update_preview()
   // Get filename and set new image
   const char *filename;
   Fl_Shared_Image *image;
-  if( ( filename = value()) == NULL || new_filename_isdir( filename))
-    image = NULL;
+  if( ( filename = value()) == nullptr || new_filename_isdir( filename))
+    image = nullptr;
   else {
     window->cursor( FL_CURSOR_WAIT);
     Fl::check();
@@ -1525,11 +1525,11 @@ void Vp_File_Chooser::update_preview()
     // Try to open file
     FILE *fp;
     if( filename) fp = fopen( filename, "rb");
-    else fp = NULL;
+    else fp = nullptr;
 
     // Try reading the first 1k of data for a label...
     int bytes;
-    if( fp != NULL) {
+    if( fp != nullptr) {
       bytes = fread( preview_text_, 1, sizeof( preview_text_) - 1, fp);
       preview_text_[ bytes] = '\0';
       fclose( fp);
@@ -1854,7 +1854,7 @@ void Vp_File_Chooser::fileNameCB()
            Fl::event_key() != FL_BackSpace) {
 
     // Check to see if the user has entered a directory.
-    if( ( slash = strrchr( pathname, '/')) == NULL)
+    if( ( slash = strrchr( pathname, '/')) == nullptr)
       slash = strrchr( pathname, '\\');
     if( !slash) return;
 
@@ -2094,7 +2094,7 @@ void Vp_File_Chooser::showChoiceCB()
   char *patend;
   char temp[ 1024];
   if( strcmp( item, custom_filter_label) == 0) {
-    if( ( item = fl_input( "%s",pattern_,custom_filter_label)) != NULL) {
+    if( ( item = fl_input( "%s",pattern_,custom_filter_label)) != nullptr) {
       strncpy( pattern_, item, sizeof(pattern_));
 
       quote_pathname( temp, item, sizeof(temp));
@@ -2102,12 +2102,12 @@ void Vp_File_Chooser::showChoiceCB()
       showChoice->value( showChoice->size() - 2);
     }
   }
-  else if( ( patstart = strchr( item, '(')) == NULL) {
+  else if( ( patstart = strchr( item, '(')) == nullptr) {
     strncpy( pattern_, item, sizeof(pattern_));
   }
   else {
     strncpy( pattern_, patstart + 1, sizeof( pattern_));
-    if( ( patend = strrchr( pattern_, ')')) != NULL) *patend = '\0';
+    if( ( patend = strrchr( pattern_, ')')) != nullptr) *patend = '\0';
   }
 
   // Load the pattern into the file browser
@@ -2224,7 +2224,7 @@ void Vp_File_Chooser::cb_delimiterButtons_i( Fl_Round_Button* pButton, void*)
     strcpy( cBuf, custom_delimiter_input->value());
 
     // OBSOLETE CODE to remove escape sequences by hand
-    // if( cBuf == NULL || strlen( cBuf) <= 0) delimiter_char_ = '\t';
+    // if( cBuf == nullptr || strlen( cBuf) <= 0) delimiter_char_ = '\t';
     // else if( cBuf[ 0] == '\\') {
     //   if( strlen( cBuf) <= 1) delimiter_char_ = '\t';
     //   else delimiter_char_ = '\t';
@@ -2459,7 +2459,7 @@ void Vp_File_Chooser::newdir()
 
   // Get a directory name from the user
   const char *dir;
-  if( ( dir = fl_input("%s",NULL,new_directory_label)) == NULL) return;
+  if( ( dir = fl_input("%s",nullptr,new_directory_label)) == nullptr) return;
 
   // Make it relative to the current directory as needed...
   #if (defined(WIN32) && ! defined (__CYGWIN__)) || defined(__EMX__)
