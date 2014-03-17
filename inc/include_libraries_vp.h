@@ -142,8 +142,8 @@
 #include <FL/Fl_Value_Slider_Input.H>
 
 // local vp modifications to flews widgets
-#include "Fl_Hor_Value_Slider_Input.H"  // modified flews slider
-#include "Vp_Value_Input_Spin.H" // modified flews spinner
+#include "Fl_Hor_Value_Slider_Input.h"  // modified flews slider
+#include "Vp_Value_Input_Spin.h" // modified flews spinner
 
 // Make provisions for PRG's new file chooser
 #include "Vp_File_Chooser.h"
@@ -205,5 +205,9 @@
 
 // FITS package includes (must be last?)
 #include <fitsio.h>
+
+#ifndef UNUSED
+#define UNUSED(expr) do { (void)(expr); } while (0)
+#endif
 
 #endif   // INCLUDE_LIBRARIES_VP_H

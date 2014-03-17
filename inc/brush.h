@@ -85,9 +85,17 @@ class Brush : public Fl_Group
     
     // Define buffers to save state
     int brush_symbol_save;
+
     float brush_size_save;
-    float alpha_save, cutoff_save, lum1_save, lum2_save;
-    double red_value_save, green_value_save, blue_value_save;
+    float alpha_save;
+		float cutoff_save;
+
+		float lum1_save;
+		float lum2_save;
+
+    double red_value_save;
+		double green_value_save;
+		double blue_value_save;
 
     // When the class Archive corresponds to an output archive, the &
     // operator is defined similar to <<.  Likewise, when the class Archive 
@@ -146,11 +154,11 @@ class Brush : public Fl_Group
     // Static functions for access by Fl Widget callbacks
     void brush_changed();
     static void static_brush_changed( Fl_Widget *w, Brush *brush)
-    { brush->brush_changed(); }
+    { UNUSED(w); brush->brush_changed(); }
 
     void change_color();
     static void static_change_color( Fl_Widget *w, Brush *brush)
-    { brush->change_color(); }
+    { UNUSED(w); brush->change_color(); }
 
     // Pointers to sliders & menus
     Fl_Hor_Value_Slider_Input *pointsize;
@@ -162,12 +170,12 @@ class Brush : public Fl_Group
     Fl_Button *clear_now_button;
     void clear_now ();
     static void static_clear_now( Fl_Widget *w, Brush *brush)
-    { brush->clear_now(); }
+    { UNUSED(w); brush->clear_now(); }
 
     Fl_Button *reset_button;
     void reset ();
     static void static_reset( Fl_Widget *w, Brush *brush)
-    { brush->reset(); }
+    { UNUSED(w); brush->reset(); }
 
     // Symbol menu with points, round points, crosses, etc.
     Fl_Choice *symbol_menu;

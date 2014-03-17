@@ -247,7 +247,7 @@ class Data_File_Manager
     int write_table_to_fits_file();
 
     // Column label edit window methods
-    static void edit_column_info( Fl_Widget *o);
+    static void edit_column_info( Fl_Widget *o, void *);
     void edit_column_info_i( Fl_Widget *o);
     void refresh_edit_column_info();
     static void delete_labels( Fl_Widget *o, void* user_data);

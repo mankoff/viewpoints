@@ -179,15 +179,15 @@ class Control_Panel_Window : public Fl_Group
     // Static functions for access by Fl Widget callbacks
     static void broadcast_change( Fl_Widget *global_widget);
     static void static_extract_and_redraw( Fl_Widget *w, Control_Panel_Window *cpw)
-    { cpw->extract_and_redraw(); }
+    { UNUSED(w); cpw->extract_and_redraw(); }
     static void static_maybe_redraw( Fl_Widget *w, Control_Panel_Window *cpw)
-    { cpw->maybe_redraw() ;}
+    { UNUSED(w); cpw->maybe_redraw() ;}
     static void replot( Fl_Widget *w, Control_Panel_Window *cpw)
-    { cpw->pw->needs_redraw=1;}
+    { UNUSED(w); cpw->pw->needs_redraw=1;}
     static void reset_view( Fl_Widget *w, Control_Panel_Window *cpw)
-    { cpw->pw->reset_view() ;}
+    { UNUSED(w); cpw->pw->reset_view() ;}
     static void redraw_one_plot( Fl_Widget *w, Control_Panel_Window *cpw)
-    { cpw->pw->redraw_one_plot();}
+    { UNUSED(w); cpw->pw->redraw_one_plot();}
 
     // Pointers to sliders & menus
     // Fl_Hor_Value_Slider_Input *pointsize_slider, *selected_pointsize_slider;
