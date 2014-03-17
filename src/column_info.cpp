@@ -35,8 +35,14 @@
 
 //***************************************************************************
 // Column_Info::Column_Info() --  Default constructor clears everything.
-Column_Info::Column_Info() : jvar_( 0), label( ""), hasASCII( 0),
-  isVector( 0), vectorLabel( ""), vectorIndex( 0), isRanked( 0)
+Column_Info::Column_Info() : 
+	jvar_(0), 
+	label(""), 
+	hasASCII(0),
+  vectorLabel(""),
+	isVector(0),
+	vectorIndex(0), 
+	isRanked(0)
 {
   ascii_values_.erase( ascii_values_.begin(), ascii_values_.end());
 }
@@ -45,9 +51,12 @@ Column_Info::Column_Info() : jvar_( 0), label( ""), hasASCII( 0),
 // Column_Info::Column_Info( sColumnInfo) --  Invoke default constructor to
 // clear everything, then parse header string from binary file to load 
 // column info.
-Column_Info::Column_Info( string sColumnInfo) : 
-  jvar_( 0), label( ""), hasASCII( 0)
+Column_Info::Column_Info(string sColumnInfo) : 
+  jvar_(0),
+	label(""),
+	hasASCII( 0)
 {
+	UNUSED(sColumnInfo);
   ascii_values_.erase( ascii_values_.begin(), ascii_values_.end());
   // Code to parse string has yet to be written
 }
@@ -239,9 +248,12 @@ Column_Info& Column_Info::add_info_and_update_data( Column_Info &old_info)
 //***************************************************************************
 // Column_Info::ascii_value( iValue) -- Protect against bad indices, then
 // loop through map of ASCII values to get value for this index.  
-string Column_Info::ascii_value( int iValue)
+string Column_Info::ascii_value(int iValue)
 {
-  if( 0>iValue || iValue >= ascii_values_.size()) return string( "BAD_INDEX_VP");
+  if(0 > iValue || size_t(iValue) >= ascii_values_.size())
+	{
+		return string( "BAD_INDEX_VP");
+	}
   map<string,int>::iterator iter = ascii_values_.begin();
   for( int i=0; i<iValue; i++) {
     iter++;
