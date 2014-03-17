@@ -27,6 +27,10 @@
 #include "Vp_File_Chooser.h"
 #include <cstring>
 
+#ifndef UNUSED
+#define UNUSED(expr) do { (void)(expr); } while (0)
+#endif
+
 // Define statics to hol bitmap image for new folder button
 static unsigned char idata_new[] = {
   0,0,120,0,132,0,2,1,
@@ -2261,6 +2265,7 @@ void Vp_File_Chooser::cb_delimiterInput( Fl_Input* o, void* v)
 // custom delimiter input field.  Sets button label and delimiter character.
 void Vp_File_Chooser::cb_delimiterInput_i( Fl_Input* pButton, void*) 
 {
+	UNUSED(pButton);
   // Set the radio buttons
   no_delimiter->value( 0);
   comma_delimiter->value( 0);
