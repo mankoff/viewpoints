@@ -11,7 +11,7 @@
 //
 // Required packages
 //    FLTK 1.1.6 -- Fast Light Toolkit graphics package
-//    FLEWS 0.3 -- Extensions to FLTK 
+//    FLEWS 0.3 -- Extensions to FLTK
 //    OGLEXP 1.2.2 -- Access to OpenGL extension under Windows
 //    GSL 1.6 -- Gnu Scientific Library package for Windows
 //    Blitz++ 0.9 -- Various math routines
@@ -48,7 +48,7 @@ const GLdouble Brush::initial_colors[NBRUSHES][4] = {
   {1,1,0,1}, // yellow
   {0.5,0.5,0.5,1}, // grey
 };
-  
+
 // Define arrays to hold menu items for symbol menu.  Each one gets its
 // image() set to one of the above 16x16 grayscale Fl_Pixmaps.
 Fl_Menu_Item Brush::symbol_menu_items[ NSYMBOLS+1];
@@ -78,7 +78,7 @@ Fl_Pixmap Brush::image_14( Symbol_Menu::idata_14);
 Fl_Pixmap Brush::image_18( Symbol_Menu::idata_18);
 Fl_Pixmap Brush::image_19( Symbol_Menu::idata_19);
 
-// Instantiate global Fl_Pixmap objects to hold images of numbers and 
+// Instantiate global Fl_Pixmap objects to hold images of numbers and
 // letters for use in the symbol menu.
 Fl_Pixmap Brush::image_osaka_21( Symbol_Menu::idata_osaka_21);
 Fl_Pixmap Brush::image_osaka_22( Symbol_Menu::idata_osaka_22);
@@ -118,18 +118,17 @@ Fl_Pixmap Brush::image_osaka_62( Symbol_Menu::idata_osaka_62);
 Fl_Pixmap Brush::image_osaka_63( Symbol_Menu::idata_osaka_63);
 
 //***************************************************************************
-// Brush::Brush() --  Default constructor with no arguments.  Used only for 
-// serialization.  Do nothing except call the constructor for the parent 
+// Brush::Brush() --  Default constructor with no arguments.  Used only for
+// serialization.  Do nothing except call the constructor for the parent
 // class, Fl_Group, with dummy arguments.
 Brush::Brush() : Fl_Group( 10, 10, 10, 10),
-  index( 0),
-  brush_symbol_save( 0), brush_size_save( 0),
+  brush_symbol_save(0), brush_size_save( 0),
   alpha_save( 1.0), cutoff_save( 0.0), lum1_save( 0.2), lum2_save( 1.0),
-  red_value_save( 1.0), green_value_save( 0), blue_value_save( 0)
+  red_value_save( 1.0), green_value_save( 0), blue_value_save( 0), index(0)
 {}
 
 //***************************************************************************
-// Brush::Brush( x, y, w, h) --  Constructor.  Set parameters and tab shape, 
+// Brush::Brush( x, y, w, h) --  Constructor.  Set parameters and tab shape,
 // invoke the make_widgets() method to generate the control panel
 Brush::Brush(int x, int y, int w, int h) : Fl_Group( x, y, w, h)
 {
@@ -142,12 +141,12 @@ Brush::Brush(int x, int y, int w, int h) : Fl_Group( x, y, w, h)
   if( index > 0) {
     label( "@circle");
     labelsize( 15);
-  } 
+  }
   else {
     label( "@square");
   }
 
-  // Invoke make_widgets() method to generate the brush control panel, then 
+  // Invoke make_widgets() method to generate the brush control panel, then
   // end the group
   make_widgets(this);
   end();
@@ -200,10 +199,10 @@ void Brush::copy_state( Brush* brush_save)
   green_value_save = brush_save->green_value_save;
   blue_value_save = brush_save->blue_value_save;
 }
-  
+
 //***************************************************************************
-// Brush::load_state() -- Load state parameters into widgets.  WARNING: 
-// There is no proetction against bad state parameters or the possibility 
+// Brush::load_state() -- Load state parameters into widgets.  WARNING:
+// There is no proetction against bad state parameters or the possibility
 // that this might be a default object without any widgets.
 void Brush::load_state()
 {
@@ -242,7 +241,7 @@ void Brush::change_color()
   labelcolor(fl_rgb_color((uchar)(c[0]*255), (uchar)(c[1]*255), (uchar)(c[2]*255)));
   redraw_label();
 
-	// keep tab's (parent's) colored labels updated while the brush color 
+	// keep tab's (parent's) colored labels updated while the brush color
   // changes and the tab is selected
   brushes_tab->labelcolor(labelcolor());
   brushes_tab->redraw_label();
@@ -252,7 +251,7 @@ void Brush::change_color()
 //***************************************************************************
 // Brush::reset() -- Reset brush to default colors, symbol, size, and
 // alpha-cutoff and luminosity parameters.
-void Brush::reset () 
+void Brush::reset ()
 {
   double c[3] = {
     Brush::initial_colors[index][0],
@@ -263,12 +262,12 @@ void Brush::reset ()
   symbol_menu->value(0);
   pointsize->value(default_pointsize);
   alpha->value(1.0);
-  lum1->value(0.2);  // !!! 
+  lum1->value(0.2);  // !!!
   lum2->value(1.0);
 }
 
 //***************************************************************************
-// Brush::clear_now() -- Clear all points that are currently selected using 
+// Brush::clear_now() -- Clear all points that are currently selected using
 // this brush leaving all other brush's selections alone.
 void Brush::clear_now()
 {
@@ -283,7 +282,7 @@ void Brush::clear_now()
 }
 
 //***************************************************************************
-// Brush::set_sizes( size) -- Loopp trough all brishes to set the pointsize 
+// Brush::set_sizes( size) -- Loopp trough all brishes to set the pointsize
 // of all brushes (called when (re)initializing all brushes)
 void Brush::set_sizes( float size)
 {
@@ -299,9 +298,9 @@ void Brush::set_sizes( float size)
 // Brush::make_widgets( *bw) -- Make widgets to hold brush control panel
 void Brush::make_widgets( Brush *bw)
 {
-  // Since these (virtual) control panels are really groups inside a tab 
-  // inside a window, set their child widget's coordinates relative to 
-  // their enclosing window's position. 
+  // Since these (virtual) control panels are really groups inside a tab
+  // inside a window, set their child widget's coordinates relative to
+  // their enclosing window's position.
   int xpos = this->x()+50;
   int ypos = this->y()+10;
 
@@ -318,8 +317,8 @@ void Brush::make_widgets( Brush *bw)
 
   // reset all parameters for this brush
   reset_button = new Fl_Button( xpos+pointsize->w()+85, ypos, 20, 20, "reset brush");
-  reset_button->align( FL_ALIGN_LEFT); 
-  reset_button->selection_color( FL_BLUE); 
+  reset_button->align( FL_ALIGN_LEFT);
+  reset_button->selection_color( FL_BLUE);
   reset_button->callback((Fl_Callback*)static_reset, this);
   reset_button->value( 0);
   reset_button->tooltip( "restore default parameters for this brush");
@@ -336,7 +335,7 @@ void Brush::make_widgets( Brush *bw)
   // Define symbol types menu for this brush
   symbol_menu = new Fl_Choice(xpos+alpha->w()+45, ypos, 60, 20);
 
-  // Call the Symbol_Menu::build_symbol_menu() method to do the dirty work 
+  // Call the Symbol_Menu::build_symbol_menu() method to do the dirty work
   // of setting up all the glyphs for the symbols menu.
   build_symbol_menu();
   symbol_menu->textsize( 12);
@@ -372,7 +371,7 @@ void Brush::make_widgets( Brush *bw)
   lum2->align(FL_ALIGN_LEFT);
   lum2->callback((Fl_Callback*)static_brush_changed, this);
   lum2->step(0.0001);
-  lum2->bounds(0.0,2.0); 
+  lum2->bounds(0.0,2.0);
   lum2->value(1.0);
   lum2->tooltip( "change accumulated luminosity when overplotting this brush");
 
@@ -383,22 +382,22 @@ void Brush::make_widgets( Brush *bw)
 
   // MCL Should there be a "selection" menu: clear, replace, intersect (and), add (or), replace always, paint mode, invert...
   clear_now_button = new Fl_Button( xpos+=110, ypos, 20, 20, "clear selection");
-  clear_now_button->align( FL_ALIGN_RIGHT); 
-  clear_now_button->selection_color( FL_BLUE); 
+  clear_now_button->align( FL_ALIGN_RIGHT);
+  clear_now_button->selection_color( FL_BLUE);
   clear_now_button->callback((Fl_Callback*)static_clear_now, this);
   clear_now_button->value( 0);
   clear_now_button->tooltip( "de-select all points currently selected by this brush");
 
   add_to_selection = new Fl_Button( xpos, ypos+=20, 20, 20, "extend selection");
-  add_to_selection->align( FL_ALIGN_RIGHT); 
-  add_to_selection->selection_color( FL_BLUE); 
+  add_to_selection->align( FL_ALIGN_RIGHT);
+  add_to_selection->selection_color( FL_BLUE);
   add_to_selection->type( FL_TOGGLE_BUTTON);
   add_to_selection->value( index?0:1);  // all brushes default this to off, except brush 0.
   add_to_selection->tooltip( "disable smart auto-clear");
 
   paint = new Fl_Button( xpos, ypos+=20, 20, 20, "paint");
-  paint->align( FL_ALIGN_RIGHT); 
-  paint->selection_color( FL_BLUE); 
+  paint->align( FL_ALIGN_RIGHT);
+  paint->selection_color( FL_BLUE);
   paint->type( FL_TOGGLE_BUTTON);
   paint->tooltip( "dribble paint (do not erase) when dragging or shift-dragging");
 }
@@ -422,18 +421,18 @@ void Brush::build_symbol_menu()
     if( i < NSYMBOLS) {
       m->labeltype_ = FL_NORMAL_LABEL;
       m->labelsize_ = 14;
-      m->user_data_ = (void *)i;
+      m->user_data_ = static_cast<void*>(&i);
     }
     else {
       m->labeltype_ = 0;
       m->labelsize_ = 0;
-      m->user_data_ = (void *)0;
+      m->user_data_ = nullptr;
     }
   }
 
   // The following was hand-transformed from code generated by fluid.
-  // Load images of symbols into the array of symbol menu items.  
-  symbol_menu_items[0].image( image_0); 
+  // Load images of symbols into the array of symbol menu items.
+  symbol_menu_items[0].image( image_0);
   symbol_images[0] = &image_0;
   symbol_menu_items[1].image( image_line);
   symbol_menu_items[2].image( image_1);
@@ -452,8 +451,8 @@ void Brush::build_symbol_menu()
   symbol_menu_items[15].image( image_14);
   symbol_menu_items[16].image( image_18);
   symbol_menu_items[17].image( image_19);
-  
-  // Load images of numbers and letters into the array of symbol menu items.  
+
+  // Load images of numbers and letters into the array of symbol menu items.
   symbol_menu_items[18].image( image_osaka_21);
   symbol_menu_items[19].image( image_osaka_22);
   symbol_menu_items[20].image( image_osaka_23);
