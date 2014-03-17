@@ -11,7 +11,7 @@
 //
 // Required packages
 //    FLTK 1.1.6 -- Fast Light Toolkit graphics package
-//    FLEWS 0.3 -- Extensions to FLTK 
+//    FLEWS 0.3 -- Extensions to FLTK
 //    OGLEXP 1.2.2 -- Access to OpenGL extension under Windows
 //    GSL 1.6 -- Gnu Scientific Library package for Windows
 //    Blitz++ 0.9 -- Various math routines
@@ -39,7 +39,7 @@
 // Set static data members for class Control_Panel_Window::
 //
 
-// Define an array of menu items for the axis selection menus.  This will 
+// Define an array of menu items for the axis selection menus.  This will
 // get filled with strings naming the axes (later, after they're read in)
 // and their respective indices (as user_data).
 Fl_Menu_Item Control_Panel_Window::varindex_menu_items[ MAXVARS+2] = { Fl_Menu_Item()};
@@ -74,20 +74,29 @@ Fl_Menu_Item Control_Panel_Window::text_ordering_style_menu_items[] = {
 
 //***************************************************************************
 // Control_Panel_Window::Control_Panel_Window() --  Default constructor with
-// no arguments.  Used only for serialization.  Do nothing except call the 
+// no arguments.  Used only for serialization.  Do nothing except call the
 // constructor for the parent class, Fl_Group, with dummy arguments.
-Control_Panel_Window::Control_Panel_Window() : Fl_Group( 10, 10, 10, 10),
-  index( 0),
-  ivar_save_( 0), jvar_save_( 0), kvar_save_( 0),
-  ix_style_( 1), jy_style_( 1), kz_style_( 1),
-  ix_lock_( 0), jy_lock_( 0), kz_lock_( 0),
-  background_save_( 0.0), luminosity_save_( 1.0), point_size_save_( 0.0),
-  scale_points_save_( 0), transform_style_save_( 0)
+Control_Panel_Window::Control_Panel_Window() :
+	Fl_Group( 10, 10, 10, 10),
+  ivar_save_( 0),
+	jvar_save_( 0),
+	kvar_save_( 0),
+  ix_style_( 1),
+	jy_style_( 1),
+	kz_style_( 1),
+  ix_lock_( 0),
+	jy_lock_( 0),
+	kz_lock_( 0),
+  background_save_( 0.0),
+	luminosity_save_( 1.0),
+	point_size_save_( 0.0),
+  scale_points_save_( 0),
+	transform_style_save_( 0), index( 0)
 {}
 
 //***************************************************************************
-// Control_Panel_Window::Control_Panel_Window( x, y, w, h) --  Default 
-// constructor.  Do nothing except call the constructor for the parent 
+// Control_Panel_Window::Control_Panel_Window( x, y, w, h) --  Default
+// constructor.  Do nothing except call the constructor for the parent
 // class, Fl_Group.
 Control_Panel_Window::Control_Panel_Window(
   int x, int y, int w, int h) : Fl_Group( x, y, w, h)
@@ -95,7 +104,7 @@ Control_Panel_Window::Control_Panel_Window(
 
 //***************************************************************************
 // Control_Panel_Window::make_state( &cp) -- Examine widgets to generate and
-// store state parameters.  Used only by the serialize method.  Note that 
+// store state parameters.  Used only by the serialize method.  Note that
 // this does not axctually save parameters to the configuration file.
 void Control_Panel_Window::make_state()
 {
@@ -115,7 +124,7 @@ void Control_Panel_Window::make_state()
 }
 
 //***************************************************************************
-// Control_Panel_Window::copy_state( &cp) -- Copy state parameters from 
+// Control_Panel_Window::copy_state( &cp) -- Copy state parameters from
 // another object.
 void Control_Panel_Window::copy_state( Control_Panel_Window* cp)
 {
@@ -127,9 +136,9 @@ void Control_Panel_Window::copy_state( Control_Panel_Window* cp)
   ix_style_ = cp->ix_style_;
   jy_style_ = cp->jy_style_;
   kz_style_ = cp->kz_style_;
-  ix_lock_ = ix_lock_;
-  jy_lock_ = jy_lock_;
-  kz_lock_ = kz_lock_;
+  ix_lock_ = cp->ix_lock_;
+  jy_lock_ = cp->jy_lock_;
+  kz_lock_ = cp->kz_lock_;
   point_size_save_ = cp->point_size_save_;
   scale_points_save_ = cp->scale_points_save_;
   transform_style_save_ = cp->transform_style_save_;
@@ -137,7 +146,7 @@ void Control_Panel_Window::copy_state( Control_Panel_Window* cp)
 }
 
 //***************************************************************************
-// Control_Panel_Window::load_state() -- Load state parameters into widgets.  
+// Control_Panel_Window::load_state() -- Load state parameters into widgets.
 // WARNING: There is no protection against bad state parameters or the
 // possibility that this might be a default object without any widgets.
 void Control_Panel_Window::load_state()
@@ -158,9 +167,9 @@ void Control_Panel_Window::load_state()
 }
 
 //***************************************************************************
-// Control_Panel_Window::restrict_axis_indices( ivar_max, jvar_max, kvar_max) 
+// Control_Panel_Window::restrict_axis_indices( ivar_max, jvar_max, kvar_max)
 // restrict axes indices.
-void Control_Panel_Window::restrict_axis_indices( 
+void Control_Panel_Window::restrict_axis_indices(
   int ivar_max, int jvar_max, int kvar_max)
 {
   if( ivar_save_ > ivar_max) ivar_save_ = ivar_max;
@@ -169,9 +178,9 @@ void Control_Panel_Window::restrict_axis_indices(
 }
 
 //***************************************************************************
-// Control_Panel_Window::transform_style_value() -- Examine the relevant 
-// widgets to get the y-axis tranform style.  NOTE: this code will have to 
-// be changed whenever the transform style buttons are added, modified, or 
+// Control_Panel_Window::transform_style_value() -- Examine the relevant
+// widgets to get the y-axis tranform style.  NOTE: this code will have to
+// be changed whenever the transform style buttons are added, modified, or
 // removed!
 int Control_Panel_Window::transform_style_value()
 {
@@ -183,9 +192,9 @@ int Control_Panel_Window::transform_style_value()
 }
 
 //***************************************************************************
-// Control_Panel_Window::tranform_style_value( tranform_style_in) -- Set 
-// the relevant widgets to set the y-axis tranform style.  NOTE: This code 
-// will have to be changed whenever the transform style buttons are added, 
+// Control_Panel_Window::tranform_style_value( tranform_style_in) -- Set
+// the relevant widgets to set the y-axis tranform style.  NOTE: This code
+// will have to be changed whenever the transform style buttons are added,
 // modified, or removed!
 void Control_Panel_Window::transform_style_value( int transform_style_in)
 {
@@ -200,8 +209,8 @@ void Control_Panel_Window::transform_style_value( int transform_style_in)
 }
 
 //***************************************************************************
-// Control_Panel_Window::blend_style_value() -- Examine the relevant widget 
-// to get the alpha-blending style.  NOTE: this code will have to be changed 
+// Control_Panel_Window::blend_style_value() -- Examine the relevant widget
+// to get the alpha-blending style.  NOTE: this code will have to be changed
 // whenever the alpha-blending menu is changed!
 int Control_Panel_Window::blend_style_value()
 {
@@ -216,8 +225,8 @@ int Control_Panel_Window::blend_style_value()
 }
 
 //***************************************************************************
-// Control_Panel_Window::blend_style_value( blend_style_in) -- Set the 
-// relevant widgets to set the alpha-blending.  NOTE: this code will have to 
+// Control_Panel_Window::blend_style_value( blend_style_in) -- Set the
+// relevant widgets to set the alpha-blending.  NOTE: this code will have to
 // be changed whenever the alpha-blending menu is changed!
 void Control_Panel_Window::blend_style_value( int blend_style_in)
 {
@@ -227,7 +236,7 @@ void Control_Panel_Window::blend_style_value( int blend_style_in)
 }
 
 //***************************************************************************
-// Control_Panel_Window::broadcast_change (*master_widget) -- Broadcast an 
+// Control_Panel_Window::broadcast_change (*master_widget) -- Broadcast an
 // interaction from the master panel to all (unlocked) panels.
 // MCL XXX "locked" panels are not yet implemented.
 void Control_Panel_Window::broadcast_change (Fl_Widget *master_widget)
@@ -245,11 +254,11 @@ void Control_Panel_Window::broadcast_change (Fl_Widget *master_widget)
   // Loop: Apply operation defined by the master widget to successive windows
   for (int i=0; i<nplots; i++) {
 
-    // Define a pointer to the relevant widget in this window and verify 
+    // Define a pointer to the relevant widget in this window and verify
     // that it exists
     Fl_Widget *slave_widget = cps[i]->child(widget_index);
     assert( slave_widget);
-    
+
     // cout << "master_widget: label = " << master_widget->label() << " type = " << typeid(*master_widget).name() << endl;
     // cout << "slave_widget:  label = " << slave_widget->label() <<  " type = " << typeid(*slave_widget).name() << endl;
 
@@ -257,18 +266,18 @@ void Control_Panel_Window::broadcast_change (Fl_Widget *master_widget)
     assert( typeid(master_widget) == typeid(slave_widget));
 
     // MCL XXX downcasting to dispatch on type and/or existance of a method is
-    // considered very bad form.  
-    // If value() were a virtual function of Fl_Widget (like callback() and 
+    // considered very bad form.
+    // If value() were a virtual function of Fl_Widget (like callback() and
     // do_callback() are) it would be cleaner.  Or we could  use one of the
-    // publish/subscribe extensions (from fltk or boost).  That could clean up 
+    // publish/subscribe extensions (from fltk or boost).  That could clean up
     // all sort of things.....  Or we could take a stab at refactoring the
     // repetitive parts of the following code using templates.
-    
+
     // If the master widget is a Button then set the slave's value using
     // the master's value.
     {
       Fl_Button *mp, *sp;
-      if( ( mp = dynamic_cast <Fl_Button*> (master_widget)) && 
+      if( ( mp = dynamic_cast <Fl_Button*> (master_widget)) &&
           ( sp = dynamic_cast <Fl_Button*> (slave_widget))) {
         sp->value(mp->value());
       }
@@ -278,7 +287,7 @@ void Control_Panel_Window::broadcast_change (Fl_Widget *master_widget)
     // the master's value.
     {
       Fl_Valuator *mp, *sp;
-      if( ( mp = dynamic_cast <Fl_Valuator*> (master_widget)) && 
+      if( ( mp = dynamic_cast <Fl_Valuator*> (master_widget)) &&
           ( sp = dynamic_cast <Fl_Valuator*> (slave_widget))) {
         sp->value(mp->value());
       }
@@ -288,7 +297,7 @@ void Control_Panel_Window::broadcast_change (Fl_Widget *master_widget)
     // the master's value.
     {
       Fl_Choice *mp, *sp;
-      if( ( mp = dynamic_cast <Fl_Choice*> (master_widget)) && 
+      if( ( mp = dynamic_cast <Fl_Choice*> (master_widget)) &&
           ( sp = dynamic_cast <Fl_Choice*> (slave_widget))) {
         sp->copy(mp->menu());  // necessary when there is per menu item state info (for FL_MENU_TOGGLE, etc)
         sp->value(mp->value());
@@ -299,7 +308,7 @@ void Control_Panel_Window::broadcast_change (Fl_Widget *master_widget)
     // the master's value.
     {
       Fl_Menu_Button *mp, *sp;
-      if( ( mp = dynamic_cast <Fl_Menu_Button*> (master_widget)) && 
+      if( ( mp = dynamic_cast <Fl_Menu_Button*> (master_widget)) &&
           ( sp = dynamic_cast <Fl_Menu_Button*> (slave_widget))) {
         sp->copy(mp->menu());  // necessary when there is per menu item state info (for FL_MENU_TOGGLE, etc)
         sp->value(mp->value());
@@ -309,7 +318,7 @@ void Control_Panel_Window::broadcast_change (Fl_Widget *master_widget)
     // If the slave widget has a callback function defined, then call the
     // callback (since the slave widget's value() may have just been updated).
     if( slave_widget->callback()) {
-      // cout << ".. doing callback for widget " << widget_index 
+      // cout << ".. doing callback for widget " << widget_index
       //      << " in panel " << i << endl;
       slave_widget->do_callback( slave_widget, cps[i]);
     }
@@ -317,9 +326,9 @@ void Control_Panel_Window::broadcast_change (Fl_Widget *master_widget)
 }
 
 //***************************************************************************
-// Control_Panel_Window::maybe_draw() -- Check plot windows to see if they 
+// Control_Panel_Window::maybe_draw() -- Check plot windows to see if they
 // need to be redrawn.
-void Control_Panel_Window::maybe_redraw() 
+void Control_Panel_Window::maybe_redraw()
 {
   // kludge.  Avoid double redraw when setting "don't clear".
   if( dont_clear->value()) return;
@@ -327,7 +336,7 @@ void Control_Panel_Window::maybe_redraw()
 }
 
 //***************************************************************************
-// Control_Panel_Window::extract_and_redraw() -- Extract data for these 
+// Control_Panel_Window::extract_and_redraw() -- Extract data for these
 // (new?) axes and redraw plot.  For one local control panel only.
 void Control_Panel_Window::extract_and_redraw ()
 {
@@ -338,9 +347,9 @@ void Control_Panel_Window::extract_and_redraw ()
 // Control_Panel_Window::make_widgets( cpw) -- Make widgets
 void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
 {
-  // Since these (virtual) control panels are really groups inside a tab 
-  // inside a window, set their child widget's coordinates relative to 
-  // their enclosing window's position. 
+  // Since these (virtual) control panels are really groups inside a tab
+  // inside a window, set their child widget's coordinates relative to
+  // their enclosing window's position.
   int xpos = this->x()+50;
   int ypos = this->y()+15;
 
@@ -362,7 +371,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   // Lock x-axis button
   lock_axis1_button = b = new Fl_Button(xpos+0*subwidth+40, ypos, 20, 20, "X ");
   b->align(FL_ALIGN_LEFT);
-  b->type(FL_TOGGLE_BUTTON); 
+  b->type(FL_TOGGLE_BUTTON);
   b->selection_color(FL_BLUE);
   b->value(0);
   b->tooltip("make this plot's x axis immune from 'change axis' events");
@@ -370,7 +379,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   // Lock y-axis button
   lock_axis2_button = b = new Fl_Button(xpos+1*subwidth+40, ypos, 20, 20, "Y ");
   b->align(FL_ALIGN_LEFT);
-  b->type(FL_TOGGLE_BUTTON); 
+  b->type(FL_TOGGLE_BUTTON);
   b->selection_color(FL_BLUE);
   b->value(0);
   b->tooltip("make this plot's y axis immune from 'change axis' events");
@@ -378,7 +387,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   // Lock z-axis button
   lock_axis3_button = b = new Fl_Button(xpos+2*subwidth+40, ypos, 20, 20, "Z ");
   b->align(FL_ALIGN_LEFT);
-  b->type(FL_TOGGLE_BUTTON); 
+  b->type(FL_TOGGLE_BUTTON);
   b->selection_color(FL_BLUE);
   b->value(0);
   b->tooltip("make this plot's z axis immune from 'change axis' events");
@@ -391,8 +400,8 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
 
   // Dynamically build the variables (axes selection) menu(s).
   // cout << "starting axes menu build, nvars = " << nvars << endl;
-  for( int i=0; i<=nvars; i++) {
-    // cout << "label " << i 
+  for( long i=0; i<=nvars; i++) {
+    // cout << "label " << i
     //      << " = " << (column_info[i].label).c_str() << endl;
     // varindex_menu_items[i].label((const char *) ((column_info[i].label).c_str()));
     varindex_menu_items[i].label( (const char *) (pdfm->column_label(i)).c_str());
@@ -446,20 +455,20 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   y_normalization_style = c = new Fl_Choice( xpos+subwidth, ypos, subwidth-15, 25);
   c->textsize(12);
   c->menu(normalization_style_menu_items);
-  c->value(NORMALIZATION_MINMAX); 
+  c->value(NORMALIZATION_MINMAX);
   c->clear_visible_focus();
   c->callback( (Fl_Callback*)static_extract_and_redraw, this);
   c->tooltip("choose normalization and/or scaling for y-axis");
- 
+
   // Z-axis normalization and scaling menu
   z_normalization_style = c = new Fl_Choice( xpos+2*subwidth, ypos, subwidth-15, 25);
   c->textsize(12);
   c->menu(normalization_style_menu_items);
-  c->value(NORMALIZATION_MINMAX); 
+  c->value(NORMALIZATION_MINMAX);
   c->clear_visible_focus();
   c->callback( (Fl_Callback*)static_extract_and_redraw, this);
   c->tooltip("choose normalization and/or scaling for z-axis");
- 
+
   // offset controls for "delay map"-like tricks.
   ypos += 25;
   for (int i=0; i<3; i++) {
@@ -478,7 +487,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   offset[2]->deactivate();
 
   // histogram controls
-  ypos += 25;    
+  ypos += 25;
 
   // label for row of histogram menus
   b = new Fl_Button (xpos, ypos, 45, 25, "histog");
@@ -487,11 +496,11 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   b->box(FL_NO_BOX);
 
   Fl_Menu_Item histogram_pulldown[] = {
-    {"marginal",    0, 0, (void *)HISTOGRAM_MARGINAL,    FL_MENU_TOGGLE},
-    {"selection",   0, 0, (void *)HISTOGRAM_SELECTION,   FL_MENU_TOGGLE},
-    {"conditional", 0, 0, (void *)HISTOGRAM_CONDITIONAL, FL_MENU_TOGGLE|FL_MENU_DIVIDER},
-    {"weighted",    0, 0, (void *)HISTOGRAM_WEIGHTED,    FL_MENU_TOGGLE},
-    {0}
+    {"marginal",    0, nullptr, (void *)HISTOGRAM_MARGINAL,    FL_MENU_TOGGLE, 0, 0, 0, 0},
+    {"selection",   0, nullptr, (void *)HISTOGRAM_SELECTION,   FL_MENU_TOGGLE, 0, 0, 0, 0},
+    {"conditional", 0, nullptr, (void *)HISTOGRAM_CONDITIONAL, FL_MENU_TOGGLE|FL_MENU_DIVIDER, 0, 0, 0, 0},
+    {"weighted",    0, nullptr, (void *)HISTOGRAM_WEIGHTED,    FL_MENU_TOGGLE, 0, 0, 0, 0},
+    {nullptr,       0, nullptr, nullptr,                       0,        0, 0, 0, 0}
   };
   // int n_histogram_pulldown_items = (sizeof(histogram_pulldown) / sizeof(histogram_pulldown[0])) - 1;
 
@@ -501,9 +510,9 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
     // copy in the menu items
     show_histogram[i]->copy(histogram_pulldown);
     // normal menu, not popup.
-    show_histogram[i]->type(0); 
+    show_histogram[i]->type(0);
     show_histogram[i]->callback((Fl_Callback*)redraw_one_plot, this);
-    show_histogram[i]->selection_color(FL_BLUE);  
+    show_histogram[i]->selection_color(FL_BLUE);
     show_histogram[i]->clear_visible_focus();
   }
   show_histogram[0]->tooltip("histogram options for x-axis");
@@ -531,7 +540,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   nbins_slider[1]->tooltip("set base 2 log of number of bins for y-axis hostograms");
   // no Z-axis histograms (yet)
   nbins_slider[2]->deactivate();
-    
+
   // one label for row of histogram height sliders
   b = new Fl_Button (xpos, ypos+=20, 45, 25, "bin ht");
   b->labelsize(14);
@@ -546,12 +555,12 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
     hscale_slider[i]->range(0.0,10.0);
     hscale_slider[i]->value(1.0);
     hscale_slider[i]->set_changed();
-  }    
+  }
   hscale_slider[0]->tooltip("scale bin height for x-axis histograms");
   hscale_slider[1]->tooltip("scale bin height for y-axis histograms");
   // no Z-axis histograms (yet)
   hscale_slider[2]->deactivate();
-    
+
   ypos += 15;
 
   // Background color slider
@@ -620,17 +629,17 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   z_bufferring_button = b = new Fl_Button(xpos2, ypos+=25, 20, 20, "z-bufferring");
   b->callback((Fl_Callback*)redraw_one_plot, this);
   b->align(FL_ALIGN_RIGHT);
-  b->type(FL_TOGGLE_BUTTON); 
-  b->selection_color(FL_BLUE); 
+  b->type(FL_TOGGLE_BUTTON);
+  b->selection_color(FL_BLUE);
   b->tooltip("toggle z-buffering for this plot");
 
   // Draw blending menu for this plot
   Fl_Menu_Item blend_menu_items[] = {
-    {"overplot",                               0, 0, (void *)BLEND_OVERPLOT,            0, 0, 0, 0, 0},
-    {"overplot with alpha",                    0, 0, (void *)BLEND_OVERPLOT_WITH_ALPHA, 0, 0, 0, 0, 0},
-    {"luminance blend each brush separately",  0, 0, (void *)BLEND_BRUSHES_SEPARATELY,  0, 0, 0, 0, 0},
-    {"luminance blend all brushes",            0, 0, (void *)BLEND_ALL_BRUSHES,         0, 0, 0, 0, 0},
-    {0}
+    {"overplot",                               0, nullptr, (void *)BLEND_OVERPLOT,            0, 0, 0, 0, 0},
+    {"overplot with alpha",                    0, nullptr, (void *)BLEND_OVERPLOT_WITH_ALPHA, 0, 0, 0, 0, 0},
+    {"luminance blend each brush separately",  0, nullptr, (void *)BLEND_BRUSHES_SEPARATELY,  0, 0, 0, 0, 0},
+    {"luminance blend all brushes",            0, nullptr, (void *)BLEND_ALL_BRUSHES,         0, 0, 0, 0, 0},
+    {nullptr,                                  0, nullptr, nullptr,                           0, 0, 0, 0, 0}
   };
 
   blend_menu = new Fl_Choice(xpos2, ypos+=25, 20, 20);
@@ -657,27 +666,27 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   // Button (1,2): Show points
   show_points = b = new Fl_Button(xpos, ypos+=25, 20, 20, "points");
   b->callback((Fl_Callback*)static_maybe_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_TOGGLE_BUTTON); 
-  b->selection_color(FL_BLUE);  
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_TOGGLE_BUTTON);
+  b->selection_color(FL_BLUE);
   b->value(1);
   b->tooltip("toggle visibility of all points");
 
   // Button (2,2): Show deselected points
   show_deselected_points = b = new Fl_Button(xpos, ypos+=25, 20, 20, "unselected");
   b->callback((Fl_Callback*)static_maybe_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_TOGGLE_BUTTON); 
-  b->selection_color(FL_BLUE);  
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_TOGGLE_BUTTON);
+  b->selection_color(FL_BLUE);
   b->value(1);
   b->tooltip("toggle visibility of brush[0] (nonseleted) points");
 
   // Button (3,2): Show axes
   show_axes = b = new Fl_Button(xpos, ypos+=25, 20, 20, "axes");
   b->callback((Fl_Callback*)static_maybe_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_TOGGLE_BUTTON); 
-  b->selection_color(FL_BLUE);  
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_TOGGLE_BUTTON);
+  b->selection_color(FL_BLUE);
   b->value(1);
   b->tooltip("toggle visibility of axis lines");
 
@@ -685,9 +694,9 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   // Button (4,2): Show axis labels
   show_labels = b = new Fl_Button(xpos, ypos+=25, 20, 20, "labels");
   b->callback((Fl_Callback*)static_maybe_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_TOGGLE_BUTTON); 
-  b->selection_color(FL_BLUE);  
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_TOGGLE_BUTTON);
+  b->selection_color(FL_BLUE);
   b->value(1);
   b->tooltip("toggle visibility of axis labels");
 #endif // 0
@@ -695,17 +704,17 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   // Button (4,2): Show axis tickmarks
   show_scale = b = new Fl_Button(xpos, ypos+=25, 20, 20, "ticks");
   b->callback((Fl_Callback*)static_maybe_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_TOGGLE_BUTTON); 
-  b->selection_color(FL_BLUE);  
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_TOGGLE_BUTTON);
+  b->selection_color(FL_BLUE);
   b->value(1);
   b->tooltip("toggle visibility of axis tickmarks");
 
   // Button (5,2): Show grid (needs work)
   show_grid = b = new Fl_Button(xpos, ypos+=25, 20, 20, "grid");
   b->callback((Fl_Callback*)static_maybe_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_TOGGLE_BUTTON); 
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_TOGGLE_BUTTON);
   b->selection_color(FL_BLUE);
   b->value(0);
   b->tooltip("toggle visibility of simple grid");
@@ -721,35 +730,35 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
   // Button (4,1): No transform
   no_transform = b = new Fl_Button(xpos, ypos+=25, 20, 20, "identity");
   b->callback((Fl_Callback*)static_extract_and_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_RADIO_BUTTON); 
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_RADIO_BUTTON);
   b->selection_color(FL_BLUE);
   b->tooltip("plot x and y values without modification");
 
   // Button (5,1): Sum vs difference transform
   sum_vs_difference = b = new Fl_Button(xpos, ypos+=25, 20, 20, "sum vs. diff.");
   b->callback((Fl_Callback*)static_extract_and_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_RADIO_BUTTON); 
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_RADIO_BUTTON);
   b->selection_color(FL_BLUE);
   b->tooltip("plot (y+x) vs. (y-x)");
-  
+
   // Button (6,1): cummulative conditional probability or rank of y given x
   cond_prop = b = new Fl_Button(xpos, ypos+=25, 20, 20, "rank(y|x)");
   b->callback((Fl_Callback*)static_extract_and_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_RADIO_BUTTON); 
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_RADIO_BUTTON);
   b->selection_color(FL_BLUE);
   b->tooltip("plot (x) vs. (rank of y given x). i.e. conditional rank");
-  
+
   // Button (7,1): fluctuation of y given x
   fluctuation = b = new Fl_Button(xpos, ypos+=25, 20, 20, "fluct(y|x)");
   b->callback((Fl_Callback*)static_extract_and_redraw, this);
-  b->align(FL_ALIGN_RIGHT); 
-  b->type(FL_RADIO_BUTTON); 
+  b->align(FL_ALIGN_RIGHT);
+  b->type(FL_RADIO_BUTTON);
   b->selection_color(FL_BLUE);
   b->tooltip("plot (x) vs. (deviation of y given x). i.e. conditional deviation");
-  
+
   transform_style->end();
   no_transform->setonly();
 }
