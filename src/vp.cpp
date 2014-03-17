@@ -14,7 +14,7 @@
 //
 // Required packages
 //    FLTK 1.1.6 -- Fast Light Toolkit graphics packageF
-//    FLEWS 0.3 -- Extensions to FLTK 
+//    FLEWS 0.3 -- Extensions to FLTK
 //    OGLEXP 1.2.2 -- Access to OpenGL extension under Windows
 //    GSL 1.6 -- Gnu Scientific Library package for Windows
 //    Blitz++ 0.9 -- Various math routines
@@ -27,20 +27,20 @@
 //
 // General design philosophy:
 //   1) This code represents a battle between Creon Levit's passion for speed
-//      and efficiency and Paul Gazis's obsession with organization and 
-//      clarity, unified by a shared desire to produce a powerful and easy to 
-//      use tool for exploratory data analysis.  Creon's code reflects a 
-//      strong 'C' heritage.  Paul's code is written in C++ using the 'if 
+//      and efficiency and Paul Gazis's obsession with organization and
+//      clarity, unified by a shared desire to produce a powerful and easy to
+//      use tool for exploratory data analysis.  Creon's code reflects a
+//      strong 'C' heritage.  Paul's code is written in C++ using the 'if
 //      only it were JAVA' programming style.
 //   2) Functions in the main routine are sufficiently interdependant that it
-//      would be difficult to distribute them among separate objects.  For 
+//      would be difficult to distribute them among separate objects.  For
 //      this reason they are left in main().  It would be quite possible to
-//      combine them into a single vp class, but they have been left in 
+//      combine them into a single vp class, but they have been left in
 //      main() for reasons of simplicity.
 //   3) This code takes advantage of the FLTK graphics toolkit, the BOOST
 //      array package, BOOST serialization, and several other C++ packages.
-//      For the most part, this is straightforward, but use of BOOST 
-//      serialization is complicated by its lack of documentation and its 
+//      For the most part, this is straightforward, but use of BOOST
+//      serialization is complicated by its lack of documentation and its
 //      assumptions regarding the availability and use of constructors.
 //   4) In addition to BOOST serialization, parts of this code also store
 //      settings via the FLTK FL_Preferences class.
@@ -48,7 +48,7 @@
 // Functions:
 //   usage() -- Print help information
 //   make_help_about_window( *o) -- Draw the 'About' window
-//   create_main_control_panel( main_x, main_y, main_w, main_h, cWindowLabel) 
+//   create_main_control_panel( main_x, main_y, main_w, main_h, cWindowLabel)
 //     -- Create the main control panel window.
 //   cb_main_control_panel( *o, *u); -- Callback for main control panel
 //   create_brushes( w_x, w_y, w_w, w_h) -- Create brushes tabs
@@ -69,7 +69,7 @@
 //   make_global_widgets() -- Controls for main control panel
 //   change_all_axes( *o) -- Change all axes
 //   npoints_changed( *o) -- Update number of points changed
-//   resize_selection_index_arrays( nplots_old, nplots) -- Resize arrays 
+//   resize_selection_index_arrays( nplots_old, nplots) -- Resize arrays
 //   write_data( *o, *u) -- Write data widget
 //   reset_all_plots() -- Reset all plots
 //   read_data( *o, *u) -- Read data widget
@@ -102,11 +102,11 @@
 static int number_of_screens = 0;
 
 // Approximate values of window manager borders & desktop borders (stay out of
-// these). The "*_frame" constants keep windows from crowding the coresponding 
-// screen edge.  The "*_safe" constants keep windows from overlapping each 
-// other.  These are used when the main control panel window is defined.  And 
-// when the plot windows are tiled to fit the screen. Too bad they are only 
-// "hints" according most window managers (and we all know how well managers 
+// these). The "*_frame" constants keep windows from crowding the coresponding
+// screen edge.  The "*_safe" constants keep windows from overlapping each
+// other.  These are used when the main control panel window is defined.  And
+// when the plot windows are tiled to fit the screen. Too bad they are only
+// "hints" according most window managers (and we all know how well managers
 // take hints).
 #ifdef __APPLE__
  static int top_frame=35, bottom_frame=0, left_frame=0, right_frame=5;
@@ -126,26 +126,26 @@ static int borderless=0;  // By default, use window manager borders
 // Needed to track position in help window
 static int help_topline;
 
-// Define variables to hold main control panel window, tabs widget, and 
+// Define variables to hold main control panel window, tabs widget, and
 // virtual control panel positions.  Consolidated here for reasons of clarity.
 
 // Increase this when the main panel needs to get wider:
-static const int main_w = 365;       
+static const int main_w = 365;
 
 // Increase this when the main panel needs to get taller, including situations
 // when cp_widget_h increases:
 // static const int main_h = 850;
 static const int main_h = 890;
 
-// These are calculated and used to hold sizes for use with small laptop 
+// These are calculated and used to hold sizes for use with small laptop
 // screens
 static const float laptop_scale = 0.8;
 static int laptop_main_w;
 static int laptop_main_h;
 
 // Increase this when the plot controls need more height to fit in their subpanel
-// static const int cp_widget_h = 505; 
-static const int cp_widget_h = 430; 
+// static const int cp_widget_h = 505;
+static const int cp_widget_h = 430;
 static const int brushes_h = 250;
 
 // The rest of these should not have to change
@@ -165,8 +165,8 @@ static Fl_Preferences
 // Define class to hold data file manager
 Data_File_Manager dfm;
 
-// Define pointers to hold main control panel, main menu bar, and any pop-up 
-// windows.  NOTE: help_view_widget must be defined here so it will be 
+// Define pointers to hold main control panel, main menu bar, and any pop-up
+// windows.  NOTE: help_view_widget must be defined here so it will be
 // available to callback functions
 Fl_Window *main_control_panel;
 Fl_Scroll *main_scroll;
@@ -202,7 +202,7 @@ void cb_manage_plot_window_array( void* o);
 void make_main_menu_bar();
 void change_screen_mode();
 void make_file_name_window( Fl_Widget *o);
-void make_statistics_window( Fl_Widget *o);
+void make_statistics_window( Fl_Widget *o, void* user_data);
 void make_options_window( Fl_Widget *o);
 void cb_options_window( Fl_Widget *o, void* user_data);
 void make_help_view_window( Fl_Widget *o);
@@ -311,15 +311,16 @@ void usage()
 // make_help_about_window( *o) -- Create the 'Help|About' window.
 void make_help_about_window( Fl_Widget *o)
 {
-  if( about_window != NULL) about_window->hide();
-   
+	UNUSED(o);
+  if( about_window != nullptr) about_window->hide();
+
   // Create Help|About window
   Fl::scheme( "plastic");  // optional
   about_window = new Fl_Window( 360, 220, "About vp");
   about_window->begin();
   about_window->selection_color( FL_BLUE);
   about_window->labelsize( 10);
-  
+
   // Write text to box label and align it inside box
   Fl_Box* output_box = new Fl_Box( 5, 5, 350, 180);
   output_box->box( FL_SHADOW_BOX);
@@ -336,16 +337,16 @@ void make_help_about_window( Fl_Widget *o)
 
   // Done creating the 'Help|About' window
   // about_window->resizable( about_window);
-  about_window->resizable( NULL);
+  about_window->resizable( nullptr);
   about_window->end();
   about_window->show();
 }
 
 //***************************************************************************
-// create_main_control_panel( main_x, main_y, main_w, main_h, cWindowLabel) 
+// create_main_control_panel( main_x, main_y, main_w, main_h, cWindowLabel)
 // -- Create the main control panel window.
-void create_main_control_panel( 
-  int main_x, int main_y, int main_w, int main_h, const char* cWindowLabel)
+void create_main_control_panel(
+  int in_main_x, int in_main_y, int in_main_w, int in_main_h, const char* cWindowLabel)
 {
   // Create main control panel window
   Fl_Group::current(0);
@@ -354,25 +355,25 @@ void create_main_control_panel(
   Fl_Tooltip::hoverdelay(1.0);
   Fl_Tooltip::size(12);
 
-  int clipped_h = min( main_h, Fl::h() - (top_frame + bottom_frame));
-  main_control_panel = new Fl_Window( main_x, main_y, main_w, clipped_h, cWindowLabel);
+  int clipped_h = min( in_main_h, Fl::h() - (top_frame + bottom_frame));
+  main_control_panel = new Fl_Window( in_main_x, in_main_y, in_main_w, clipped_h, cWindowLabel);
   main_control_panel->resizable( main_control_panel);
 
   // Add callback function to intercept 'Close' operations
-  main_control_panel->callback( (Fl_Callback*) cb_main_control_panel, main_control_panel);
+  main_control_panel->callback( static_cast<Fl_Callback*>(cb_main_control_panel), main_control_panel);
 
   // Make main menu bar and add the global widgets to control panel
   make_main_menu_bar();
   main_control_panel->add(main_menu_bar);
 
-  // All controls (except the main menu bar) in the main panel are inside an Fl_Scroll, 
+  // All controls (except the main menu bar) in the main panel are inside an Fl_Scroll,
   // because there are too many controls to all fit vertically on some small screens.
-  // Eventally, we will make the sub-panels independently expandable and reorganize 
+  // Eventally, we will make the sub-panels independently expandable and reorganize
   // the gui to alleviate this problem.
-  main_scroll = new Fl_Scroll( 0, main_menu_bar->h(), main_w, main_h - main_menu_bar->h());
+  main_scroll = new Fl_Scroll( 0, main_menu_bar->h(), in_main_w, in_main_h - main_menu_bar->h());
   main_scroll->box(FL_NO_BOX);
 
-  // Define a group to hold contents of the scolling area and make them 
+  // Define a group to hold contents of the scolling area and make them
   // resizable
   main_scroll_group =
     new Fl_Group( main_scroll->x(), main_scroll->y(), main_scroll->w(), main_scroll->h());
@@ -382,34 +383,35 @@ void create_main_control_panel(
   // MCL XXX
   // if I move this call to create_brushes() to the end of this routine, to just before
   // the call to main_control_panel->end(), I get a core dump.  That's' too bad......
-  create_brushes( brushes_x, brushes_y, main_w-6, brushes_h);
+  create_brushes( brushes_x, brushes_y, in_main_w-6, brushes_h);
 
   // the widgets at the bottom of the main panel.  Seems they need to created here. :-?
   make_global_widgets();
 
-  // Inside the main control panel, there is a tab widget, cpt, 
+  // Inside the main control panel, there is a tab widget, cpt,
   // that contains the sub-panels (groups), one per plot.
-  cpt = new Fl_Tabs( tabs_widget_x, tabs_widget_y, main_w-6, tabs_widget_h);
+  cpt = new Fl_Tabs( tabs_widget_x, tabs_widget_y, in_main_w-6, tabs_widget_h);
   cpt->selection_color( FL_BLUE);
   cpt->labelsize( 10);
   // main_control_panel->add(cpt);
   main_scroll_group->add(cpt);
 
-  // Done creating main control panel (except for the tabbed 
+  // Done creating main control panel (except for the tabbed
   // sub-panels created by manage_plot_window_array)
   main_scroll_group->end();
   main_scroll->end();
   main_control_panel->end();
-  Fl_Group::current(0);  
+  Fl_Group::current(0);
 }
 
 //***************************************************************************
-// cb_main_control_panel( *o, *user_data) -- Callback (and potentially 
+// cb_main_control_panel( *o, *user_data) -- Callback (and potentially
 // close) the main control panel window.  It is assumed that a pointer to
-// the window will be passed as USER_DATA.  WARNING: No error checking is 
+// the window will be passed as USER_DATA.  WARNING: No error checking is
 // done on USER_DATA!
 void cb_main_control_panel( Fl_Widget *o, void* user_data)
 {
+	UNUSED(o);
   if( expert_mode || make_confirmation_window( "Quit?  Are you sure?") > 0) {
     ((Fl_Window*) user_data)->hide();
     exit( 0);
@@ -417,7 +419,7 @@ void cb_main_control_panel( Fl_Widget *o, void* user_data)
 }
 
 //***************************************************************************
-// create_brushes( w_x, w_y, w_w, w_h) -- Create bushes.  Move this to class 
+// create_brushes( w_x, w_y, w_w, w_h) -- Create bushes.  Move this to class
 // Brush?
 void create_brushes( int w_x, int w_y, int w_w, int w_h)
 {
@@ -454,7 +456,7 @@ void create_brushes( int w_x, int w_y, int w_w, int w_h)
 }
 
 //***************************************************************************
-// brushes_tab_cb() -- Callback to keep tab's colored labels drawn in the 
+// brushes_tab_cb() -- Callback to keep tab's colored labels drawn in the
 // right color when they're selected.  Move this to class Brush?
 void brushes_tab_cb() {
   brushes_tab->labelcolor(brushes_tab->value()->labelcolor());
@@ -462,13 +464,13 @@ void brushes_tab_cb() {
 }
 
 //***************************************************************************
-// create_broadcast_group () -- Create a special panel (really a group under 
-// a tab) with label "+" this group's widgets effect all the others (unless 
-// a plot's tab is "locked" - TBI).  MCL XXX should this be a method of 
+// create_broadcast_group () -- Create a special panel (really a group under
+// a tab) with label "+" this group's widgets effect all the others (unless
+// a plot's tab is "locked" - TBI).  MCL XXX should this be a method of
 // Control_Panel_Window or should it be a singleton?
 void create_broadcast_group ()
 {
-  Fl_Group::current(cpt);  
+  Fl_Group::current(cpt);
   Control_Panel_Window *cp = cps[nplots];
   cp = new Control_Panel_Window( cp_widget_x, cp_widget_y, main_w - 6, cp_widget_h);
   cp->label("all");
@@ -480,7 +482,7 @@ void create_broadcast_group ()
   // this group's index is highest (and it has no associated plot window)
   cp->index = nplots;
 
-  // this group's callbacks all broadcast any "event" to the other 
+  // this group's callbacks all broadcast any "event" to the other
   // (unlocked) tabs groups.  with a few exceptions... (for now)
   for (int i=0; i<cp->children(); i++) {
     Fl_Widget *wp = cp->child(i);
@@ -501,41 +503,41 @@ void create_broadcast_group ()
 }
 
 //***************************************************************************
-// manage_plot_window_array( *o, *u) -- General-purpose method to create, 
-// manage, and reload the plot window array.  It saves any existing axis 
-// information, deletes old tabs, creates new tabs, restores existing axis 
-// information, and loads new data into new plot windows.  
+// manage_plot_window_array( *o, *u) -- General-purpose method to create,
+// manage, and reload the plot window array.  It saves any existing axis
+// information, deletes old tabs, creates new tabs, restores existing axis
+// information, and loads new data into new plot windows.
 //   WARNING: This method is the 800-lb gorilla, on which much of the GUI
-// depends!  Like all gorillas, it is delicate, sensitive, and must be 
-// treated with a profound mixture of caution and respect.  In particular, 
-// slight changes in the FLTK calls can lead to elusive segmentation faults!  
+// depends!  Like all gorillas, it is delicate, sensitive, and must be
+// treated with a profound mixture of caution and respect.  In particular,
+// slight changes in the FLTK calls can lead to elusive segmentation faults!
 // Test any changes carefully!
 //   WARNING: There is little protection against missing data, and gorillas
 // can misbehave if they can't find their bananas!
-//   NOTE: Little attempt has been made to optimize this method for speed.  
+//   NOTE: Little attempt has been made to optimize this method for speed.
 //
-//   There are four possible behaviors, which all must be recognized, 
+//   There are four possible behaviors, which all must be recognized,
 // identified, and treated differently:
-// 1) INITIALIZE -- NULL argument.  Set nplots_old = 0.  
-// 2) NEW_DATA -- Called from a menu or as part of a 'load saved state' 
+// 1) INITIALIZE -- nullptr argument.  Set nplots_old = 0.
+// 2) NEW_DATA -- Called from a menu or as part of a 'load saved state'
 //    operation.  In this mode, new data is read into the VBOs, so all
 //    plot windows must be hidden and redrawn!
-// 3) REFRESH_WINDOWS -- Called from a menu.  In this mode, some windows 
+// 3) REFRESH_WINDOWS -- Called from a menu.  In this mode, some windows
 //    may be preserved without the need for redrawing.
-// 4) RELOAD -- Called from a button or menu.  NOTE: These no longer happen, 
+// 4) RELOAD -- Called from a button or menu.  NOTE: These no longer happen,
 //    and this operation is no longer supported!
 // Redrawing of plot windows is controlled by the value of NPLOTS_OLD.  This
-// is initialized to NPLOTS.  For an INITIALIZE or NEW_DATA operation, it is 
-// then reset to zero, so that all existing plots will be hidden so they can 
-// be redrawn with new data as noted above.  
-//   In some cases, it is desirable to restore window parameters such as 
+// is initialized to NPLOTS.  For an INITIALIZE or NEW_DATA operation, it is
+// then reset to zero, so that all existing plots will be hidden so they can
+// be redrawn with new data as noted above.
+//   In some cases, it is desirable to restore window parameters such as
 // axis labels or normalization schemes.  Whether this happens is controlled
 // by the 'do_restore_settings' flag.
 void manage_plot_window_array( Fl_Widget *o, void* user_data)
 {
   // Define an enumeration to hold a list of operation types
   enum operationType { INITIALIZE = 0, NEW_DATA, REFRESH_WINDOWS, RELOAD};
-  
+
   // Define and initialize the operationType switch, old number of plots,
   // widget title, and pointers to the pMenu_ and pButton objects.
   operationType thisOperation = INITIALIZE;
@@ -545,21 +547,21 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
   strcpy( userData, "");
   Fl_Menu_* pMenu_;
   Fl_Button* pButton;
-  
-  // Define and set flags and state variables to control the number of plots 
+
+  // Define and set flags and state variables to control the number of plots
   // to be preserved and whether or not to restore their control panel
   // settings and positions
   int nplots_old = nplots;
   int do_restore_settings = 0;
   int do_restore_positions = 0;
-  
+
   // Determine how the method was invoked, and set flags and parameters
-  // accordingly.  If method was called with a NULL arguments, assume this 
-  // is an initialization operation and set the old number of plots to zero, 
-  // otherwise identify the argument type via a dynamic cast, extract the 
+  // accordingly.  If method was called with a nullptr arguments, assume this
+  // is an initialization operation and set the old number of plots to zero,
+  // otherwise identify the argument type via a dynamic cast, extract the
   // widget title, and set the old and new numbers of plots accordingly.
-  // CASE 1: If the widget was NULL, this is an initialzation operation
-  if( o == NULL) {
+  // CASE 1: If the widget was nullptr, this is an initialzation operation
+  if( o == nullptr) {
     thisOperation = INITIALIZE;
     nplots_old = 0;
   }
@@ -570,15 +572,15 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
   else if( (pMenu_ = dynamic_cast <Fl_Menu_*> (o))) {
     thisOperation = REFRESH_WINDOWS;
     nplots_old = nplots;
-  
+
     // Get widget title and user data, and make absolutely sure that these
-    // aren't NULL
+    // aren't nullptr
     strcpy( widgetTitle, "");
     strcpy( userData, "");
-    if( ((Fl_Menu_*) o)->text() != NULL) 
+    if( ((Fl_Menu_*) o)->text() != nullptr)
       strcpy( widgetTitle, ((Fl_Menu_*) o)->text());
-    if( user_data != NULL) strcpy( userData, (char*) user_data);
-  
+    if( user_data != nullptr) strcpy( userData, (char*) user_data);
+
     // Examine widget title and user data to determine behavior on a case by
     // case basis for reasons of clarity
     if( strncmp( userData, "NEW_DATA", 8) == 0) {
@@ -631,9 +633,9 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
       do_restore_settings = 1;
       do_restore_positions = 1;
     }
-  
-    // When reading new data, invoke Fl_Gl_Window.hide() (instead of the 
-    // destructor!) to destroy all plot windows along with their context, 
+
+    // When reading new data, invoke Fl_Gl_Window.hide() (instead of the
+    // destructor!) to destroy all plot windows along with their context,
     // including VBOs.  Then set nplots_old to zero because we'll need to
     // redraw all of these plots.  NOTE: If this is not done, and one
     // attempts to preserve some panels without redrawing them, VBO usage
@@ -671,37 +673,37 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
   // diag_stuff.push_back( "REFRESH_WINDOWS");
   // diag_stuff.push_back( "NEW_DATA");
   // diag_stuff.push_back( "RELOAD");
-  // cout << "DIAGNOSTIC, manage_plot_window_array: widgetTitle(" << widgetTitle  
+  // cout << "DIAGNOSTIC, manage_plot_window_array: widgetTitle(" << widgetTitle
   //      << ") userData(" << userData << ")" << endl;
-  // cout << "DIAGNOSTIC, manage_plot_window_array: thisOperation " 
-  //      << thisOperation << " (" << diag_stuff[ thisOperation].c_str() 
+  // cout << "DIAGNOSTIC, manage_plot_window_array: thisOperation "
+  //      << thisOperation << " (" << diag_stuff[ thisOperation].c_str()
   //      << ")" << endl;
-  
+
   // Determine how many plot windows are available to be saved.  If this is an
   // INITIALIZE operation, set this number to zero.
   int nplots_save = nplots;
   if( thisOperation == INITIALIZE) nplots_save = 0;
 
-  // Save an array of Plot_Window objects with the positions of the existing 
-  // plot windows.  NOTE: This must be an array rather than a pointer array 
+  // Save an array of Plot_Window objects with the positions of the existing
+  // plot windows.  NOTE: This must be an array rather than a pointer array
   // to invoke the default constructor.
   Plot_Window pws_save[ MAXPLOTS+1];
-  cout << "manage_plot_window_array: saving information for " << nplots_save 
+  cout << "manage_plot_window_array: saving information for " << nplots_save
        << " windows" << endl;
   for( int i=0; i<nplots_save; i++) {
     pws[i]->make_state();
     pws_save[i].copy_state( pws[i]);
   }
-  
-  // Save an array of Control_Panel_Window objects with axis, normalization, 
+
+  // Save an array of Control_Panel_Window objects with axis, normalization,
   // and transform style information of the existing control panels
   Control_Panel_Window cps_save[ MAXPLOTS+1];
   for( int i=0; i<nplots_save; i++) {
     cps[i]->make_state();
     cps_save[i].copy_state( cps[i]);
   }
-  
-  // Save position and size of control panel windows so these can be used to 
+
+  // Save position and size of control panel windows so these can be used to
   // calculate sizes for laptop mode
   int x_save = cp_widget_x;
   int y_save = cp_widget_y;
@@ -713,7 +715,7 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     w_save = cps[0]->w();
     h_save = cps[0]->h();
   }
-  
+
   // Save an array of Brush objects with information of the existing brushes
   Brush brushes_save[ NBRUSHES];
   for( int i=0; i<NBRUSHES; i++) {
@@ -742,25 +744,25 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
 
     // Determine default plot window size for regular and laptop mode
     // int pw_w =
-    //   ( ( number_of_screens*Fl::w() - 
+    //   ( ( number_of_screens*Fl::w() -
     //       (main_w+left_frame+right_frame+right_safe+left_safe+20)) / ncols) -
     //   (left_frame + right_frame);
     int scaled_main_w = w_save+6;
     if( laptop_mode) scaled_main_w = (int) (laptop_scale*main_w);
     int pw_w =
-      ( ( number_of_screens*Fl::w() - 
+      ( ( number_of_screens*Fl::w() -
           (scaled_main_w+left_frame+right_frame+right_safe+left_safe+20)) / ncols) -
       (left_frame + right_frame);
-    int pw_h = 
-      ( (Fl::h() - (top_safe+bottom_safe))/ nrows) - 
+    int pw_h =
+      ( (Fl::h() - (top_safe+bottom_safe))/ nrows) -
       (top_frame + bottom_frame);
 
     // Calculate default plot window positions
-    int pw_x = 
-      left_safe + left_frame + 
+    int pw_x =
+      left_safe + left_frame +
       col * (pw_w + left_frame + right_frame);
-    int pw_y = 
-      top_safe + top_frame + 
+    int pw_y =
+      top_safe + top_frame +
       row * (pw_h + top_frame + bottom_frame);
 
     // Create a label for this tab
@@ -771,7 +773,7 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     // Set the pointer to the current group to the tab widget defined by
     // create_control_panel and add a new virtual control panel under this
     // tab widget
-    Fl_Group::current( cpt);  
+    Fl_Group::current( cpt);
     cps[i] = new Control_Panel_Window( cp_widget_x, cp_widget_y, main_w - 6, cp_widget_h);
     cps[i]->index = i;
     cps[i]->copy_label( labstr.c_str());
@@ -782,15 +784,15 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     // End the group here so that we can create new plot windows at the top
     // level, then set the pointer to the current group to the top level.
     cps[i]->end();
-    Fl_Group::current( 0); 
+    Fl_Group::current( 0);
 
     // If this was an INITIALIZE, REFRESH_WINDOWS, or NEW_DATA operation,
-    // then create or restore the relevant windows.  NOTE: If this code was 
-    // executed during a reload operation (which is no longer supported!), 
+    // then create or restore the relevant windows.  NOTE: If this code was
+    // executed during a reload operation (which is no longer supported!),
     // it would cause a segmentation fault due to problems with the way the
     // shown() and hide() calls work.
-    if( thisOperation == INITIALIZE || 
-        thisOperation == REFRESH_WINDOWS || 
+    if( thisOperation == INITIALIZE ||
+        thisOperation == REFRESH_WINDOWS ||
         thisOperation == NEW_DATA) {
       if( i >= nplots_old) {
         DEBUG(cout << "Creating new plot window " << i << endl);
@@ -806,7 +808,7 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
       }
       pws[i]->copy_label( labstr.c_str());
       pws[i]->position(pw_x, pw_y);
-      pws[i]->row = row; 
+      pws[i]->row = row;
       pws[i]->column = col;
       pws[i]->end();
     }
@@ -816,25 +818,25 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     cps[i]->pw = pws[i];
     pws[i]->cp = cps[i];
 
-    // Always invoke Plot_Window::upper_triangle_incr to determine which 
+    // Always invoke Plot_Window::upper_triangle_incr to determine which
     // variables to plot in new panels.
     int ivar, jvar;
     if( i==0) {
       ivar = 0;
       jvar = 1;
-      
-      // If this is an initialize operation, then the plot window array is being 
+
+      // If this is an initialize operation, then the plot window array is being
       // created, the tabs should come up free of context.  It also might be
       // desirable that the first plot's tab be shown with its axes locked.
       if( thisOperation == INITIALIZE) {
-        cps[i]->hide();  
+        cps[i]->hide();
       }
     }
     else Plot_Window::upper_triangle_incr( ivar, jvar, nvars);
 
 #ifdef SERIALIZATION
-    // If there has been an explicit request to restore the saved control 
-    // panel settings or the number of plots has changed, restore those 
+    // If there has been an explicit request to restore the saved control
+    // panel settings or the number of plots has changed, restore those
     // settings, then generate any new settings that may be required.
     if( do_restore_settings != 0 ||
         nplots != (nplots_old && i<nplots_old)) {
@@ -844,20 +846,20 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
 
       cps[i]->copy_state( &cps_save[i]);
       cps[i]->load_state();
-    } 
+    }
     else {
-      cps[i]->varindex1->value(ivar);  
-      cps[i]->varindex2->value(jvar);  
-      cps[i]->varindex3->value(nvars);  
+      cps[i]->varindex1->value(ivar);
+      cps[i]->varindex2->value(jvar);
+      cps[i]->varindex3->value(nvars);
     }
 #else // SERIALIZATION
-    cps[i]->varindex1->value(ivar);  
-    cps[i]->varindex2->value(jvar);  
-    cps[i]->varindex3->value(nvars);  
+    cps[i]->varindex1->value(ivar);
+    cps[i]->varindex2->value(jvar);
+    cps[i]->varindex3->value(nvars);
 #endif //SERIALIZATION
 
     // KLUDGE: If there has been an explicit request to restore the saved
-    // control panel settings or the number of plots has changed, restore the 
+    // control panel settings or the number of plots has changed, restore the
     // brush settings, but only do this once, during the first iteration.
     // XXX PRG: This seems unreliable.  Is there a better place to put this?
     if( i==0 && (do_restore_settings != 0 || nplots != nplots_old)) {
@@ -867,13 +869,13 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
       }
     }
 
-    // If this is an INITIALIZE, REFRESH_WINDOWS, or NEW_DATA operation, 
-    // test for missing data, extract data, reset panels, and make them 
+    // If this is an INITIALIZE, REFRESH_WINDOWS, or NEW_DATA operation,
+    // test for missing data, extract data, reset panels, and make them
     // resizable.  Otherwise it must be a RELOAD operation (which is no
-    // longer supported!), and we must invoke the relevant Plot_Window 
+    // longer supported!), and we must invoke the relevant Plot_Window
     // member functions to initialize and draw panels.
-    if( thisOperation == INITIALIZE || 
-        thisOperation == REFRESH_WINDOWS || 
+    if( thisOperation == INITIALIZE ||
+        thisOperation == REFRESH_WINDOWS ||
         thisOperation == NEW_DATA) {
       if( npoints > 1) {
         pws[i]->extract_data_points();
@@ -887,8 +889,8 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
       pws[i]->extract_data_points();
     }
 
-    // OLD KLUDGE: If this is a "append", "merge", "reload file" or "restore 
-    // panels" operation, restore old plot window positions.  This should 
+    // OLD KLUDGE: If this is a "append", "merge", "reload file" or "restore
+    // panels" operation, restore old plot window positions.  This should
     // be controlled by a flag rather than examining WIDGETTITLE.
     // if( strncmp( userData, "REFRESH_WINDOWS", 15) == 0 ||
     //     strncmp( widgetTitle, "Append", 6) == 0 ||
@@ -900,10 +902,10 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
      // 'reload file', or 'restore panels' operation, restire old window
      // positions.
     if( do_restore_positions != 0) {
-      for( int i=0; i<nplots_save; i++) {
-        pws[ i]->copy_state( &pws_save[i]);
-        pws[ i]->load_state();
-        
+      for( int restore_iter=0; restore_iter<nplots_save; restore_iter++) {
+        pws[restore_iter]->copy_state( &pws_save[restore_iter]);
+        pws[restore_iter]->load_state();
+
         // DIAGNOSTIC
         // cout << "  window[ " << i << "/" << nplots_old
         //      << "]: ( " << pws[ i]->x()
@@ -912,12 +914,12 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
         //      << ", " << pws[ i]->h() << ")" << endl;
       }
     }
-    
+
     // Account for the 'borderless' option
     if( borderless) pws[i]->border(0);
 
-    // Make sure the window has been shown and check again to make absolutely 
-    // sure it is resizable.  NOTE: pws[i]->show() with no arguments is not 
+    // Make sure the window has been shown and check again to make absolutely
+    // sure it is resizable.  NOTE: pws[i]->show() with no arguments is not
     // sufficient when windows are created.
     if( !pws[i]->shown()) {
       DEBUG(cout << "showing plot window " << i << endl);
@@ -931,13 +933,13 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
 
   // Set the color arrays to make sure points get drawn.
   pws[0]->color_array_from_selection();
-  
+
   // Invoke Fl_Gl_Window::hide() (rather than the destructor, which may
   // produce strange behavior) to rid of any superfluous plot windows
   // along with their contexts.
   if( nplots < nplots_old)
     for( int i=nplots; i<nplots_old; i++) pws[i]->hide();
-  
+
   // Create a master control panel to encompass all the tabs
   create_broadcast_group ();
 
@@ -953,10 +955,11 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
 }
 
 //***************************************************************************
-// cb_manage_plot_window_array( o) -- Idle callback to see if the plot 
+// cb_manage_plot_window_array( o) -- Idle callback to see if the plot
 // windows need to be refreshed.
 void cb_manage_plot_window_array( void* o)
 {
+	UNUSED(o);
   // Examine and set flags
   if( dfm.needs_restore_panels() <= 0) return;
   dfm.needs_restore_panels( 0);
@@ -969,14 +972,14 @@ void cb_manage_plot_window_array( void* o)
   // some way to avoid chosing random axes from the reduced set?
   // for( int i=0; i<nplots; i++) pws[i]->extract_data_points();
 
-  // KLUDGE: make manage_plot_window_array think it's called from a menu.  
+  // KLUDGE: make manage_plot_window_array think it's called from a menu.
   // manage_plot_window_array( main_menu_bar, (void*) "REFRESH_WINDOWS");
   manage_plot_window_array( main_menu_bar, (void*) "NEW_DATA");
 }
 
 //***************************************************************************
-// make_main_menu_bar() -- Make main menu bar.  NOTE: because the FLTK 
-// documentation recommends against manipulating the Fl_Menu_Item array 
+// make_main_menu_bar() -- Make main menu bar.  NOTE: because the FLTK
+// documentation recommends against manipulating the Fl_Menu_Item array
 // directly, this is done via the add() method of Fl_Menu_.
 void make_main_menu_bar()
 {
@@ -984,91 +987,91 @@ void make_main_menu_bar()
   main_menu_bar =
     new Fl_Menu_Bar( 0, 0, main_w, 25);
 
-  // Add File menu items.  NOTE: In some cases, the values of the title 
-  // and user_data fields of the main_menu_bar object may be used to control 
+  // Add File menu items.  NOTE: In some cases, the values of the title
+  // and user_data fields of the main_menu_bar object may be used to control
   // the behavior of the manage_plot_window_array method.
-  main_menu_bar->add( 
-    "File/Open data file       ", 0, 
+  main_menu_bar->add(
+    "File/Open data file       ", 0,
     (Fl_Callback *) read_data, (void*) "open data file");
-  main_menu_bar->add( 
-    "File/Append more data     ", 0, 
+  main_menu_bar->add(
+    "File/Append more data     ", 0,
     (Fl_Callback *) read_data, (void*) "append more data");
-  main_menu_bar->add( 
-    "File/Merge another file   ", 0, 
+  main_menu_bar->add(
+    "File/Merge another file   ", 0,
     (Fl_Callback *) read_data, (void*) "merge another file", FL_MENU_DIVIDER);
-  main_menu_bar->add( 
-    "File/Save all data        ", 0, 
+  main_menu_bar->add(
+    "File/Save all data        ", 0,
     (Fl_Callback *) write_data, (void*) "save data");
-  main_menu_bar->add( 
-    "File/Save selected data   ", 0, 
+  main_menu_bar->add(
+    "File/Save selected data   ", 0,
     (Fl_Callback *) write_data, (void*) "save selected data", FL_MENU_DIVIDER);
-  main_menu_bar->add( 
-    "File/Load configuration   ", 0, 
+  main_menu_bar->add(
+    "File/Load configuration   ", 0,
     (Fl_Callback *) load_state);
-  main_menu_bar->add( 
-    "File/Save configuration   ", 0, 
+  main_menu_bar->add(
+    "File/Save configuration   ", 0,
     (Fl_Callback *) save_state, 0, FL_MENU_DIVIDER);
-  main_menu_bar->add( 
-    "File/Current File Name    ", 0, 
+  main_menu_bar->add(
+    "File/Current File Name    ", 0,
     (Fl_Callback *) make_file_name_window);
-  main_menu_bar->add( 
-    "File/Clear all data       ", 0, 
+  main_menu_bar->add(
+    "File/Clear all data       ", 0,
     (Fl_Callback *) read_data, (void*) "clear all data");
-  main_menu_bar->add( 
+  main_menu_bar->add(
     "File/Quit   ", 0, (Fl_Callback *) exit);
 
   // Add View menu items
-  main_menu_bar->add( 
-    "View/Add Row   ", 0, 
+  main_menu_bar->add(
+    "View/Add Row   ", 0,
     (Fl_Callback *) manage_plot_window_array);
-  main_menu_bar->add( 
-    "View/Add Column   ", 0, 
+  main_menu_bar->add(
+    "View/Add Column   ", 0,
     (Fl_Callback *) manage_plot_window_array);
-  main_menu_bar->add( 
-    "View/Remove Row   ", 0, 
+  main_menu_bar->add(
+    "View/Remove Row   ", 0,
     (Fl_Callback *) manage_plot_window_array);
-  main_menu_bar->add( 
-    "View/Remove Column   ", 0, 
+  main_menu_bar->add(
+    "View/Remove Column   ", 0,
     (Fl_Callback *) manage_plot_window_array, 0, FL_MENU_DIVIDER);
-  main_menu_bar->add( 
-    "View/Reload File     ", 0, 
+  main_menu_bar->add(
+    "View/Reload File     ", 0,
     (Fl_Callback *) read_data, (void*) "reload file");
-  main_menu_bar->add( 
-    "View/Restore Panels  ", 0, 
+  main_menu_bar->add(
+    "View/Restore Panels  ", 0,
     (Fl_Callback *) manage_plot_window_array);
-  main_menu_bar->add( 
-    "View/Default Panels ", 0, 
+  main_menu_bar->add(
+    "View/Default Panels ", 0,
     (Fl_Callback *) manage_plot_window_array);
 
   // Add Tools menu items
-  main_menu_bar->add( 
-    "Tools/Edit Column Labels ", 0, 
+  main_menu_bar->add(
+    "Tools/Edit Column Labels ", 0,
     (Fl_Callback *) dfm.edit_column_info);
-  main_menu_bar->add( 
-    "Tools/Statistics         ", 0, 
+  main_menu_bar->add(
+    "Tools/Statistics         ", 0,
     (Fl_Callback *) make_statistics_window, 0, FL_MENU_DIVIDER);
-  main_menu_bar->add( 
-    "Tools/Options...         ", 0, 
+  main_menu_bar->add(
+    "Tools/Options...         ", 0,
     // (Fl_Callback *) make_options_window, 0, FL_MENU_INACTIVE);
     (Fl_Callback *) make_options_window);
 
   // Add Help menu items
-  main_menu_bar->add( 
+  main_menu_bar->add(
     "Help/Viewpoints Help   ", 0, (Fl_Callback *) make_help_view_window);
-  main_menu_bar->add( 
+  main_menu_bar->add(
     "Help/About Viewpoints  ", 0, (Fl_Callback *) make_help_about_window);
-  
+
   // Set colors, fonts, etc
   main_menu_bar->color( FL_BACKGROUND_COLOR);
   main_menu_bar->textfont( FL_HELVETICA);
   main_menu_bar->textsize( 14);
   main_menu_bar->down_box( FL_FLAT_BOX);
   main_menu_bar->selection_color( FL_SELECTION_COLOR);
-  
-  // This example is included to illustrate how awkward it can  be to access 
+
+  // This example is included to illustrate how awkward it can  be to access
   // elements of the Fl_Menu_Item array directly.
   // for( int i=0; i<main_menu_bar->size(); i++) {
-  //   Fl_Menu_Item *pMenuItem = 
+  //   Fl_Menu_Item *pMenuItem =
   //     (Fl_Menu_Item*) &(main_menu_bar->menu()[i]);
   //   pMenuItem->labelsize(32);
   // }
@@ -1076,7 +1079,7 @@ void make_main_menu_bar()
 
 //***************************************************************************
 // change_screen_mode() -- Change between default and laptop screen modes.
-// WARNING: This doesn't check the current state so it's the user's 
+// WARNING: This doesn't check the current state so it's the user's
 // responsibility not to call this at the wrong time.
 void change_screen_mode()
 {
@@ -1087,55 +1090,61 @@ void change_screen_mode()
   main_scroll->resizable( main_scroll);
   main_scroll_group->resizable( main_scroll);
 
-  // Move and resize the main control panel, scroll area, font sizes, and 
+  // Move and resize the main control panel, scroll area, font sizes, and
   // scroll area
   int main_control_panel_x_ = main_control_panel->x();
   if( laptop_mode) {
     main_control_panel_x_ = main_control_panel_x_ + main_w - laptop_main_w;
-    main_control_panel->resize( 
+    main_control_panel->resize(
       main_control_panel_x_, main_control_panel->y(),
       laptop_main_w, laptop_main_h);
-    main_scroll->resize( 
+    main_scroll->resize(
       0, main_menu_bar->h(),
       laptop_main_w, laptop_main_h-main_menu_bar->h());
     shrink_widget_fonts( main_control_panel, laptop_scale);
   }
   else {
     main_control_panel_x_ = main_control_panel_x_ + laptop_main_w - main_w;
-    main_control_panel->resize( 
+    main_control_panel->resize(
       main_control_panel_x_, main_control_panel->y(),
       main_w, main_h);
-    main_scroll->resize( 
+    main_scroll->resize(
       0, main_menu_bar->h(),
       main_w, main_h-main_menu_bar->h());
     shrink_widget_fonts( main_control_panel, 1.0/laptop_scale);
   }
-  main_scroll_group->resize( 
+  main_scroll_group->resize(
     main_scroll->x(), main_scroll->y(),
     main_scroll->w(), main_scroll->h());
 
   // Make scroll group a child of scroll area and non-resizable to 'freeze'
   // it at this size.
   main_scroll->add( main_scroll_group);
-  main_scroll_group->resizable( NULL);
+  main_scroll_group->resizable( nullptr);
 }
 
 //***************************************************************************
 // make_file_name_window( *o) -- Create the 'File|Current File Name' window.
 void make_file_name_window( Fl_Widget *o)
 {
+	UNUSED(o);
   string sConfirmText = dfm.input_filespec();
-  if( sConfirmText.size()<=0) sConfirmText = "No input file is specified.";
-  (void)make_confirmation_window( sConfirmText.c_str(), 1);
+  if( sConfirmText.size()<=0)
+	{
+		sConfirmText = "No input file is specified.";
+	}
+  make_confirmation_window( sConfirmText.c_str(), 1);
 }
 
 //***************************************************************************
 // make_statistics_window( *o) -- Create the 'Tools|Statistics' window.
-void make_statistics_window( Fl_Widget *o)
+void make_statistics_window( Fl_Widget *o, void * user_data = nullptr)
 {
+	UNUSED(o);
+	UNUSED(user_data);
   // Destroy any existing window
-  // MCL XXX rule #2: "Compile cleanly at high warning levels." 
-  if( statistics_window != NULL) statistics_window->hide();
+  // MCL XXX rule #2: "Compile cleanly at high warning levels."
+  if( statistics_window != nullptr) statistics_window->hide();
 
   // Generate dimensions
   int nLines = 3 + NBRUSHES;
@@ -1153,7 +1162,7 @@ void make_statistics_window( Fl_Widget *o)
   for( int i=0; i<NBRUSHES; i++) n_selected_[ i] = 0;
   for( int i=0; i<npoints; i++) n_selected_[ selected( i)]++;
   int n_total_selected_ = npoints - n_selected_[0];
-  
+
   // Use statistics to generate text
   string sText = "";
   char cLine[ 80];
@@ -1181,28 +1190,28 @@ void make_statistics_window( Fl_Widget *o)
   // Define buttons and invoke callback functions to handle them
   Fl_Button* ok_button = new Fl_Button( 170, nHeight-20, 60, 25, "&OK");
 
-  // Finish creating and show the statistics window.  Make sure it is 
+  // Finish creating and show the statistics window.  Make sure it is
   // 'modal' to prevent events from being delivered to the other windows.
   // statistics_window->resizable( statistics_window);
-  statistics_window->resizable( NULL);
+  statistics_window->resizable( nullptr);
   statistics_window->end();
   statistics_window->set_modal();   // Switches off label buttons
   statistics_window->show();
-  
-  // Loop: While the window is open, wait and check the read queue until the 
+
+  // Loop: While the window is open, wait and check the read queue until the
   // right widget is activated
   while( statistics_window->shown()) {
     Fl::wait();
     for( ; ;) {   // Is this loop needed?
-      Fl_Widget* o = Fl::readqueue();
-      if( !o) break;
+      Fl_Widget* local_widget = Fl::readqueue();
+      if( !local_widget) break;
 
       // Has the window been closed or a button been pushed?
-      if( o == ok_button) {
+      if( local_widget == ok_button) {
         statistics_window->hide();
         return;
       }
-      else if( o == statistics_window) {
+      else if( local_widget == statistics_window) {
 
         // Don't need to hide window because user has already deleted it
         // confirmation_window->hide();
@@ -1219,125 +1228,129 @@ void make_statistics_window( Fl_Widget *o)
 // make_options_window( *o) -- Create the 'Tools|Options' window.
 void make_options_window( Fl_Widget *o)
 {
-  if( options_window != NULL) options_window->hide();
-   
+	UNUSED(o);
+  if( options_window != nullptr) options_window->hide();
+
   // Create Tools|Options window
   Fl::scheme( "plastic");  // optional
   options_window = new Fl_Window( 300, 250, "Options");
   options_window->begin();
   options_window->selection_color( FL_BLUE);
   options_window->labelsize( 10);
-  
+
   // Write text to box label and align it inside box
   // Fl_Box* options_box = new Fl_Box( 5, 5, 290, 360);
   // box->box( FL_NO_BOX);
   // options_window->resizable( box);
-  options_window->resizable( NULL);
+  options_window->resizable( nullptr);
 
   // Expert mode checkbox
   {
-    Fl_Check_Button* o = expertButton = 
+    expertButton =
       new Fl_Check_Button( 10, 10, 150, 20, " Expert Mode");
-    o->down_box( FL_DOWN_BOX);
-    o->value( expert_mode == true);
-    o->tooltip( "Suppress confirmation windows");
-  }
-  
+    expertButton->down_box( FL_DOWN_BOX);
+    expertButton->value( expert_mode == true);
+    expertButton->tooltip( "Suppress confirmation windows");
+  }//this is dangerous. (1) memory is allocated;
+	//(unsure if it is destroyed);
+	//TODO: refactor into shared_ptr or unique_ptr
+
   // Use VBOs
   {
-    Fl_Check_Button* o = use_VBOs_Button = 
+    use_VBOs_Button =
       new Fl_Check_Button( 10, 35, 250, 20, " Use graphics VBOs (recommended)");
-    o->down_box( FL_DOWN_BOX);
-    o->value( use_VBOs == true);
-    o->tooltip( "Perform graphical operations using VBOs to improve performance");
+    use_VBOs_Button->down_box( FL_DOWN_BOX);
+    use_VBOs_Button->value( use_VBOs == true);
+    use_VBOs_Button->tooltip( "Perform graphical operations using VBOs to improve performance");
   }
 
   // Remove trivial columns
   {
-    Fl_Check_Button* o = trivialColumnsButton = 
+    trivialColumnsButton =
       new Fl_Check_Button( 10, 60, 250, 20, " Remove Trivial Columns");
-    o->down_box( FL_DOWN_BOX);
-    o->value( trivial_columns_mode == true);
-    o->tooltip( "Remove any columns that only contain a single value");
+    trivialColumnsButton->down_box( FL_DOWN_BOX);
+    trivialColumnsButton->value( trivial_columns_mode == true);
+    trivialColumnsButton->tooltip( "Remove any columns that only contain a single value");
   }
-  
+
   // Preserve Old Data
   {
-    Fl_Check_Button* o = preserveOldDataButton = 
+    preserveOldDataButton =
       new Fl_Check_Button( 10, 85, 250, 20, " Preserve Old Data");
-    o->down_box( FL_DOWN_BOX);
-    o->value( preserve_old_data_mode == true);
-    o->tooltip( "Preserve old data for restoration if a read operation fails");
+    preserveOldDataButton->down_box( FL_DOWN_BOX);
+    preserveOldDataButton->value( preserve_old_data_mode == true);
+    preserveOldDataButton->tooltip( "Preserve old data for restoration if a read operation fails");
   }
- 
+
   // Maximum number of rows of data (npoints) field
   {
-    Fl_Input* o = maxpoints_input =
+    maxpoints_input =
       new Fl_Input( 10, 110, 90, 20, " Maximum number of points");
-    o->align( FL_ALIGN_RIGHT);
+    maxpoints_input->align( FL_ALIGN_RIGHT);
     stringstream ss_int;
     string s_int;
     ss_int << dfm.maxpoints();
     ss_int >> s_int;
-    o->value( s_int.c_str());
-    o->tooltip( "Maximum number of data points (rows of data)");
+    maxpoints_input->value( s_int.c_str());
+    maxpoints_input->tooltip( "Maximum number of data points (rows of data)");
   }
 
   // Maximum number of columns of data (nvars) field
   {
-    Fl_Input* o = maxvars_input =
+    maxvars_input =
       new Fl_Input( 10, 135, 70, 20, " Maximum number of variables");
-    o->align( FL_ALIGN_RIGHT);
+    maxvars_input->align( FL_ALIGN_RIGHT);
     stringstream ss_int;
     string s_int;
     ss_int << dfm.maxvars();
     ss_int >> s_int;
-    o->value( s_int.c_str());
-    o->tooltip( "Maximum number of variables (columns of data)");
+    maxvars_input->value( s_int.c_str());
+    maxvars_input->tooltip( "Maximum number of variables (columns of data)");
   }
 
   // Bad value proxy field
   {
-    Fl_Input* o = bad_value_proxy_input =
+    bad_value_proxy_input =
       new Fl_Input( 10, 160, 70, 20, " Bad Value Proxy");
-    o->align( FL_ALIGN_RIGHT);
+    bad_value_proxy_input->align( FL_ALIGN_RIGHT);
     stringstream ss_float;
     string s_float;
     ss_float << dfm.bad_value_proxy();
     ss_float >> s_float;
-    o->value( s_float.c_str());
-    o->tooltip( "Value used for missing or bad data");
+    bad_value_proxy_input->value( s_float.c_str());
+    bad_value_proxy_input->tooltip( "Value used for missing or bad data");
   }
 
   // Laptop mode checkbox
   {
-    Fl_Check_Button* o = laptopModeButton = 
+    laptopModeButton =
       new Fl_Check_Button( 10, 185, 150, 20, " Laptop Mode");
-    o->down_box( FL_DOWN_BOX);
-    o->value( laptop_mode == true);
-    o->tooltip( "Tiny control panel and fonts for small laptop screens");
+    laptopModeButton->down_box( FL_DOWN_BOX);
+    laptopModeButton->value( laptop_mode == true);
+    laptopModeButton->tooltip( "Tiny control panel and fonts for small laptop screens");
   }
-  
+
   // Invoke a multi-purpose callback function to process window
   Fl_Button* ok_button = new Fl_Button( 150, 220, 40, 25, "&OK");
-  ok_button->callback( (Fl_Callback*) cb_options_window, ok_button);
+  ok_button->callback( static_cast<Fl_Callback*>(&cb_options_window), ok_button);
   Fl_Button* cancel = new Fl_Button( 200, 220, 60, 25, "&Cancel");
-  cancel->callback( (Fl_Callback*) cb_options_window, cancel);
+  cancel->callback( static_cast<Fl_Callback*>(&cb_options_window), cancel);
 
   // Done creating the 'Help|Options' window
   // options_window->resizable( options_window);
-  options_window->resizable( NULL);
+  options_window->resizable( nullptr);
   options_window->end();
   options_window->show();
 }
 
 //***************************************************************************
 // cb_options_window( *o, *user_data) -- Callback function to process the
-// Options window.  It is assumed that the necessary pointers will be 
+// Options window.  It is assumed that the necessary pointers will be
 // passed as USER_DATA.  WARNING: No error checking is done on USER_DATA!
 void cb_options_window( Fl_Widget *o, void* user_data)
 {
-  if( user_data == NULL) {
+	UNUSED(o);
+  if( user_data == nullptr) {
     options_window->hide();
     return;
   }
@@ -1359,13 +1372,13 @@ void cb_options_window( Fl_Widget *o, void* user_data)
     // prefs_.set( "use_VBOs_mode", i_use_VBOs_mode);
     use_VBOs = ( i_use_VBOs_mode != 0);
 
-    int maxpoints_value = (int) strtof( maxpoints_input->value(), NULL);
+    int maxpoints_value = (int) strtof( maxpoints_input->value(), nullptr);
     dfm.maxpoints( maxpoints_value);
 
-    int maxvars_value = (int) strtof( maxvars_input->value(), NULL);
+    int maxvars_value = (int) strtof( maxvars_input->value(), nullptr);
     dfm.maxvars( maxvars_value);
 
-    float bad_value_proxy = strtof( bad_value_proxy_input->value(), NULL);
+    float bad_value_proxy = strtof( bad_value_proxy_input->value(), nullptr);
     dfm.bad_value_proxy( bad_value_proxy);
 
     int i_laptop_mode = laptopModeButton->value();
@@ -1381,8 +1394,9 @@ void cb_options_window( Fl_Widget *o, void* user_data)
 // make_help_view_window( *o) -- Create the 'Help|Help' window.
 void make_help_view_window( Fl_Widget *o)
 {
-  if( help_view_window != NULL) help_view_window->hide();
-  
+	UNUSED(o);
+  if( help_view_window != nullptr) help_view_window->hide();
+
   // Create Help|Help window
   Fl::scheme( "plastic");  // optional
   help_view_window = new Fl_Window( 600, 500, "Viewpoints Help");
@@ -1392,30 +1406,33 @@ void make_help_view_window( Fl_Widget *o)
 
   // Define Fl_Help_View widget
   help_view_widget = new Fl_Help_View( 5, 5, 590, 450, "");
-  (void) help_view_widget->load( "vp_help_manual.htm");
+  help_view_widget->load( "vp_help_manual.htm");
   help_view_widget->labelsize( 14);
   help_view_widget->textsize( 14);
   help_topline = help_view_widget->topline();
 
   // Invoke callback functions to change text size
-  Fl_Box* fontsize_box = new Fl_Box( 15, 465, 60, 25, "Font Size:"); 
+  Fl_Box* fontsize_box = new Fl_Box( 15, 465, 60, 25, "Font Size:");
   fontsize_box->align( FL_ALIGN_CENTER);
   Fl_Button* shrink_font = new Fl_Button( 80, 465, 25, 25, "-");
-  shrink_font->callback( (Fl_Callback*) textsize_help_view_widget, (void*) -2);
+  shrink_font->callback( static_cast<Fl_Callback*> (textsize_help_view_widget), (void*) -2);
+	//TODO: this is dangerous (void *)-2 is equivalent to memory address like 0xFFFFFFFD;
   Fl_Button* grow_font = new Fl_Button( 110, 465, 25, 25, "+");
-  grow_font->callback( (Fl_Callback*) textsize_help_view_widget, (void*) 2);
-  
+  grow_font->callback( static_cast<Fl_Callback*>(textsize_help_view_widget), (void*) 2);
+
   // Invoke callback function to move through help_view widget
-  int help_height = help_view_widget->h();
+  long help_height = help_view_widget->h();
   help_height = 3*help_height/4;
   Fl_Button* back = new Fl_Button( 325, 465, 70, 25, "&Back");
-  back->callback( (Fl_Callback*) step_help_view_widget, (void*) -help_height);
+  back->callback( static_cast<Fl_Callback*>(step_help_view_widget), (void*)(-help_height));
   Fl_Button* fwd = new Fl_Button( 400, 465, 70, 25, "&Fwd");
-  fwd->callback( (Fl_Callback*) step_help_view_widget, (void*) help_height);
+  fwd->callback( static_cast<Fl_Callback*>(step_help_view_widget), (void*)(help_height));
+	//this is also dangerous;
+	//need to guarantee that user_data doesn't get dereferenced;
 
   // Invoke callback function to close window
   Fl_Button* close = new Fl_Button( 500, 465, 70, 25, "&Close");
-  close->callback( (Fl_Callback*) close_help_window, help_view_window);
+  close->callback( static_cast<Fl_Callback*>(close_help_window), help_view_window);
 
   // Done creating the 'Help|Help' window
   help_view_window->resizable( help_view_window);
@@ -1424,29 +1441,32 @@ void make_help_view_window( Fl_Widget *o)
 }
 
 //***************************************************************************
-// textsize_help_view_window( *o, *user_data) -- Step through the 'Help|Help' 
+// textsize_help_view_window( *o, *user_data) -- Step through the 'Help|Help'
 // window.
 void textsize_help_view_widget( Fl_Widget *o, void* user_data)
 {
+	UNUSED(o);
   int help_textsize = help_view_widget->textsize() + (long) user_data;
   if( help_textsize < 8) help_textsize=8;
   help_view_widget->textsize( help_textsize);
 }
 
 //***************************************************************************
-// close_help_window( *o, *user_data) -- Callback function to close a Help 
-// window.  It is assumed that a pointer to the window will be passed as 
+// close_help_window( *o, *user_data) -- Callback function to close a Help
+// window.  It is assumed that a pointer to the window will be passed as
 // USER_DATA.  WARNING: No error checking is done on USER_DATA!
 void close_help_window( Fl_Widget *o, void* user_data)
 {
+	UNUSED(o);
   ((Fl_Window*) user_data)->hide();
 }
 
 //***************************************************************************
-// step_help_view_window( *o, *user_data) -- Step through the 'Help|Help' 
+// step_help_view_window( *o, *user_data) -- Step through the 'Help|Help'
 // window.
 void step_help_view_widget( Fl_Widget *o, void* user_data)
 {
+	UNUSED(o);
   help_topline += (long) user_data;
   if( help_topline < 0) help_topline=0;
   help_view_widget->topline( help_topline);
@@ -1463,8 +1483,8 @@ void make_global_widgets()
 
   // Button(1,1): Show nonselected points (on by default)
   show_deselected_button = b = new Fl_Button( xpos, ypos+=25, 20, 20, "show nonselected");
-  b->align( FL_ALIGN_RIGHT); 
-  b->selection_color( FL_BLUE); 
+  b->align( FL_ALIGN_RIGHT);
+  b->selection_color( FL_BLUE);
   b->type( FL_TOGGLE_BUTTON);
   b->value( 1);
   b->callback( (Fl_Callback*) Plot_Window::toggle_display_deselected);
@@ -1475,16 +1495,16 @@ void make_global_widgets()
   // Button(2,1): mask out deselected
   mask_out_deselected = b = new Fl_Button( xpos, ypos+=25, 20, 20, "mask nonselected");
   b->type(FL_TOGGLE_BUTTON);
-  b->align( FL_ALIGN_RIGHT); 
-  b->selection_color( FL_BLUE); 
+  b->align( FL_ALIGN_RIGHT);
+  b->selection_color( FL_BLUE);
   b->tooltip("don't select nonselected points");
   // main_control_panel->add(b);
   main_scroll_group->add(b);
 
   // Button(3,1): Invert selected and nonselected data
   invert_selection_button = b = new Fl_Button( xpos, ypos+=25, 20, 20, "invert selection");
-  b->align( FL_ALIGN_RIGHT); 
-  b->selection_color( FL_BLUE); 
+  b->align( FL_ALIGN_RIGHT);
+  b->selection_color( FL_BLUE);
   b->callback( (Fl_Callback*) Plot_Window::invert_selection);
   b->tooltip("invert selection status of all points");
   // main_control_panel->add(b);
@@ -1492,8 +1512,8 @@ void make_global_widgets()
 
   // Button(4,1): Clear all selections
   clear_selection_button = b = new Fl_Button(xpos, ypos+=25, 20, 20, "clear selections");
-  b->align( FL_ALIGN_RIGHT); 
-  b->selection_color( FL_BLUE); 
+  b->align( FL_ALIGN_RIGHT);
+  b->selection_color( FL_BLUE);
   b->callback( Plot_Window::clear_selections);
   b->tooltip("clear all selections");
   // main_control_panel->add(b);
@@ -1501,8 +1521,8 @@ void make_global_widgets()
 
   // Button(5,1): Delete selected data
   delete_selection_button = b = new Fl_Button( xpos, ypos+=25, 20, 20, "kill selected");
-  b->align( FL_ALIGN_RIGHT); 
-  b->selection_color( FL_BLUE); 
+  b->align( FL_ALIGN_RIGHT);
+  b->selection_color( FL_BLUE);
   b->callback( Plot_Window::delete_selection);
   b->tooltip("remove selected points completely (does not change data on disk)");
   // main_control_panel->add(b);
@@ -1513,8 +1533,8 @@ void make_global_widgets()
 
   // Button(3,2): permute all unlocked axes
   change_all_axes_button = new Fl_Repeat_Button( xpos, ypos+=25, 20, 20, "change axes");
-  change_all_axes_button->align( FL_ALIGN_RIGHT); 
-  change_all_axes_button->selection_color( FL_BLUE); 
+  change_all_axes_button->align( FL_ALIGN_RIGHT);
+  change_all_axes_button->selection_color( FL_BLUE);
   change_all_axes_button->callback( (Fl_Callback*)change_all_axes);
   change_all_axes_button->tooltip("automatically choose new axes for all plots");
   // main_control_panel->add( change_all_axes_button);
@@ -1522,9 +1542,9 @@ void make_global_widgets()
 
   // Button(4,2): Link all axes
   link_all_axes_button = b = new Fl_Button( xpos, ypos+=25, 20, 20, "link axes");
-  b->align( FL_ALIGN_RIGHT); 
-  b->selection_color( FL_BLUE); 
-  b->type( FL_TOGGLE_BUTTON); 
+  b->align( FL_ALIGN_RIGHT);
+  b->selection_color( FL_BLUE);
+  b->type( FL_TOGGLE_BUTTON);
   b->value( 0);
   b->tooltip("toggle linked viewing transormations");
   // main_control_panel->add(b);
@@ -1532,9 +1552,9 @@ void make_global_widgets()
 
   // Button(5,2): defer redraws (for huge data)
   defer_redraws_button = b = new Fl_Button( xpos, ypos+=25, 20, 20, "defer redraws");
-  b->align( FL_ALIGN_RIGHT); 
-  b->selection_color( FL_BLUE); 
-  b->type( FL_TOGGLE_BUTTON); 
+  b->align( FL_ALIGN_RIGHT);
+  b->selection_color( FL_BLUE);
+  b->type( FL_TOGGLE_BUTTON);
   b->value( 0);
   b->tooltip("update selections on mouse-up only (for large data)");
   // main_control_panel->add(b);
@@ -1542,14 +1562,15 @@ void make_global_widgets()
 }
 
 //***************************************************************************
-// change_all_axes( *o) -- Invoke the change_axes method of each Plot_Window 
+// change_all_axes( *o) -- Invoke the change_axes method of each Plot_Window
 // to change all unlocked axes.
 void change_all_axes( Fl_Widget *o)
 {
-  // Loop: Examine successive plots and change the axes of those for which 
+	UNUSED(o);
+  // Loop: Examine successive plots and change the axes of those for which
   // the x or y axis is unlocked.
   for( int i=0; i<nplots; i++) {
-    if( !( cps[i]->lock_axis1_button->value() && 
+    if( !( cps[i]->lock_axis1_button->value() &&
            cps[i]->lock_axis2_button->value()))
       pws[i]->change_axes( 0);
   }
@@ -1557,29 +1578,30 @@ void change_all_axes( Fl_Widget *o)
 }
 
 //***************************************************************************
-// npoints_changed( 0) -- Examine slider widget to determine the new number 
-// of points, then invoke a static method of class Plot_Window to redraw all 
+// npoints_changed( 0) -- Examine slider widget to determine the new number
+// of points, then invoke a static method of class Plot_Window to redraw all
 // plots.
-void npoints_changed( Fl_Widget *o) 
+void npoints_changed( Fl_Widget *o)
 {
   npoints = int( ( (Fl_Slider *)o)->value());
   Plot_Window::redraw_all_plots( 0);
 }
 
 //***************************************************************************
-// write_data( o) -- Write data widget.  Invoked by main control panel.  
+// write_data( o) -- Write data widget.  Invoked by main control panel.
 // Invokes the write method of class data_file_manager to write a data file.
 void write_data( Fl_Widget *o, void* user_data)
 {
+	UNUSED(o);
   // Evaluate user_data to get ASCII or binary file format
-  // if( strstr( (char *) user_data, "binary") != NULL) dfm.ascii_output( 0);
+  // if( strstr( (char *) user_data, "binary") != nullptr) dfm.ascii_output( 0);
   // else dfm.ascii_output( 1);
 
   // Evaluate user_data to determine if only selected data are to be used
-  if( strstr( (char *) user_data, "selected") != NULL) dfm.write_all_data( 0);
+  if( strstr( (char *) user_data, "selected") != nullptr) dfm.write_all_data( 0);
   else dfm.write_all_data( 1);
 
-  // Query user to find name of output file.  If no file was specified, 
+  // Query user to find name of output file.  If no file was specified,
   // return immediately and hope the calling routine can handle this.
   int iQueryStatus = 0;
   iQueryStatus = dfm.findOutputFile();
@@ -1587,7 +1609,7 @@ void write_data( Fl_Widget *o, void* user_data)
     cout << "No output file was selected" << endl;
     return;
   }
-  
+
   // Invoke the data file manager to save the file or fail gracefully
   dfm.save_data_file();
 }
@@ -1608,25 +1630,25 @@ void read_data( Fl_Widget* o, void* user_data)
   // dfm.ascii_input( 1);
 
   // Evaluate USER_DATA to get the operation type
-  if( strstr( (char *) user_data, "append") != NULL) dfm.do_append( 1);
+  if( strstr( (char *) user_data, "append") != nullptr) dfm.do_append( 1);
   else dfm.do_append( 0);
-  if( strstr( (char *) user_data, "merge") != NULL) dfm.do_merge( 1);
+  if( strstr( (char *) user_data, "merge") != nullptr) dfm.do_merge( 1);
   else dfm.do_merge( 0);
 
   // If this was a "Clear all data" operation, query the user and set the
-  // doCleaarAllData flag.  If this was a "Reload File" operation and we 
-  // know the name of the data file, do nothing.  Otherwise invoke the 
-  // findInputFile() method of the data_file_manager object to query the 
-  // user for the input filename.  If no file is specified, return 
+  // doCleaarAllData flag.  If this was a "Reload File" operation and we
+  // know the name of the data file, do nothing.  Otherwise invoke the
+  // findInputFile() method of the data_file_manager object to query the
+  // user for the input filename.  If no file is specified, return
   // immediately and hope the calling routine can handle this situation.
   unsigned doClearAllData = 0;
-  if( strstr( (char *) user_data, "clear") != NULL) {
+  if( strstr( (char *) user_data, "clear") != nullptr) {
     if( !expert_mode &&
         make_confirmation_window( "Clear all data?  Are you sure?") <= 0)
       return;
     doClearAllData = 1;
   }
-  else if( ( strstr( (char *) user_data, "reload") != NULL) &&
+  else if( ( strstr( (char *) user_data, "reload") != nullptr) &&
       (dfm.input_filespec()).length() > 0) {
   }
   else{
@@ -1639,13 +1661,13 @@ void read_data( Fl_Widget* o, void* user_data)
   }
 
   // If the doClearAllData flag is set, invoke the create_default_data()
-  // method of the Data_File_Manager object to generate default data, 
-  // otherwise invoke the load_data_file() method to read the data file.  
+  // method of the Data_File_Manager object to generate default data,
+  // otherwise invoke the load_data_file() method to read the data file.
   // Error reporting is handled by the relevant methods.
   if( doClearAllData) dfm.create_default_data( 10);
   else dfm.load_data_file();
 
-  // If only one or fewer records are available, quit before something 
+  // If only one or fewer records are available, quit before something
   // terrible happens!
   if( npoints <= 1) {
     cout << "Insufficient data, " << npoints
@@ -1656,7 +1678,7 @@ void read_data( Fl_Widget* o, void* user_data)
     cout << "Loaded " << npoints
          << " samples with " << nvars << " fields" << endl;
   }
-  
+
   // Resize the slider
   // npoints_slider->bounds(1,npoints);
   // npoints_slider->value(npoints);
@@ -1670,23 +1692,23 @@ void read_data( Fl_Widget* o, void* user_data)
   // cout << "Finished dfm.load_data_file and about to refresh plots" << endl;
   // char ans;
   // cin >> ans;
-  
+
   // Clear children of the tab widgets and reload the plot window array.
-  manage_plot_window_array( o, NULL);
+  manage_plot_window_array( o, nullptr);
 }
 
 //***************************************************************************
-// load_initial_state( configFileSpec) -- Use BOOST serialization to load 
+// load_initial_state( configFileSpec) -- Use BOOST serialization to load
 // the initial saved state from an XML archive.  NOTE: For reasons related
-// to the configuration filespec and manage_plot_window_array, this must be 
-// handled differently from the ordinary load_state operation.  NOTE: Since 
-// BOOST reads configuration files as sequential files rather than XML, the 
-// order and number of the load and save operations is extremely important, 
+// to the configuration filespec and manage_plot_window_array, this must be
+// handled differently from the ordinary load_state operation.  NOTE: Since
+// BOOST reads configuration files as sequential files rather than XML, the
+// order and number of the load and save operations is extremely important,
 // and this is noted explictly in the comments below.
 int load_initial_state( string configFileSpec)
 {
-#ifdef SERIALIZATION  
-  // Create dummy menu for use with manage_plot_window_array.  Instantiate 
+#ifdef SERIALIZATION
+  // Create dummy menu for use with manage_plot_window_array.  Instantiate
   // an actual object to avoid potential dangers of pointers.
   Fl_Menu_Bar dummy_menu( 0, 0, 1, 1);
 
@@ -1703,17 +1725,17 @@ int load_initial_state( string configFileSpec)
     // closed when destructors are called
     boost::archive::xml_iarchive inputArchive( inputFileStream);
 
-    // STEP 1/8) Begin by checking the serialization file version to see if 
+    // STEP 1/8) Begin by checking the serialization file version to see if
     // it's supported
     inputArchive >> BOOST_SERIALIZATION_NVP( serialization_file_version);
     if( serialization_file_version < last_supported_serialization_version) throw 0;
-    
+
     // STEP 2/8) Get data file from archive and read it
     inputArchive >> BOOST_SERIALIZATION_NVP( dfm);
     if( dfm.input_filespec().length() <= 0) dfm.create_default_data( 10);
     else {
       if( dfm.load_data_file() != 0) dfm.create_default_data( 10);
-      else 
+      else
         cout << "Loaded " << npoints
              << " samples with " << nvars << " fields" << endl;
     }
@@ -1721,35 +1743,35 @@ int load_initial_state( string configFileSpec)
     // Fewer points -> bigger starting default_pointsize
     default_pointsize = max( 1.0, 6.0 - log10f( (float) npoints));
     Brush::set_sizes(default_pointsize);
-  
-    // STEPS 3/8 and 4/8) Read configuration information from archive.  
+
+    // STEPS 3/8 and 4/8) Read configuration information from archive.
     // NOTE: Must be done before first call to MANAGE_PLOT_WINDOW_ARRAY!
     inputArchive >> BOOST_SERIALIZATION_NVP( nrows);
     inputArchive >> BOOST_SERIALIZATION_NVP( ncols);
 
-    // Set user_data for this widget to indicate that this is a NEW_DATA 
-    // operation, then invoke MANAGE_PLOT_WINDOW_ARRAY to clear children of 
+    // Set user_data for this widget to indicate that this is a NEW_DATA
+    // operation, then invoke MANAGE_PLOT_WINDOW_ARRAY to clear children of
     // the tab widget and reload the plot window array.
     // manage_plot_window_array( o, (void*) "NEW_DATA");
     manage_plot_window_array( &dummy_menu, (void*) "NEW_DATA");
 
-    // STEP 5/8) Read NPLOTS from the archive to make sure it is consistent 
-    // with the stored control panel and plot window information.  NOTE: If 
-    // something went wrong with MANAGE_PLOT_WINDOW_ARRAY, this could cause 
+    // STEP 5/8) Read NPLOTS from the archive to make sure it is consistent
+    // with the stored control panel and plot window information.  NOTE: If
+    // something went wrong with MANAGE_PLOT_WINDOW_ARRAY, this could cause
     // problems.
     inputArchive >> BOOST_SERIALIZATION_NVP( nplots);
 
-    // STEPS 6/8 and 7/8) Define temporary arrays, load these with 
-    // serialization information, then transfer this information to the 
-    // actual arrays.  NOTE: This awkward procedure is imposed by the 
+    // STEPS 6/8 and 7/8) Define temporary arrays, load these with
+    // serialization information, then transfer this information to the
+    // actual arrays.  NOTE: This awkward procedure is imposed by the
     // limitations of the constructors for these classes.
-    Control_Panel_Window *cps_input[ MAXPLOTS+1]; 
+    Control_Panel_Window *cps_input[ MAXPLOTS+1];
     inputArchive >> BOOST_SERIALIZATION_NVP( cps_input);
     for( int i=0; i<nplots; i++) {
       cps[i]->copy_state( cps_input[ i]);
       cps[i]->load_state();
     }
-    Plot_Window *pws_input[ MAXPLOTS+1]; 
+    Plot_Window *pws_input[ MAXPLOTS+1];
     inputArchive >> BOOST_SERIALIZATION_NVP( pws_input);
     for( int i=0; i<nplots; i++) {
       pws[i]->copy_state( pws_input[ i]);
@@ -1763,7 +1785,7 @@ int load_initial_state( string configFileSpec)
       brushes[i]->copy_state( brushes_input[ i]);
       brushes[i]->load_state();
     }
-        
+
     // Set user_data to indicate that this is a RESIZE operation, then i
     // invoke manage_plot_window( o) to apply configuration.
     // manage_plot_window_array( o, (void*) "REFRESH_WINDOWS");
@@ -1798,7 +1820,7 @@ int load_initial_state( string configFileSpec)
     manage_plot_window_array( &dummy_menu, (void*) "NEW_DATA");
     return 0;
   }
-  
+
   // If this is an older serialization file, query the user to determine if
   // they wish to resave it as a newer version
   if( serialization_file_version < current_serialization_version) {
@@ -1822,21 +1844,21 @@ int load_initial_state( string configFileSpec)
 //***************************************************************************
 // load_state( o) -- Use BOOST serialization to load a saved state from an
 // XML archive.  NOTE: Since BOOST reads these as sequential files rather
-// than XML, the order and number of the load and save operations is 
+// than XML, the order and number of the load and save operations is
 // extremely important, and this noted explicetly in the comments below.
 int load_state( Fl_Widget* o)
 {
 #ifdef SERIALIZATION
 
-  // Extract directory from the Data_File_Manager class to initialize the 
-  // filespec for the XML archive.  NOTE: cInFileSpec is defined as const 
-  // char* for use with Vp_File_Chooser, which means it could be destroyed 
+  // Extract directory from the Data_File_Manager class to initialize the
+  // filespec for the XML archive.  NOTE: cInFileSpec is defined as const
+  // char* for use with Vp_File_Chooser, which means it could be destroyed
   // by the relevant destructors!
   const char *cInFileSpec = dfm.directory().c_str();
   // const char *cInFileSpec = strcat( dfm.directory().c_str(), "vp.xml");
 
   // Instantiate and show an Vp_File_Chooser widget and switch it to the
-  // Configuration File Mode.  NOTE: The pathname must be passed as a 
+  // Configuration File Mode.  NOTE: The pathname must be passed as a
   // variable or the window will begin in some root directory.
   const char* title = "Load saved configuration from file";
   const char* pattern = "*.xml\tAll Files (*)";
@@ -1845,37 +1867,37 @@ int load_state( Fl_Widget* o)
   file_chooser->directory( cInFileSpec);
   file_chooser->isConfigFileMode( 1);
 
-  // Loop: wait until the file selection is done.  NOTE: This version 
+  // Loop: wait until the file selection is done.  NOTE: This version
   // doesn't work and is retained only for archival purposes
   // file_chooser->show();
   // while( file_chooser->shown()) Fl::wait();
-  // cInFileSpec = file_chooser->value();   
+  // cInFileSpec = file_chooser->value();
 
-  // Loop: Set the directory, then select fileSpecs until a non-directory is 
-  // obtained.  NOTE: This should all be handled by the file_chooser object, 
+  // Loop: Set the directory, then select fileSpecs until a non-directory is
+  // obtained.  NOTE: This should all be handled by the file_chooser object,
   // but it's necessary to add some protection in case the user selects a
   // pathname that does not correspnd to a file.
   while( 1) {
-    if( cInFileSpec != NULL) file_chooser->directory( cInFileSpec);
+    if( cInFileSpec != nullptr) file_chooser->directory( cInFileSpec);
 
     // Loop: wait until the file selection is done
     file_chooser->show();
     while( file_chooser->shown()) Fl::wait();
-    cInFileSpec = file_chooser->value();   
+    cInFileSpec = file_chooser->value();
 
     // If no file was specified then quit
-    if( cInFileSpec == NULL) {
+    if( cInFileSpec == nullptr) {
       cerr << "Main::load_state: "
            << "No input file was specified" << endl;
       break;
     }
 
-    // In FLTK 1.1.7 under Windows, the fl_filename_isdir method doesn't work, 
-    // so try to open this file to see if it is a directory.  If it is, set 
+    // In FLTK 1.1.7 under Windows, the fl_filename_isdir method doesn't work,
+    // so try to open this file to see if it is a directory.  If it is, set
     // the pathname and continue.  Otherwise merely update the pathname stored
     // in the Data_File_Manager object.
     FILE* pFile = fopen( cInFileSpec, "r");
-    if( pFile == NULL) {
+    if( pFile == nullptr) {
       file_chooser->directory( cInFileSpec);
       dfm.directory( (string) cInFileSpec);
       continue;
@@ -1885,13 +1907,13 @@ int load_state( Fl_Widget* o)
     }
 
     fclose( pFile);
-    break;         
-  } 
+    break;
+  }
   int isConfigOnly = file_chooser->isConfigOnly();
 
-  // If no file was specified then report, deallocate the Vp_File_Chooser 
+  // If no file was specified then report, deallocate the Vp_File_Chooser
   // object, and quit.
-  if( cInFileSpec == NULL) {
+  if( cInFileSpec == nullptr) {
     cerr << "Main::load_state: "
          << "No input file was specified" << endl;
     delete file_chooser;  // WARNING! Destroys cInFileSpec!
@@ -1914,11 +1936,11 @@ int load_state( Fl_Widget* o)
     // closed when destructors are called
     boost::archive::xml_iarchive inputArchive( inputFileStream);
 
-    // STEP 1/8) Begin by checking the serialization file version to see if 
+    // STEP 1/8) Begin by checking the serialization file version to see if
     // it's supported
     inputArchive >> BOOST_SERIALIZATION_NVP( serialization_file_version);
     if( serialization_file_version < last_supported_serialization_version) throw 0;
-    
+
     // STEP 2/8) Copy existing state, if any, of the data file manager, then
     // get file i/o information from archive and read input file
     Data_File_Manager dfm_save;
@@ -1936,7 +1958,7 @@ int load_state( Fl_Widget* o)
     else if( dfm.input_filespec().length() <= 0) dfm.create_default_data( 10);
     else {
       if( dfm.load_data_file() != 0) dfm.create_default_data( 10);
-      else 
+      else
         cout << "Loaded " << npoints
              << " samples with " << nvars << " fields" << endl;
     }
@@ -1944,34 +1966,34 @@ int load_state( Fl_Widget* o)
     // Fewer points -> bigger starting default_pointsize
     default_pointsize = max( 1.0, 6.0 - log10f( (float) npoints));
     Brush::set_sizes(default_pointsize);
-  
-    // STEPS 3/8 and 4/8) Read configuration information from archive.  
+
+    // STEPS 3/8 and 4/8) Read configuration information from archive.
     // NOTE: Must be done before first call to MANAGE_PLOT_WINDOW_ARRAY!
     inputArchive >> BOOST_SERIALIZATION_NVP( nrows);
     inputArchive >> BOOST_SERIALIZATION_NVP( ncols);
 
-    // Set user_data for this widget to indicate that this is a NEW_DATA 
-    // operation, then invoke MANAGE_PLOT_WINDOW_ARRAY to clear children of 
+    // Set user_data for this widget to indicate that this is a NEW_DATA
+    // operation, then invoke MANAGE_PLOT_WINDOW_ARRAY to clear children of
     // the tab widget and reload the plot window array.
     manage_plot_window_array( o, (void*) "NEW_DATA");
 
-    // STEP 5/8) Read NPLOTS from the archive to make sure it is consistent 
-    // with the stored control panel and plot window information.  NOTE: If 
-    // something went wrong with MANAGE_PLOT_WINDOW_ARRAY, this could cause 
+    // STEP 5/8) Read NPLOTS from the archive to make sure it is consistent
+    // with the stored control panel and plot window information.  NOTE: If
+    // something went wrong with MANAGE_PLOT_WINDOW_ARRAY, this could cause
     // problems.
     inputArchive >> BOOST_SERIALIZATION_NVP( nplots);
 
-    // STEPS 6/8 and 7/8) Define temporary arrays, load these with 
-    // serialization information, then transfer this information to the 
-    // actual arrays.  NOTE: This awkward procedure is imposed by the 
+    // STEPS 6/8 and 7/8) Define temporary arrays, load these with
+    // serialization information, then transfer this information to the
+    // actual arrays.  NOTE: This awkward procedure is imposed by the
     // limitations of the constructors for these classes.
-    Control_Panel_Window *cps_input[ MAXPLOTS+1]; 
+    Control_Panel_Window *cps_input[ MAXPLOTS+1];
     inputArchive >> BOOST_SERIALIZATION_NVP( cps_input);
     for( int i=0; i<nplots; i++) {
       cps[i]->copy_state( cps_input[ i]);
       cps[i]->load_state();
     }
-    Plot_Window *pws_input[ MAXPLOTS+1]; 
+    Plot_Window *pws_input[ MAXPLOTS+1];
     inputArchive >> BOOST_SERIALIZATION_NVP( pws_input);
     for( int i=0; i<nplots; i++) {
       pws[i]->copy_state( pws_input[ i]);
@@ -1985,7 +2007,7 @@ int load_state( Fl_Widget* o)
       brushes[i]->copy_state( brushes_input[ i]);
       brushes[i]->load_state();
     }
-        
+
     // Set user_data to indicate that this is a RESIZE operation, then i
     // invoke manage_plot_window( o) to apply configuration.
     manage_plot_window_array( o, (void*) "REFRESH_WINDOWS");
@@ -2017,7 +2039,7 @@ int load_state( Fl_Widget* o)
     manage_plot_window_array( main_menu_bar, (void*) "NEW_DATA");
     return 0;
   }
-  
+
   // Refresh display
   // manage_plot_window_array( o,  (void*) "Resize");
 
@@ -2040,53 +2062,54 @@ int load_state( Fl_Widget* o)
 }
 
 //***************************************************************************
-// save_state( o) -- Use BOOST serialization to save the current state to an 
+// save_state( o) -- Use BOOST serialization to save the current state to an
 // XML archive.  NOTE: Since BOOST reads these as sequential files rather
-// than XML, the order and number of the load and save operations is 
+// than XML, the order and number of the load and save operations is
 // extremely important, and tis noted explicetly in the comments below.
 int save_state( Fl_Widget* o)
 {
+	UNUSED(o);
 #ifdef SERIALIZATION
 
-  // Extract directory from the Data_File_Manager class to initialize the 
-  // filespec for the XML archive.  NOTE: cOutFileSpec is defined as const 
-  // char* for use with Vp_File_Chooser, which means it could be destroyed 
+  // Extract directory from the Data_File_Manager class to initialize the
+  // filespec for the XML archive.  NOTE: cOutFileSpec is defined as const
+  // char* for use with Vp_File_Chooser, which means it could be destroyed
   // by the relevant destructors!
   const char *cOutFileSpec = dfm.directory().c_str();
   // const char *cOutFileSpec = strcat( dfm.directory().c_str(), "vp.xml");
 
-  // Instantiate and show an Vp_File_Chooser widget.  NOTE: The pathname 
-  // must be passed as a variable or the window will begin in some root 
+  // Instantiate and show an Vp_File_Chooser widget.  NOTE: The pathname
+  // must be passed as a variable or the window will begin in some root
   // directory.
   const char* title = "Save current configuration to file";
   const char* pattern = "*.xml\tAll Files (*)";
-  Vp_File_Chooser* file_chooser = 
-    new Vp_File_Chooser( 
+  Vp_File_Chooser* file_chooser =
+    new Vp_File_Chooser(
       cOutFileSpec, pattern, Vp_File_Chooser::CREATE, title);
   file_chooser->directory( cOutFileSpec);
   file_chooser->isConfigFileMode( 1);
 
   // Loop: Select succesive filespecs until a non-directory is obtained
   while( 1) {
-    // if( cOutFileSpec != NULL) file_chooser->directory( cOutFileSpec);
+    // if( cOutFileSpec != nullptr) file_chooser->directory( cOutFileSpec);
 
-    // Loop: wait until the selection is done, then extract the value.  NOTE: 
+    // Loop: wait until the selection is done, then extract the value.  NOTE:
     // This usage of while and Fl::wait() seems strange.
     file_chooser->show();
     while( file_chooser->shown()) Fl::wait();
-    cOutFileSpec = file_chooser->value();   
+    cOutFileSpec = file_chooser->value();
 
     // If no file was specified then quit
-    if( cOutFileSpec == NULL) break;
+    if( cOutFileSpec == nullptr) break;
 
     // If this is a new file, it can't be opened for read
     int isNewFile = 0;
     FILE* pFile = fopen( cOutFileSpec, "r");
-    if( pFile == NULL) isNewFile= 1;
+    if( pFile == nullptr) isNewFile= 1;
     else fclose( pFile);
 
-    // Attempt to open an output stream to make sure the file can be opened 
-    // for write.  If it can't, assume that cOutFileSpec was a directory and 
+    // Attempt to open an output stream to make sure the file can be opened
+    // for write.  If it can't, assume that cOutFileSpec was a directory and
     // make it the working directory.  Otherwise close the output stream.
     // NOTE: If the file exists, it will be opened for append, then closed.
     // Otherwise this will create and close an empty file.
@@ -2110,23 +2133,23 @@ int save_state( Fl_Widget* o)
     if( isNewFile != 0) break;
 
     // If we got this far, the file must exist and be available to be
-    // overwritten, so open a confirmation window and wait for the button 
+    // overwritten, so open a confirmation window and wait for the button
     // handler to do something.
     string sConfirmText = "Configuration file already exists:\n'";
     sConfirmText.append( cOutFileSpec);
     sConfirmText.append( "'\nOverwrite exisiting file?\n");
     int iConfirmResult = make_confirmation_window( sConfirmText.c_str(), 3, 3);
 
-    // If this was a 'CANCEL' request, return without doing anything.  If 
+    // If this was a 'CANCEL' request, return without doing anything.  If
     // this was a 'YES' request, move on.  Otherwise, make sure we're in
     // the right directory and try again.
     if( iConfirmResult < 0) return -1;
     if( iConfirmResult > 0) break;
-  } 
+  }
 
-  // If no file was specified then report, deallocate the Vp_File_Chooser 
+  // If no file was specified then report, deallocate the Vp_File_Chooser
   // object, and quit.
-  if( cOutFileSpec == NULL) {
+  if( cOutFileSpec == nullptr) {
     cerr << "Main::load_state: "
          << "No output file was specified" << endl;
     delete file_chooser;  // WARNING! Destroys cInFileSpec!
@@ -2141,13 +2164,13 @@ int save_state( Fl_Widget* o)
   boost::archive::xml_oarchive outputArchive( outputFileStream);
 
   // STEP 1/8) Begin by saving current serialization file version number
-  outputArchive << boost::serialization::make_nvp( 
+  outputArchive << boost::serialization::make_nvp(
     "serialization_file_version", current_serialization_version);
 
   // STEP 2/8) Write class instance to archive
   outputArchive << BOOST_SERIALIZATION_NVP( dfm);
 
-  // STEPS 3/8, 4/8, and 5/8) Write plot window array information to 
+  // STEPS 3/8, 4/8, and 5/8) Write plot window array information to
   // archive
   outputArchive << BOOST_SERIALIZATION_NVP( nrows);
   outputArchive << BOOST_SERIALIZATION_NVP( ncols);
@@ -2159,18 +2182,19 @@ int save_state( Fl_Widget* o)
 
   // STEP 8/8) Do the same thing for brushes
   outputArchive << BOOST_SERIALIZATION_NVP( brushes);
-  
+
   // Report success
 #endif //SERIALIZATION
   return 1;
 }
 
 //***************************************************************************
-// redraw_if_changing( dummy) -- Callback function for use by FLTK 
-// Fl::add_idle.  When an idle callback occurs, redraw any plot that is 
+// redraw_if_changing( dummy) -- Callback function for use by FLTK
+// Fl::add_idle.  When an idle callback occurs, redraw any plot that is
 // spinning or otherwise needs to be redrawn.
 void redraw_if_changing( void *dummy)
 {
+	UNUSED(dummy);
   // DEBUG( cout << "in redraw_if_changing" << endl) ;
   for( int i=0; i<nplots; i++) {
     // DEBUG ( cout << "  i=" << i << ", needs_redraw=" << pws[i]->needs_redraw << endl );
@@ -2203,9 +2227,9 @@ void reset_selection_arrays()
 //***************************************************************************
 // Main routine
 //
-// Purpose: Driver to run everything.  STEP 1: Read and parse the command 
-//  line.  STEP 2: Read the input data file or create a default data set.  
-//  STEP 3: Create the main control panel.  STEP 4: Create the plot window 
+// Purpose: Driver to run everything.  STEP 1: Read and parse the command
+//  line.  STEP 2: Read the input data file or create a default data set.
+//  STEP 3: Create the main control panel.  STEP 4: Create the plot window
 //  array.  STEP 5: Enter the main execution loop.
 //
 // Functions:
@@ -2220,8 +2244,8 @@ int main( int argc, char **argv)
 {
   ostringstream fltk_version_ss;
   fltk_version_ss << Fl::version();
-  
-  // XXX: In a more perfect world, this should be included with the global 
+
+  // XXX: In a more perfect world, this should be included with the global
   // definitions
 
   about_string = "\n\
@@ -2268,7 +2292,7 @@ int main( int argc, char **argv)
     { "version", no_argument, 0, 'V'},
     { "stdin", no_argument, 0, 'I'},
 		// Apple OS X "provides" this next argument when any program invoked by clicking on its icon
-    { "psn_", required_argument, 0, 'p'}, 
+    { "psn_", required_argument, 0, 'p'},
     { 0, 0, 0, 0}
   };
 
@@ -2290,24 +2314,24 @@ int main( int argc, char **argv)
   laptop_mode = ( i_laptop_mode != 0);
 
   // Initialize the data file manager, just in case, even though this should
-  // already have been done by the constructor, then set global pointer for 
+  // already have been done by the constructor, then set global pointer for
   // by everyone.
   dfm.initialize();
   pdfm = &dfm;
 
-  // Loop: Invoke GETOPT_LONG to parse successive command-line arguments 
-  // (Windows version of GETOPT_LONG is implemented in LIBGW32).  NOTES: 1) 
-  // The possible options MUST be listed in the call to GETOPT_LONG, 2) This 
+  // Loop: Invoke GETOPT_LONG to parse successive command-line arguments
+  // (Windows version of GETOPT_LONG is implemented in LIBGW32).  NOTES: 1)
+  // The possible options MUST be listed in the call to GETOPT_LONG, 2) This
   // process does NOT effect arc and argv in any way.
   int c;
   string inFileSpec = "";
   string configFileSpec = "";
   char delimiter_char_ = ' ';
-  while( 
-    ( c = getopt_long_only( 
-        argc, argv, 
-        "f:n:v:s:t:o:P:r:c:m:i:C:M:d:bBhlLxOVIp", long_options, NULL)) != -1) {
-  
+  while(
+    ( c = getopt_long_only(
+        argc, argv,
+        "f:n:v:s:t:o:P:r:c:m:i:C:M:d:bBhlLxOVIp", long_options, nullptr)) != -1) {
+
     // Examine command-line options and extract any optional arguments
     switch( c) {
 
@@ -2322,7 +2346,7 @@ int main( int argc, char **argv)
         }
         break;
 
-      // npoints: Extract maximum number of points (samples, rows of data) to 
+      // npoints: Extract maximum number of points (samples, rows of data) to
       // read from the data file.  If requested, increase MAXPOINTS_
       case 'n':
         dfm.npoints_cmd_line = atoi( optarg);
@@ -2333,8 +2357,8 @@ int main( int argc, char **argv)
         if( dfm.npoints_cmd_line > dfm.maxpoints())
           dfm.maxpoints( dfm.npoints_cmd_line);
         break;
-      
-      // nvars: Extract maximum number of variables (attributes) to read from 
+
+      // nvars: Extract maximum number of variables (attributes) to read from
       // each line of data file.  If requested, increase MAXVARS_
       case 'v':
         dfm.nvars_cmd_line = atoi( optarg);
@@ -2345,7 +2369,7 @@ int main( int argc, char **argv)
         if( dfm.nvars_cmd_line > dfm.maxvars())
           dfm.maxvars( dfm.nvars_cmd_line);
         break;
-      
+
       // nSkipHeaderLines: Extract number of header lines to skip at the
       // beginning of the data file
       case 's':
@@ -2355,7 +2379,7 @@ int main( int argc, char **argv)
           exit( -1);
         }
         break;
-      
+
       // trivial_column_mode: Set flag to remove trivial columns
       case 't':
         if( !strncmp( optarg, "true", 1)) trivial_columns_mode = true;
@@ -2367,8 +2391,8 @@ int main( int argc, char **argv)
           exit( -1);
         }
         break;
-      
-      // ordering: Extract the ordering of ("columnmajor or rowmajor") of a 
+
+      // ordering: Extract the ordering of ("columnmajor or rowmajor") of a
       // binary input file
       case 'o':
         if( !strncmp( optarg, "columnmajor", 1))
@@ -2392,7 +2416,7 @@ int main( int argc, char **argv)
           exit( -1);
         }
         break;
-      
+
       // rows: Extract the number of rows of plot windows
       case 'r':
         nrows = atoi( optarg);
@@ -2422,9 +2446,9 @@ int main( int argc, char **argv)
 
       // Missing or unreadable values get set to this number
       case 'M':
-        // bad_value_proxy = strtof (optarg, NULL);
+        // bad_value_proxy = strtof (optarg, nullptr);
         // if( !bad_value_proxy) {
-        dfm.bad_value_proxy( strtof( optarg, NULL));
+        dfm.bad_value_proxy( strtof( optarg, nullptr));
         if( !dfm.bad_value_proxy()) {
           usage();
           exit( -1);
@@ -2433,7 +2457,7 @@ int main( int argc, char **argv)
 
       // set field delimiter character
       case 'd':
-        if( optarg!=NULL) {
+        if( optarg!=nullptr) {
           std::string buf(unescape(optarg));
           delimiter_char_ = buf[0];
           cout << "Main: delimiter character is: (" << delimiter_char_
@@ -2530,7 +2554,7 @@ int main( int argc, char **argv)
   else i_laptop_mode = 0;
   prefs_.set( "laptop_mode", i_laptop_mode);
 
-  // If no data file was specified, but there was at least one argument 
+  // If no data file was specified, but there was at least one argument
   // in the command line, assume the last argument is the filespec.
   if( inFileSpec.length() <= 0 && configFileSpec.length() <= 0 && argc > 1)
     inFileSpec.append( argv[ argc-1]);
@@ -2546,12 +2570,12 @@ int main( int argc, char **argv)
   // gsl_rng_env_setup();   // Not needed
   vp_gsl_rng = gsl_rng_alloc( gsl_rng_mt19937);
 
-  // Restrict format and restrict and initialize the number of plots.  NOTE: 
-  // nplots will later be reset by manage_plot_window_array( NULL) 
+  // Restrict format and restrict and initialize the number of plots.  NOTE:
+  // nplots will later be reset by manage_plot_window_array( nullptr)
   assert( nrows*ncols <= MAXPLOTS);
   nplots = nrows*ncols;
 
-  // STEP 2: Read the data file or create a 10-D default data set if the 
+  // STEP 2: Read the data file or create a 10-D default data set if the
   // read attempt fails
   if( inFileSpec.length() <= 0) dfm.create_default_data( 10);
   else {
@@ -2561,18 +2585,18 @@ int main( int argc, char **argv)
          << ")" << endl;
     if( dfm.load_data_file() != 0) dfm.create_default_data( 10);
   }
-  
+
   // Fewer points -> bigger starting default_pointsize
   default_pointsize = max( 1.0, 6.0 - log10f( (float) npoints));
   Brush::set_sizes(default_pointsize);
 
   // STEP 3: Create main control panel.
-  // Determine the number of screens.  NOTE screen_count requires OpenGL 1.7, 
+  // Determine the number of screens.  NOTE screen_count requires OpenGL 1.7,
   // which was not available under most Windows OS as of 10-APR-2006.
   #ifndef __WIN32__
     if( number_of_screens <= 0)
       number_of_screens = Fl::screen_count();
-  #else 
+  #else
     if( number_of_screens <= 0)
       number_of_screens = 1;
   #endif   // __WIN32__
@@ -2582,19 +2606,19 @@ int main( int argc, char **argv)
   const int main_y = top_frame+top_safe;
 
   // Create the main control panel window
-  create_main_control_panel( 
+  create_main_control_panel(
     main_x, main_y, main_w, main_h,
     "viewpoints -> Fast Interactive Visualization");
 
-  // Step 4: Call manage_plot_window_array with a NULL argument to
+  // Step 4: Call manage_plot_window_array with a nullptr argument to
   // initialize the plot window array.  KLUDGE ALERT: argc and argv are
   // 'globalized' to make them available to manage_plot_window_array.
   global_argc = argc;
   global_argv = argv;
-  manage_plot_window_array( NULL, NULL);
+  manage_plot_window_array( nullptr, nullptr);
 
-  // Invoke Plot_Window::initialize_selection to clear the random selection 
-  // that can occur when vp is initialized on some Linux systems.  
+  // Invoke Plot_Window::initialize_selection to clear the random selection
+  // that can occur when vp is initialized on some Linux systems.
   if( dfm.read_selection_info() != 1)
     Plot_Window::initialize_selection();
 
@@ -2603,20 +2627,20 @@ int main( int argc, char **argv)
 
   // This should be moved to create_main_control_panel?
   main_scroll->add( main_scroll_group);
-  main_scroll_group->resizable( NULL);
+  main_scroll_group->resizable( nullptr);
 
   // Get screen sizes for laptop mode and use it if requested
   laptop_main_w = (int) (laptop_scale*main_w);
   laptop_main_h = (int) (laptop_scale*main_h);
   if( laptop_mode) change_screen_mode();
-  
+
   // Step 5: Register functions to call on a reglar basis, when no other
   // events (mouse, etc.) are waiting to be processed.
   // Do not use Fl::add_idle().  It causes causes a busy-wait loop.
   // use Fl:add_timeout() instead.
   Fl::add_timeout( 0.01, redraw_if_changing);
 
-  // For some reason, add_timout doesn't seem to work.  But add_check 
+  // For some reason, add_timout doesn't seem to work.  But add_check
   // seems to avoid the problem with the busy-wait loop
   // Fl::add_timeout(0.25, cb_manage_plot_window_array);
   Fl::add_check( cb_manage_plot_window_array);
