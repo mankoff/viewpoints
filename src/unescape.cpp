@@ -28,7 +28,7 @@
 #define ISODIGIT(c)  ((int)(c) >= '0' && (int)(c) <= '7')
 
 //*****************************************************************************
-// unescape( orig) - Return a string with escaped character sequences replaced 
+// unescape( orig) - Return a string with escaped character sequences replaced
 // by the actual characters that the escape codes refer to.
 char* unescape( char *orig)
 {
