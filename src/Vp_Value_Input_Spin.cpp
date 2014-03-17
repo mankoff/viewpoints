@@ -29,7 +29,7 @@
 #include <FL/Fl_Group.H>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Vp_Value_Input_Spin.H"
+#include "Vp_Value_Input_Spin.h"
 #include <FL/fl_draw.H>
 
 // Static variable used by value_damage()
@@ -97,7 +97,8 @@ void Vp_Value_Input_Spin::draw()
   if (damage()&~FL_DAMAGE_CHILD) input.clear_damage(FL_DAMAGE_ALL);
   input.box(box());
   input.color(FL_WHITE, selection_color());
-  input.draw();
+  Fl_Widget * draw_hack = &input;
+  draw_hack->draw();
   input.clear_damage();
   sxx+=border_size;
   syy+=border_size;
