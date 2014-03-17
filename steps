@@ -5,5 +5,5 @@
 (5) bring over changes including ROOT reading;
 (6) attempt to build a simple JSON reader;
 (7) run cppcheck on the entire source code;
-
+(8) correct warnings from gcc and g++; 
 
