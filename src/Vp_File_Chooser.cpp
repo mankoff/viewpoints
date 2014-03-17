@@ -14,8 +14,8 @@
 // Compiler directives:
 //   Requires WIN32 to be defined
 //
-// Purpose: Source code for <Vp_File_Chooser.H.h>.  Based on the 
-//   Fl_File_Chooser dialog for the Fast Light Tool Kit (FLTK), copyright 
+// Purpose: Source code for <Vp_File_Chooser.H.h>.  Based on the
+//   Fl_File_Chooser dialog for the Fast Light Tool Kit (FLTK), copyright
 //   1998-2005 by Bill Spitzak and others, for FLTK 1.1.7, but extensively
 //   modified by Paul Gazis and Creon Levit for use with viewpoints.
 //
@@ -41,7 +41,7 @@ static Fl_Bitmap image_new( idata_new, 16, 16);
 
 // Set File chooser preferences
 // Fl_Preferences Vp_File_Chooser::prefs_( Fl_Preferences::USER, "fltk.org", "filechooser");
-Fl_Preferences Vp_File_Chooser::prefs_( 
+Fl_Preferences Vp_File_Chooser::prefs_(
   Fl_Preferences::USER, "viewpoints.arc.nasa.gov", "filechooser");
 
 // Set File chooser label strings, tooltips, and sort function...
@@ -49,10 +49,10 @@ const char *Vp_File_Chooser::add_favorites_label = "Add to Favorites";
 const char *Vp_File_Chooser::all_files_label = "All Files (*)";
 const char *Vp_File_Chooser::custom_filter_label = "Custom Filter";
 const char *Vp_File_Chooser::commentLabels_label = "Column labels are preceeded by a comment";
-const char *Vp_File_Chooser::commentLabels_tooltip = 
+const char *Vp_File_Chooser::commentLabels_tooltip =
   "Column Labels are included in the last line of the \nheader and begin with a comment character";
 const char *Vp_File_Chooser::configQuery_label = "Only load configuration information";
-const char *Vp_File_Chooser::configQuery_tooltip = 
+const char *Vp_File_Chooser::configQuery_tooltip =
   "Load configuration information alone, \nwithout reading any new data";
 const char *Vp_File_Chooser::delimiter_label = "Delimiter:";
 const char *Vp_File_Chooser::existing_file_label = "Please choose an existing file!";
@@ -79,15 +79,15 @@ static int compare_dirnames( const char *a, const char *b);
 static void quote_pathname( char *, const char *, int);
 static void unquote_pathname( char *, const char *, int);
 
-// Define a static global function to replace fl_filename_isdir.  In the 
-// original fl_filename_isdir.cxx, this was accomplished by including 
+// Define a static global function to replace fl_filename_isdir.  In the
+// original fl_filename_isdir.cxx, this was accomplished by including
 // #include <FL/filename.H>, but this doesn't seem to work here.
 FL_EXPORT static int new_filename_isdir( const char* pathname);
 
 //*****************************************************************************
-// Vp_File_Chooser::Vp_File_Chooser( *value_in, *filter_in, type_in, *title) 
+// Vp_File_Chooser::Vp_File_Chooser( *value_in, *filter_in, type_in, *title)
 // -- Constructor.  Create windows and buttons and initialize various settings.
-Vp_File_Chooser::Vp_File_Chooser( 
+Vp_File_Chooser::Vp_File_Chooser(
   const char *value_in, const char *filter_in, int type_in, const char *title)
 {
   // Initialize to ASCII mode with no delimiter
@@ -96,342 +96,338 @@ Vp_File_Chooser::Vp_File_Chooser(
   isConfigOnly_ = 0;
   delimiter_char_ = ' ';
   doCommentedLabels_ = 0;
-  
+
   // Define pointer to the main double window
   Fl_Double_Window* w;
 
-  // Double_Window scope: Create and fill the main double-buffered window to 
+  // Double_Window scope: Create and fill the main double-buffered window to
   // hold almost everything
-  { 
-    Fl_Double_Window* mainDoubleWindow = window = 
-      new Fl_Double_Window( 490, 460, "Choose File");
-    w = mainDoubleWindow;
-    mainDoubleWindow->callback( (Fl_Callback*) cb_window, (void*)(this));
+  {
+    window = new Fl_Double_Window( 490, 460, "Choose File");
+    w = window;
+    window->callback( (Fl_Callback*) cb_window, (void*)(this));
 
     // Upper Row Group scope: Create a group to hold buttons and fields
-    { 
+    {
       Fl_Group* upperRowGroup = new Fl_Group( 10, 5, 470, 35);
       // upperRowGroup->box( FL_UP_FRAME);
 
       // 'Favorites:' Button/menu at upper left
-      { 
-        Fl_Menu_Button* o = favoritesButton = 
+      {
+        favoritesButton =
           new Fl_Menu_Button( 10, 10, 155, 25, "Favorites");
-        o->down_box( FL_BORDER_BOX);
-        o->callback( (Fl_Callback*) cb_favoritesButton);
-        o->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+        favoritesButton->down_box( FL_BORDER_BOX);
+        favoritesButton->callback( (Fl_Callback*) cb_favoritesButton);
+        favoritesButton->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
         favoritesButton->label( favorites_label);
       }
 
       // 'New Folder' button to the right of Favorites
-      { 
-        Fl_Button* o = newButton = 
+      {
+        newButton =
           new Fl_Button( 175, 10, 25, 25);
-        o->image( image_new);
-        o->labelsize( 8);
-        o->callback( (Fl_Callback*) cb_newButton);
-        o->tooltip( new_directory_tooltip);
+        newButton->image( image_new);
+        newButton->labelsize( 8);
+        newButton->callback( (Fl_Callback*) cb_newButton);
+        newButton->tooltip( new_directory_tooltip);
       }
-
       // Preview checkbox above the preview window
-      { 
-        Fl_Check_Button* o = previewButton = 
+      {
+        previewButton =
           new Fl_Check_Button( 360, 15, 73, 20, "Preview");
-        o->down_box( FL_DOWN_BOX);
-        o->value( 1);
-        o->shortcut( 0x80070);
-        o->callback( (Fl_Callback*) cb_previewButton);
+        previewButton->down_box( FL_DOWN_BOX);
+        previewButton->value( 1);
+        previewButton->shortcut( 0x80070);
+        previewButton->callback( (Fl_Callback*) cb_previewButton);
         previewButton->label( preview_label);
       }
-
       upperRowGroup->end();
     }   // End of scope for the Upper Row Group
-    
-    // Browser Tile scope: Create a tiling to hold the file browser and 
-    // preview windows below the 'Favorites' field, 'New Folder' button, 
+
+    // Browser Tile scope: Create a tiling to hold the file browser and
+    // preview windows below the 'Favorites' field, 'New Folder' button,
     // and 'Preview'checkbox
-    { 
+    {
       Fl_Tile* browserTile = new Fl_Tile( 10, 45, 470, 225);
       browserTile->callback( (Fl_Callback*) cb_preview);
 
       // Draw File Browser on the left below the 'Show:' field
-      { 
-        Fl_File_Browser* o = fileBrowser = 
+      {
+        fileBrowser =
           new Fl_File_Browser( 10, 45, 295, 225);
-        o->type( 2);
-        o->callback( (Fl_Callback*) cb_fileBrowser);
-        w->hotspot( o);
+        fileBrowser->type( 2);
+        fileBrowser->callback( (Fl_Callback*) cb_fileBrowser);
+        w->hotspot(fileBrowser);
       }
-      
+
       // Draw the 'Preview' box on the right below the 'Favorites' field,
       // 'New Folder' button, and 'Preview'checkbox
-      { 
-        Fl_Box* o = previewBox = 
+      {
+        previewBox =
           new Fl_Box( 305, 45, 175, 225, "?");
-        o->box( FL_DOWN_BOX);
-        o->labelsize( 100);
-        o->align( FL_ALIGN_CLIP|FL_ALIGN_INSIDE);
+        previewBox->box( FL_DOWN_BOX);
+        previewBox->labelsize( 100);
+        previewBox->align( FL_ALIGN_CLIP|FL_ALIGN_INSIDE);
       }
       browserTile->end();
       Fl_Group::current()->resizable( browserTile);
     }   // End of scope for the Browser Tile
-    
-    // Lower Controls Group scope: Create group to hold a box with the 
+
+    // Lower Controls Group scope: Create group to hold a box with the
     // filename input field, the file type chooser, the extension chooser,
     // and a box with the 'OK' and 'Cancel' buttons.
     {
       Fl_Group* lowerControlsGroup = new Fl_Group( 10, 275, 470, 175);
       // lowerControlsGroup->box( FL_DOWN_FRAME);  // GROUP_FRAMING
 
-      // Box with a 'Filename:' label followed by an Fl_File_Input widget to 
+      // Box with a 'Filename:' label followed by an Fl_File_Input widget to
       // manage the Filename input field
       {
-        Fl_Box* o = new Fl_Box( 10, 290, 105, 25, "Filename:");
-        o->labelfont( 1);
-        o->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-        o->label( filename_label);
+        Fl_Box* fl_box_filename = new Fl_Box( 10, 290, 105, 25, "Filename:");
+        fl_box_filename->labelfont( 1);
+        fl_box_filename->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+        fl_box_filename->label( filename_label);
       }
-      { 
-        Fl_File_Input* o = fileName =
+      {
+        fileName =
           new Fl_File_Input( 85, 280, 365, 35);
-        o->labelfont( 1);
-        o->callback( (Fl_Callback*) cb_fileName);
-        o->when( FL_WHEN_ENTER_KEY);
-        Fl_Group::current()->resizable(o);
+        fileName->labelfont( 1);
+        fileName->callback( (Fl_Callback*) cb_fileName);
+        fileName->when( FL_WHEN_ENTER_KEY);
+        Fl_Group::current()->resizable(fileName);
         fileName->when( FL_WHEN_CHANGED | FL_WHEN_ENTER_KEY_ALWAYS);
       }
 
       // Box with a 'File Type:' label followed by an Fl_Choice widget to
       // manage the File Type menu
       {
-        Fl_Box* o = new Fl_Box( 10, 320, 55, 25, "File Type:");
-        o->labelfont( 1);
-        o->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-        o->label( filetype_label);
+        Fl_Box* fl_box_filetype = new Fl_Box( 10, 320, 55, 25, "File Type:");
+        fl_box_filetype->labelfont( 1);
+        fl_box_filetype->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+        fl_box_filetype->label( filetype_label);
       }
-      { 
-        Fl_Choice* o = fileTypeChoice = new Fl_Choice( 85, 320, 215, 25);
-        o->down_box( FL_BORDER_BOX);
-        o->labelfont( 1);
-        o->add( "ASCII");
-        o->add( "binary");
-        o->add( "FITS table extension");
-        o->value( fileType_);
-        o->callback( (Fl_Callback*) cb_fileType);
-        Fl_Group::current()->resizable(o);
+      {
+        fileTypeChoice = new Fl_Choice( 85, 320, 215, 25);
+        fileTypeChoice->down_box( FL_BORDER_BOX);
+        fileTypeChoice->labelfont( 1);
+        fileTypeChoice->add( "ASCII");
+        fileTypeChoice->add( "binary");
+        fileTypeChoice->add( "FITS table extension");
+        fileTypeChoice->value( fileType_);
+        fileTypeChoice->callback( (Fl_Callback*) cb_fileType);
+        Fl_Group::current()->resizable(fileTypeChoice);
       }
 
       // Box with a 'Show ext:' label followed by an Fl_Choice widget to
       // manage the 'File Extension' chooser
       {
-        Fl_Box* o = new Fl_Box( 10, 350, 105, 25, "Show ext:");
-        o->labelfont( 1);
-        o->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-        o->label( show_label);
+        Fl_Box* fl_box_showext = new Fl_Box( 10, 350, 105, 25, "Show ext:");
+        fl_box_showext->labelfont( 1);
+        fl_box_showext->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+        fl_box_showext->label( show_label);
       }
-      { 
-        Fl_Choice* o = showChoice = 
+      {
+        showChoice =
           new Fl_Choice( 85, 350, 215, 25);
-        o->down_box( FL_BORDER_BOX);
-        o->labelfont( 1);
-        o->callback( (Fl_Callback*) cb_showChoice);
-        Fl_Group::current()->resizable(o);
+        showChoice->down_box( FL_BORDER_BOX);
+        showChoice->labelfont( 1);
+        showChoice->callback( (Fl_Callback*) cb_showChoice);
+        Fl_Group::current()->resizable(showChoice);
         // showChoice->label( show_label);
       }
 
       // Group to hold radio buttons to control delimiter type
       {
-        Fl_Box* o = delimiter_box =
+        delimiter_box =
           new Fl_Box( 10, 380, 105, 25, "Delimiter:");
-        o->labelfont( 1);
-        o->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
-        o->label( delimiter_label);
+        delimiter_box->labelfont( 1);
+        delimiter_box->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
+        delimiter_box->label( delimiter_label);
       }
       {
-        Fl_Group* o =  delimiter_group = new Fl_Group( 85, 380, 355, 30);
+        delimiter_group = new Fl_Group( 85, 380, 355, 30);
         // o->box( FL_UP_FRAME);
         {
-          Fl_Round_Button* o = no_delimiter = 
+          no_delimiter =
             new Fl_Round_Button( 85, 385, 15, 15, "none");
-          o->down_box( FL_ROUND_DOWN_BOX);
-          o->type( FL_RADIO_BUTTON);
-          o->callback( (Fl_Callback*) cb_delimiterButtons);
+          no_delimiter->down_box( FL_ROUND_DOWN_BOX);
+          no_delimiter->type( FL_RADIO_BUTTON);
+          no_delimiter->callback( (Fl_Callback*) cb_delimiterButtons);
         }
         {
-          Fl_Round_Button* o = comma_delimiter = 
+          comma_delimiter =
             new Fl_Round_Button( 145, 385, 15, 15, "comma");
-          o->down_box( FL_ROUND_DOWN_BOX);
-          o->type( FL_RADIO_BUTTON);
-          o->callback( (Fl_Callback*) cb_delimiterButtons);
+          comma_delimiter->down_box( FL_ROUND_DOWN_BOX);
+          comma_delimiter->type( FL_RADIO_BUTTON);
+          comma_delimiter->callback( (Fl_Callback*) cb_delimiterButtons);
         }
         {
-          Fl_Round_Button* o = tab_delimiter = 
+          tab_delimiter =
             new Fl_Round_Button( 220, 385, 15, 15, "tab");
-          o->down_box( FL_ROUND_DOWN_BOX);
-          o->type( FL_RADIO_BUTTON);
-          o->callback( (Fl_Callback*) cb_delimiterButtons);
+          tab_delimiter->down_box( FL_ROUND_DOWN_BOX);
+          tab_delimiter->type( FL_RADIO_BUTTON);
+          tab_delimiter->callback( (Fl_Callback*) cb_delimiterButtons);
         }
         {
-          Fl_Round_Button* o = custom_delimiter = 
+          custom_delimiter =
             new Fl_Round_Button( 270, 385, 15, 15, "custom");
-          o->down_box( FL_ROUND_DOWN_BOX);
-          o->type( FL_RADIO_BUTTON);
-          o->callback( (Fl_Callback*) cb_delimiterButtons);
+          custom_delimiter->down_box( FL_ROUND_DOWN_BOX);
+          custom_delimiter->type( FL_RADIO_BUTTON);
+          custom_delimiter->callback( (Fl_Callback*) cb_delimiterButtons);
         }
         {
-          Fl_Input* o = custom_delimiter_input = 
+          custom_delimiter_input =
             new Fl_Input( 340, 380, 50, 25);
-          o->box( FL_DOWN_BOX);
+          custom_delimiter_input->box( FL_DOWN_BOX);
           // o->value( ",");
           char cBuf[ 10];
-          strcpy( cBuf, " ");  // Crude way to initialize a 1-element string
+          strncpy( cBuf, " ", 10);  // Crude way to initialize a 1-element string
           cBuf[ 0] = delimiter_char_;
-          o->value( escape_sequences_insert( cBuf));
-          o->callback( (Fl_Callback*) cb_delimiterInput);
+          custom_delimiter_input->value( escape_sequences_insert( cBuf));
+          custom_delimiter_input->callback( (Fl_Callback*) cb_delimiterInput);
         }
         no_delimiter->value( 1);
-        o->end();
+        delimiter_group->end();
       }
 
       // Write Selection Info check button
-      { 
-        Fl_Check_Button* o = selectionButton = 
+      {
+        selectionButton =
           new Fl_Check_Button( 10, 405, 160, 20, "Write selection information");
           // new Fl_Check_Button( 85, 410, 160, 20, "Write selection info");
-        o->down_box( FL_DOWN_BOX);
-        if( writeSelectionInfo_ == 0) o->value( 0);
-        else o->value( 1);
-        o->callback( (Fl_Callback*) cb_selectionButton);
-        o->tooltip( selection_tooltip);
+        selectionButton->down_box( FL_DOWN_BOX);
+        if( writeSelectionInfo_ == 0) selectionButton->value( 0);
+        else selectionButton->value( 1);
+        selectionButton->callback( (Fl_Callback*) cb_selectionButton);
+        selectionButton->tooltip( selection_tooltip);
         selectionButton->label( selection_label);
       }
 
       // Write but do not show Configuration Only check button in the
       // same location as the Selection Info check button
-      { 
-        Fl_Check_Button* o = configQueryButton = 
+      {
+        configQueryButton =
           new Fl_Check_Button( 10, 405, 160, 20, "Only load configuation");
-        o->down_box( FL_DOWN_BOX);
-        if( doCommentedLabels_ == 0) o->value( 0);
-        else o->value( 1);
-        o->callback( (Fl_Callback*) cb_configQueryButton);
-        o->tooltip( configQuery_tooltip);
+        configQueryButton->down_box( FL_DOWN_BOX);
+        if( doCommentedLabels_ == 0) configQueryButton->value( 0);
+        else configQueryButton->value( 1);
+        configQueryButton->callback( (Fl_Callback*) cb_configQueryButton);
+        configQueryButton->tooltip( configQuery_tooltip);
         configQueryButton->label( configQuery_label);
         configQueryButton->hide();
       }
 
       // Write Comment Column Labels check button
-      { 
-        Fl_Check_Button* o = commentLabelsButton = 
+      {
+        commentLabelsButton =
           new Fl_Check_Button( 10, 425, 160, 20, "Column labels are preceeded by a coment");
           // new Fl_Check_Button( 165, 410, 160, 20, "Comment Labels");
-        o->down_box( FL_DOWN_BOX);
-        if( doCommentedLabels_ == 0) o->value( 0);
-        else o->value( 1);
-        o->callback( (Fl_Callback*) cb_commentLabelsButton);
-        o->tooltip( commentLabels_tooltip);
+        commentLabelsButton->down_box( FL_DOWN_BOX);
+        if( doCommentedLabels_ == 0) commentLabelsButton->value( 0);
+        else commentLabelsButton->value( 1);
+        commentLabelsButton->callback( (Fl_Callback*) cb_commentLabelsButton);
+        commentLabelsButton->tooltip( commentLabels_tooltip);
         commentLabelsButton->label( commentLabels_label);
       }
-      
+
       // Group with 'OK' and 'Cancel' buttons at bottom right
       {
-        Fl_Group* o = new Fl_Group( 310, 420, 175, 35);
+        Fl_Group* ok_and_cancel_group = new Fl_Group( 310, 420, 175, 35);
         // o->box( FL_ROUNDED_BOX);  // GROUP_FRAMING
         {
-          Fl_Return_Button* o = okButton = 
+          okButton =
             new Fl_Return_Button( 313, 425, 85, 25, "OK");
-          o->callback( (Fl_Callback*) cb_okButton);
+          okButton->callback( (Fl_Callback*) cb_okButton);
           okButton->label( fl_ok);
         }
         {
-          Fl_Button* o = cancelButton = 
+          cancelButton =
             new Fl_Button( 408, 425, 72, 25, "Cancel");
-          o->callback( (Fl_Callback*) cb_cancelButton);
-          o->label( fl_cancel);
+          cancelButton->callback( (Fl_Callback*) cb_cancelButton);
+          cancelButton->label( fl_cancel);
         }
         {
-          Fl_Box* o = new Fl_Box( 10, 405, 30, 25);
-          Fl_Group::current()->resizable(o);
+          Fl_Box* fl_box_ok_and_cancel = new Fl_Box( 10, 405, 30, 25);
+          Fl_Group::current()->resizable(fl_box_ok_and_cancel);
         }
-        o->end();
+        ok_and_cancel_group->end();
       }
       lowerControlsGroup->end();
     }   // End of scope for the Lower Controls Group
 
     // If title is available, load it.
     if( title) window->label( title);
-    mainDoubleWindow->set_modal();
-    mainDoubleWindow->end();
+    window->set_modal();
+    window->end();
   }   // End scope for main double window
-  
+
   // FavWindow scope: Create the favorites window
   {
-    Fl_Double_Window* o = favWindow = 
+    favWindow =
       new Fl_Double_Window( 355, 150, "Manage Favorites");
-    w = o;
-    o->user_data( (void*) (this));
+    favWindow->user_data( (void*) (this));
 
     // FavWindow scope: Create a file browser to hold the favorites list
     {
-      Fl_File_Browser* o = favList = 
+      favList =
         new Fl_File_Browser( 10, 10, 300, 95);
-      o->type( 2);
-      o->callback( (Fl_Callback*) cb_favList);
-      Fl_Group::current()->resizable(o);
+      favList->type( 2);
+      favList->callback( (Fl_Callback*) cb_favList);
+      Fl_Group::current()->resizable(favList);
     }
 
-    // FavWindow scope: Create a group to hold the favorites up, down, and 
+    // FavWindow scope: Create a group to hold the favorites up, down, and
     // delete buttons
     {
-      Fl_Group* o = new Fl_Group( 320, 10, 25, 95);
+      Fl_Group* up_down_delete_group = new Fl_Group( 320, 10, 25, 95);
       {
-        Fl_Button* o = favUpButton = 
+        favUpButton =
           new Fl_Button( 320, 10, 25, 25, "@8>");
-        o->callback( (Fl_Callback*) cb_favUpButton);
+        favUpButton->callback( (Fl_Callback*) cb_favUpButton);
       }
       {
-        Fl_Button* o = favDeleteButton = 
+        favDeleteButton =
           new Fl_Button( 320, 45, 25, 25, "X");
-        o->labelfont( 1);
-        o->callback( (Fl_Callback*) cb_favDeleteButton);
-        Fl_Group::current()->resizable(o);
+        favDeleteButton->labelfont( 1);
+        favDeleteButton->callback( (Fl_Callback*) cb_favDeleteButton);
+        Fl_Group::current()->resizable(favDeleteButton);
       }
       {
-        Fl_Button* o = favDownButton = 
+        favDownButton =
           new Fl_Button( 320, 80, 25, 25, "@2>");
-        o->callback( (Fl_Callback*) cb_favDownButton);
+        favDownButton->callback( (Fl_Callback*) cb_favDownButton);
       }
-      o->end();
+      up_down_delete_group->end();
     }
 
     // Manage Favorites Group scope: Create a group to hold a the
     // 'Manage Favorites' window
     {
-      Fl_Group* o = new Fl_Group( 10, 113, 335, 29);
+      Fl_Group* manage_favourite_group = new Fl_Group( 10, 113, 335, 29);
       {
-        Fl_Button* o = favCancelButton = 
+        favCancelButton =
           new Fl_Button( 273, 115, 72, 25, "Cancel");
-        o->callback( (Fl_Callback*) cb_favCancelButton);
+        favCancelButton->callback( (Fl_Callback*) cb_favCancelButton);
         favCancelButton->label( fl_cancel);
       }
       {
-        Fl_Return_Button* o = favOkButton = 
+        favOkButton =
           new Fl_Return_Button( 181, 115, 79, 25, "Save");
-        o->callback( (Fl_Callback*) cb_favOkButton);
+        favOkButton->callback( (Fl_Callback*) cb_favOkButton);
         favOkButton->label( save_label);
       }
       {
-        Fl_Box* o = new Fl_Box( 10, 115, 161, 25);
-        Fl_Group::current()->resizable(o);
+        Fl_Box* fl_box_manage_favourite_group = new Fl_Box( 10, 115, 161, 25);
+        Fl_Group::current()->resizable(fl_box_manage_favourite_group);
       }
-      o->end();
+      manage_favourite_group->end();
     }
 
     // Load the 'Manage Favorites' label
     favWindow->label( manage_favorites_label);
-    o->set_modal();
-    o->size_range( 181, 150);
-    o->end();
+    favWindow->set_modal();
+    favWindow->size_range( 181, 150);
+    favWindow->end();
   }   // End of scope of the 'Manage Favorites Group'
 
   // Set size range for the main double window
@@ -449,7 +445,7 @@ Vp_File_Chooser::Vp_File_Chooser(
   value( value_in);
   type( type_in);  // XXX PRG: Why is this here twice?
   fileType_ = 0;
-  
+
   // Set up selection state and box
   int iWriteSelectionInfo;
   prefs_.get( "writeSelectionInfo", iWriteSelectionInfo, 0);
@@ -459,7 +455,7 @@ Vp_File_Chooser::Vp_File_Chooser(
   int iPreview;
   prefs_.get( "preview", iPreview, 1);
   preview( iPreview);
-  
+
   // Set up commented labels state and box
   int iDoCommentedLabels;
   prefs_.get( "doCommentedLabels", iDoCommentedLabels, 1);
@@ -467,8 +463,8 @@ Vp_File_Chooser::Vp_File_Chooser(
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::~Vp_File_Chooser() -- Destructor.  Remove timeout 
-// handler associated with the preview control button and deallocate storage 
+// Vp_File_Chooser::~Vp_File_Chooser() -- Destructor.  Remove timeout
+// handler associated with the preview control button and deallocate storage
 // for main window and favorites window.
 Vp_File_Chooser::~Vp_File_Chooser()
 {
@@ -478,9 +474,9 @@ Vp_File_Chooser::~Vp_File_Chooser()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::callback( (*pCallback)( *, *), *pData = 0) -- Set pointer 
+// Vp_File_Chooser::callback( (*pCallback)( *, *), *pData = 0) -- Set pointer
 // to the callback function and if specified, pass a pointer to the file data.
-void Vp_File_Chooser::callback( 
+void Vp_File_Chooser::callback(
   void (*pCallback)( Vp_File_Chooser*, void*), void *pData)
 {
   callback_ = pCallback;
@@ -495,7 +491,7 @@ Fl_Color Vp_File_Chooser::color()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::color( file_browser_color_in) -- Set color of the 
+// Vp_File_Chooser::color( file_browser_color_in) -- Set color of the
 // Fl_File_Browser object.
 void Vp_File_Chooser::color( Fl_Color file_browser_color_in)
 {
@@ -503,11 +499,11 @@ void Vp_File_Chooser::color( Fl_Color file_browser_color_in)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::count() - Return the number of files that have been 
+// Vp_File_Chooser::count() - Return the number of files that have been
 // selected.
 int Vp_File_Chooser::count()
 {
-  // Get contents of the filename input field, check file browser usage type, 
+  // Get contents of the filename input field, check file browser usage type,
   // and check to see if the file name input field is blank.
   const char *filename;
   filename = fileName->value();
@@ -516,7 +512,7 @@ int Vp_File_Chooser::count()
     else return 1;
   }
 
-  // Loop: Examine successive members of fileBrowser to see if they are files 
+  // Loop: Examine successive members of fileBrowser to see if they are files
   // or directories and increment the file count if this is not a directory.
   int i, file_count;
   for( i = 1, file_count = 0; i <= fileBrowser->size(); i++) {
@@ -541,7 +537,7 @@ char Vp_File_Chooser::delimiter_char()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::delimiter_hide() -- Hide the delimiter box and comment 
+// Vp_File_Chooser::delimiter_hide() -- Hide the delimiter box and comment
 // labels button
 void Vp_File_Chooser::delimiter_hide()
 {
@@ -551,7 +547,7 @@ void Vp_File_Chooser::delimiter_hide()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::delimiter_show() -- Show the delimiter box and comment 
+// Vp_File_Chooser::delimiter_show() -- Show the delimiter box and comment
 // labels button
 void Vp_File_Chooser::delimiter_show()
 {
@@ -561,7 +557,7 @@ void Vp_File_Chooser::delimiter_show()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::directory() -- Get the current directory in the file 
+// Vp_File_Chooser::directory() -- Get the current directory in the file
 // chooser.
 char* Vp_File_Chooser::directory()
 {
@@ -569,13 +565,13 @@ char* Vp_File_Chooser::directory()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::directory( directory_in) -- Set the current directory in 
+// Vp_File_Chooser::directory( directory_in) -- Set the current directory in
 // the file chooser.
 void Vp_File_Chooser::directory( const char *directory_in)
 {
   // DIAGNOSTIC
   // cout << "Vp_File_Chooser::directory( \""
-  //      << ( directory_in == NULL ? "(null)" : directory_in) 
+  //      << ( directory_in == NULL ? "(null)" : directory_in)
   //      << "\")" << endl;
 
   // If no directory was specified, set it to the local directory
@@ -588,15 +584,15 @@ void Vp_File_Chooser::directory( const char *directory_in)
   char fixed_pathname[ 1024];  // Pathname with slashes converted
   if( strchr( directory_in, '\\')) {
     strncpy( fixed_pathname, directory_in, sizeof( fixed_pathname));
-    for( slash = strchr( fixed_pathname, '\\'); 
-         slash; 
+    for( slash = strchr( fixed_pathname, '\\');
+         slash;
          slash = strchr(slash + 1, '\\'))
       *slash = '/';
     directory_in = fixed_pathname;
   }
   #endif   // WIN32
 
-  // If no directory was specified, set the directory string to nothing, 
+  // If no directory was specified, set the directory string to nothing,
   // otherwise extract and set the directory string
   if( directory_in[ 0] == '\0') directory_[0] = '\0';
   else {
@@ -604,26 +600,26 @@ void Vp_File_Chooser::directory( const char *directory_in)
     // If necessary, make the directory absolute, otherwise just copy the
     // user-specified directory string
     #if( defined(WIN32) && ! defined(__CYGWIN__)) || defined(__EMX__)
-    if( directory_in[ 0] != '/' && 
-        directory_in[ 0] != '\\' && 
+    if( directory_in[ 0] != '/' &&
+        directory_in[ 0] != '\\' &&
         directory_in[ 1] != ':')
     #else
-    if( directory_in[ 0] != '/' && 
+    if( directory_in[ 0] != '/' &&
         directory_in[ 0] != '\\')
     #endif /* WIN32 || __EMX__ */
       fl_filename_absolute( directory_, directory_in);
     else
       strncpy( directory_, directory_in, sizeof( directory_));
 
-    // Set a temporary directory pointer to the end of the current directory 
+    // Set a temporary directory pointer to the end of the current directory
     // string and strip any trailing slash.
     char *dirptr;
     dirptr = directory_ + strlen( directory_) - 1;
     if( ( *dirptr == '/' || *dirptr == '\\') && dirptr > directory_)
       *dirptr = '\0';
 
-    // Set the temporary directory pointer to two characters before the end of 
-    // the current directory string.  If we have a trailing "..", strip the 
+    // Set the temporary directory pointer to two characters before the end of
+    // the current directory string.  If we have a trailing "..", strip the
     // trailing path...
     dirptr = directory_ + strlen( directory_) - 3;
     if( dirptr >= directory_ && strcmp( dirptr, "/..") == 0) {
@@ -633,7 +629,7 @@ void Vp_File_Chooser::directory( const char *directory_in)
         dirptr--;
       }
       if( dirptr >= directory_ && *dirptr == '/') *dirptr = '\0';
-    } 
+    }
 
     // ...otherwise, strip any trailing "."
     else if( ( dirptr + 1) >= directory_ && strcmp( dirptr + 1, "/.") == 0) {
@@ -646,7 +642,7 @@ void Vp_File_Chooser::directory( const char *directory_in)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::doCommentedLabels( doCommentedLabels_in) -- Set mode for use 
+// Vp_File_Chooser::doCommentedLabels( doCommentedLabels_in) -- Set mode for use
 // of comment characters in line of column labels.
 void Vp_File_Chooser::doCommentedLabels( int doCommentedLabels_in)
 {
@@ -656,8 +652,8 @@ void Vp_File_Chooser::doCommentedLabels( int doCommentedLabels_in)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::escape_sequences_insert( *orig) - Return character string 
-// with actual the characters replaced by the corresponding escaped character 
+// Vp_File_Chooser::escape_sequences_insert( *orig) - Return character string
+// with actual the characters replaced by the corresponding escaped character
 // sequences
 char* Vp_File_Chooser::escape_sequences_insert( char *orig)
 {
@@ -723,9 +719,9 @@ char* Vp_File_Chooser::escape_sequences_insert( char *orig)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::escape_sequences_remove( orig) - Return a character string 
-// with escaped character sequences replaced by the actual characters that the 
-// escape codes refer to.  This is a simplified version of unescape() that is 
+// Vp_File_Chooser::escape_sequences_remove( orig) - Return a character string
+// with escaped character sequences replaced by the actual characters that the
+// escape codes refer to.  This is a simplified version of unescape() that is
 // replicated here to ensure that this class is self-contained.
 char* Vp_File_Chooser::escape_sequences_remove( char *orig)
 {
@@ -783,13 +779,13 @@ char* Vp_File_Chooser::escape_sequences_remove( char *orig)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::fileType( fileType_in) -- Set the file type value and 
+// Vp_File_Chooser::fileType( fileType_in) -- Set the file type value and
 // and and update the controls for the Data File mode.  NOTE: for development
-// purposes, file types are specified as integers, and it is the user's 
+// purposes, file types are specified as integers, and it is the user's
 // responsibility to remember what these integers mean.  At present, the
 // assignments are: (0,1,2) -> ASCII, binary, FITS
 void Vp_File_Chooser::fileType( int fileType_in)
-{ 
+{
   fileType_ = fileType_in;
   if( fileType_ < 0) fileType_ = 0;
   if( fileType_ > 2) fileType_ = 2;
@@ -842,7 +838,7 @@ const char* Vp_File_Chooser::filter()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::filter( pattern_in) -- Set the filter pattern(s) for the 
+// Vp_File_Chooser::filter( pattern_in) -- Set the filter pattern(s) for the
 // file browser.
 void Vp_File_Chooser::filter( const char *pattern_in)
 {
@@ -864,12 +860,12 @@ void Vp_File_Chooser::filter( const char *pattern_in)
     end = strchr( start, '\t');
     if( end) *end++ = '\0';
 
-    // If pattern is "*", add label for all files and set flag, otherwise 
+    // If pattern is "*", add label for all files and set flag, otherwise
     // extract the pattern string and add it to the choice window
     if( strcmp( start, "*") == 0) {
       showChoice->add( all_files_label);
       doallfiles = 1;
-    } 
+    }
     else {
       char temp[ 1024];
       quote_pathname( temp, start, sizeof( temp));
@@ -890,7 +886,7 @@ void Vp_File_Chooser::filter( const char *pattern_in)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::filter_value() -- Get the value (index) of the filter in 
+// Vp_File_Chooser::filter_value() -- Get the value (index) of the filter in
 // the choice window.
 int Vp_File_Chooser::filter_value()
 {
@@ -898,7 +894,7 @@ int Vp_File_Chooser::filter_value()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::filter_value( index_in) -- Set the value (index) of the 
+// Vp_File_Chooser::filter_value( index_in) -- Set the value (index) of the
 // filter in the choice window.
 void Vp_File_Chooser::filter_value( int index_in)
 {
@@ -954,7 +950,7 @@ void Vp_File_Chooser::isConfigFileMode( int isConfigFileMode_in)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::isConfigFileMode() -- Return value of the Configuration 
+// Vp_File_Chooser::isConfigFileMode() -- Return value of the Configuration
 // File Mode flag.  Not needed but included for completeness.
 int Vp_File_Chooser::isConfigFileMode()
 {
@@ -998,8 +994,8 @@ const char* Vp_File_Chooser::ok_label()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::ok_label( label_in) -- Set label of the 'OK' button, 
-// resize the button to fit next to the cancel button, and reinitialize sizes 
+// Vp_File_Chooser::ok_label( label_in) -- Set label of the 'OK' button,
+// resize the button to fit next to the cancel button, and reinitialize sizes
 // in the parent group.
 void Vp_File_Chooser::ok_label( const char *label_in)
 {
@@ -1025,23 +1021,23 @@ void Vp_File_Chooser::preview( int iPreviewState)
   if( iPreviewState) {
     int w = previewBoxParent->w() * 2 / 3;
     fileBrowser->resize(
-      fileBrowser->x(), fileBrowser->y(), 
+      fileBrowser->x(), fileBrowser->y(),
       w, fileBrowser->h());
     previewBox->resize(
-      fileBrowser->x()+w, previewBox->y(), 
+      fileBrowser->x()+w, previewBox->y(),
       previewBoxParent->w()-w, previewBox->h());
     previewBox->show();
     update_preview();
   }
 
-  // ...otherwise resize the file browser and preview box and hide the 
+  // ...otherwise resize the file browser and preview box and hide the
   // preview.
   else {
     fileBrowser->resize(
-      fileBrowser->x(), fileBrowser->y(), 
+      fileBrowser->x(), fileBrowser->y(),
       previewBoxParent->w(), fileBrowser->h());
     previewBox->resize(
-      previewBoxParent->x()+previewBoxParent->w(), 
+      previewBoxParent->x()+previewBoxParent->w(),
       previewBox->y(), 0, previewBox->h());
     previewBox->hide();
   }
@@ -1057,14 +1053,14 @@ void Vp_File_Chooser::rescan()
 {
   // Clear the current filename
   char pathname[ 1024];
-  strncpy( pathname, directory_, sizeof( pathname));
+  strncpy( pathname, directory_, sizeof(pathname));
   if( pathname[ 0] && pathname[ strlen( pathname) - 1] != '/') {
-    strncat( pathname, "/", sizeof( pathname));
+    strncat( pathname, "/", sizeof(pathname) - strlen(pathname) - 1);
   }
   // cout << "Setting fileName in Vp_File_Chooser::rescan()";
   fileName->value( pathname);
 
-  // Depending on whether or not this is a directory, activate or deactivate 
+  // Depending on whether or not this is a directory, activate or deactivate
   // the 'OK button
   if( type_ & DIRECTORY) okButton->activate();
   else okButton->deactivate();
@@ -1076,9 +1072,9 @@ void Vp_File_Chooser::rescan()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::show() -- Show the main window.  Set the hotspot to the 
+// Vp_File_Chooser::show() -- Show the main window.  Set the hotspot to the
 // file browser, show the main window, call Fl::flush() to redraw windows,
-// set cursor information, rescan the directory, and wait for the user to do 
+// set cursor information, rescan the directory, and wait for the user to do
 // something.
 void Vp_File_Chooser::show()
 {
@@ -1106,7 +1102,7 @@ Fl_Color Vp_File_Chooser::textcolor()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::textcolor( file_browser_text_color_in) -- Set the file 
+// Vp_File_Chooser::textcolor( file_browser_text_color_in) -- Set the file
 // browser text color
 void Vp_File_Chooser::textcolor( Fl_Color file_browser_text_color_in)
 {
@@ -1151,8 +1147,8 @@ int Vp_File_Chooser::type()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::type( type_in) -- Set the type of usage for the file 
-// browser, pass this information to the browser itself, and activate or 
+// Vp_File_Chooser::type( type_in) -- Set the type of usage for the file
+// browser, pass this information to the browser itself, and activate or
 // deactivate the necessary buttons.
 void Vp_File_Chooser::type( int type_in)
 {
@@ -1163,7 +1159,7 @@ void Vp_File_Chooser::type( int type_in)
   if( type_in & CREATE) newButton->activate();
   else newButton->deactivate();
 
-  if( type_in & DIRECTORY) 
+  if( type_in & DIRECTORY)
     fileBrowser->filetype( Fl_File_Browser::DIRECTORIES);
   else fileBrowser->filetype( Fl_File_Browser::FILES);
 
@@ -1175,7 +1171,7 @@ void Vp_File_Chooser::type( int type_in)
 
 //*****************************************************************************
 // Vp_File_Chooser::user_data() -- Get pointer to the file data
-void* Vp_File_Chooser::user_data() const 
+void* Vp_File_Chooser::user_data() const
 {
   return (data_);
 }
@@ -1213,7 +1209,7 @@ const char* Vp_File_Chooser::value( int index)
       if( file_count == index) {
         if( directory_[ 0]) {
           snprintf( pathname, sizeof( pathname), "%s/%s", directory_, name);
-        } 
+        }
         // else strlcpy( pathname, name, sizeof(pathname));
         else strncpy( pathname, name, sizeof(pathname));
       }
@@ -1232,7 +1228,7 @@ void Vp_File_Chooser::value( const char *filename_in)
 {
   // DIAGNOSTIC
   // cout << "Vp_File_Chooser::value( \""
-  //      << ( filename_in == NULL ? "(null)" : filename_in) 
+  //      << ( filename_in == NULL ? "(null)" : filename_in)
   //      << "\")" << endl;
 
   // If the filename is NULL or empty, change the current directory to the
@@ -1250,15 +1246,15 @@ void Vp_File_Chooser::value( const char *filename_in)
   char fixed_pathname[ 1024];
   if( strchr( filename_in, '\\')) {
     strncpy( fixed_pathname, filename_in, sizeof( fixed_pathname));
-    for( slash = strchr( fixed_pathname, '\\'); 
-         slash; 
+    for( slash = strchr( fixed_pathname, '\\');
+         slash;
          slash = strchr(slash + 1, '\\'))
       *slash = '/';
     filename_in = fixed_pathname;
   }
   #endif   // WIN32
 
-  // Make a local copy of the pathname.  If it is a directory, change the 
+  // Make a local copy of the pathname.  If it is a directory, change the
   // display to that directory, otherwise change to current directory
   char pathname[ 1024];
   fl_filename_absolute( pathname, sizeof( pathname), filename_in);
@@ -1307,7 +1303,7 @@ int Vp_File_Chooser::visible()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::writeSelectionState( writeSelectionInfo_in) -- Set write 
+// Vp_File_Chooser::writeSelectionState( writeSelectionInfo_in) -- Set write
 // selection state and update preferences
 void Vp_File_Chooser::writeSelectionInfo( int writeSelectionInfo_in)
 {
@@ -1354,12 +1350,12 @@ void Vp_File_Chooser::favoritesCB( Fl_Widget *pWidget)
     // Set and show hotspot?
     favWindow->hotspot(favList);
     favWindow->show();
-  } 
+  }
 
   // ..or examine the favorites list
   else if( pWidget == favList) {
     int i = favList->value();
-    
+
     // Activate and deactivate the relevant buttons
     if( i) {
       if( i > 1) favUpButton->activate();
@@ -1367,14 +1363,14 @@ void Vp_File_Chooser::favoritesCB( Fl_Widget *pWidget)
       favDeleteButton->activate();
       if (i < favList->size()) favDownButton->activate();
       else favDownButton->deactivate();
-    } 
+    }
     else {
       favUpButton->deactivate();
       favDeleteButton->deactivate();
       favDownButton->deactivate();
     }
-  } 
-  
+  }
+
   // .. or process the Favorites Up button...
   else if( pWidget == favUpButton) {
     int i = favList->value();
@@ -1388,8 +1384,8 @@ void Vp_File_Chooser::favoritesCB( Fl_Widget *pWidget)
     if( i == 2) favUpButton->deactivate();
     favDownButton->activate();
     favOkButton->activate();
-  } 
-  
+  }
+
   // .. or process the Favorites Delete button...
   else if( pWidget == favDeleteButton) {
     int i = favList->value();
@@ -1406,8 +1402,8 @@ void Vp_File_Chooser::favoritesCB( Fl_Widget *pWidget)
     else favUpButton->deactivate();
     if( !i) favDeleteButton->deactivate();
     favOkButton->activate();
-  } 
-  
+  }
+
   // .. or process the Favorites Down button...
   else if( pWidget == favDownButton) {
     int i = favList->value();
@@ -1421,8 +1417,8 @@ void Vp_File_Chooser::favoritesCB( Fl_Widget *pWidget)
     if ( (i + 1) == favList->size()) favDownButton->deactivate();
     favUpButton->activate();
     favOkButton->activate();
-  } 
-  
+  }
+
   // .. or process the Favorites OK button...
   else if( pWidget == favOkButton) {
 
@@ -1433,7 +1429,7 @@ void Vp_File_Chooser::favoritesCB( Fl_Widget *pWidget)
       prefs_.set( name, favList->text( i + 1));
     }
 
-    // Loop: Clear favorite directory 0 to 99 to clear old entries as 
+    // Loop: Clear favorite directory 0 to 99 to clear old entries as
     // necessary.  NOTE: index 'i' is retained from the previous loop!
     for( ; i < 100; i ++) {
       sprintf( name, "favorite%02d", i);
@@ -1503,7 +1499,7 @@ void Vp_File_Chooser::update_preview()
   // Get filename and set new image
   const char *filename;
   Fl_Shared_Image *image;
-  if( ( filename = value()) == NULL || new_filename_isdir( filename)) 
+  if( ( filename = value()) == NULL || new_filename_isdir( filename))
     image = NULL;
   else {
     window->cursor( FL_CURSOR_WAIT);
@@ -1537,7 +1533,7 @@ void Vp_File_Chooser::update_preview()
       bytes = fread( preview_text_, 1, sizeof( preview_text_) - 1, fp);
       preview_text_[ bytes] = '\0';
       fclose( fp);
-    } 
+    }
 
     // ...or assume we can't read any data.
     else {
@@ -1562,8 +1558,8 @@ void Vp_File_Chooser::update_preview()
       previewBox->align(FL_ALIGN_CLIP);
       previewBox->labelsize(100);
       previewBox->labelfont(FL_HELVETICA);
-    } 
-    
+    }
+
     // ...or get the height of the preview box, use this to determine a font
     // size, and show the first 1k of text.
     else {
@@ -1573,12 +1569,12 @@ void Vp_File_Chooser::update_preview()
 
       previewBox->label( preview_text_);
       previewBox->align(
-        (Fl_Align) 
+        (Fl_Align)
           (FL_ALIGN_CLIP | FL_ALIGN_INSIDE | FL_ALIGN_LEFT | FL_ALIGN_TOP));
       previewBox->labelsize( (uchar) size);
       previewBox->labelfont( FL_COURIER);
     }
-  } 
+  }
 
   // ...otherwise use the image
   else {
@@ -1596,7 +1592,7 @@ void Vp_File_Chooser::update_preview()
       oldimage = (Fl_Shared_Image *) image->copy(w, h);
       previewBox->image( (Fl_Image *) oldimage);
       image->release();
-    } 
+    }
     else {
       previewBox->image((Fl_Image *)image);
     }
@@ -1610,7 +1606,7 @@ void Vp_File_Chooser::update_preview()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_favList( o, v) -- Wrapper for callback method for the 
+// Vp_File_Chooser:::cb_favList( o, v) -- Wrapper for callback method for the
 // favorites list
 void Vp_File_Chooser::cb_favList(Fl_File_Browser* o, void* v)
 {
@@ -1618,7 +1614,7 @@ void Vp_File_Chooser::cb_favList(Fl_File_Browser* o, void* v)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_favList_i( *, *) -- Callback method for the favorites 
+// Vp_File_Chooser:::cb_favList_i( *, *) -- Callback method for the favorites
 // list.  Invokes favoritesCB
 void Vp_File_Chooser::cb_favList_i( Fl_File_Browser*, void*)
 {
@@ -1626,11 +1622,11 @@ void Vp_File_Chooser::cb_favList_i( Fl_File_Browser*, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_fileBrowser( o, v) -- Wrapper for the callback method 
+// Vp_File_Chooser::cb_fileBrowser( o, v) -- Wrapper for the callback method
 // for the file browser.
 void Vp_File_Chooser::cb_fileBrowser( Fl_File_Browser* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
       (o->parent()->parent()->user_data()))->cb_fileBrowser_i( o, v);
 }
 
@@ -1643,7 +1639,7 @@ void Vp_File_Chooser::cb_fileBrowser_i( Fl_File_Browser*, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::fileBrowserCB() - Handle clicks and double-clicks in the 
+// Vp_File_Chooser::fileBrowserCB() - Handle clicks and double-clicks in the
 // Fl_File_Browser.
 void Vp_File_Chooser::fileBrowserCB()
 {
@@ -1652,13 +1648,13 @@ void Vp_File_Chooser::fileBrowserCB()
   filename = (char*) fileBrowser->text(fileBrowser->value());
   if( !filename) return;
 
-  // Examine name of current directory to extract, reformat, and load it into 
+  // Examine name of current directory to extract, reformat, and load it into
   // the full pathname
   char pathname[ 1024];
   if( !directory_[0]) {
     // strlcpy( pathname, filename, sizeof(pathname));
     strncpy( pathname, filename, sizeof(pathname));
-  } 
+  }
   else if( strcmp(directory_, "/") == 0) {
     snprintf( pathname, sizeof(pathname), "/%s", filename);
   }
@@ -1669,9 +1665,9 @@ void Vp_File_Chooser::fileBrowserCB()
   // Check for event clicks...
   if( Fl::event_clicks()) {
 
-    // Deal with OS-specific formats, change directories, and reset the 
+    // Deal with OS-specific formats, change directories, and reset the
     // click count so that a click in the same spot won't be treated as a
-    // triple-click.  Use a value of -1 because the next click will 
+    // triple-click.  Use a value of -1 because the next click will
     // increment click count to 0, which is what we really want...
     #if (defined(WIN32) && ! defined(__CYGWIN__)) || defined(__EMX__)
     if( ( strlen(pathname) == 2 && pathname[1] == ':') ||
@@ -1705,7 +1701,7 @@ void Vp_File_Chooser::fileBrowserCB()
         fileBrowser->select(i);
       }
 
-      // ...or clicked on a file so loop through fileBrowser to see if there 
+      // ...or clicked on a file so loop through fileBrowser to see if there
       // are other directories selected, then set values and selections.
       // NOTE: Value of index 'i' is kept after loop.
       else {
@@ -1750,10 +1746,10 @@ void Vp_File_Chooser::fileBrowserCB()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_fileName( o, v) -- Wrapper for the callback method for 
+// Vp_File_Chooser::cb_fileName( o, v) -- Wrapper for the callback method for
 // the file name field.
 void Vp_File_Chooser::cb_fileName( Fl_File_Input* o, void* v) {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
       (o->parent()->parent()->user_data()))->cb_fileName_i( o, v);
 }
 
@@ -1772,7 +1768,7 @@ void Vp_File_Chooser::fileNameCB()
   char *slash; // Pointer to trailing slash
   char pathname[ 1024];  // Full pathname to file
   char matchname[ 256];  // Matching filename
-  
+
   int min_match;   // Minimum number of matching chars
   int max_match;   // Maximum number of matching chars
   int num_files;   // Number of files in directory
@@ -1809,7 +1805,7 @@ void Vp_File_Chooser::fileNameCB()
     fl_filename_absolute( pathname, sizeof( pathname), filename);
     value( pathname);
     fileName->mark( fileName->position()); // no selection after expansion
-  } 
+  }
 
   // ...or set pathname to make sure we have a writable copy...
   else if( filename != pathname) {
@@ -1834,7 +1830,7 @@ void Vp_File_Chooser::fileNameCB()
         compare_dirnames(pathname, directory_)) {
     #endif   // WIN32 || __EMX__
       directory( pathname);
-    } 
+    }
 
     // ...or update the preview box, o any callback that is registered, and
     // hide the window to signal things are done...
@@ -1845,8 +1841,8 @@ void Vp_File_Chooser::fileNameCB()
         if( callback_) (*callback_)( this, data_);
         window->hide();
       }
-    } 
-    
+    }
+
     // ..or file doesn't exist, so beep at and alert the user...
     else {
       fl_alert("%s",existing_file_label);
@@ -1905,7 +1901,7 @@ void Vp_File_Chooser::fileNameCB()
       #else
       if( strncmp( filename, file, min_match) == 0) {
       #endif   // WIN32 || __EMX__
- 
+
         // If first line is empty, copy stuff over
         if( !first_line) {
           // strlcpy( matchname, file, sizeof(matchname));
@@ -1923,7 +1919,7 @@ void Vp_File_Chooser::fileNameCB()
           first_line = i;
         }
 
-        // ...otherwise, compare succesize matches to find the maximum 
+        // ...otherwise, compare succesize matches to find the maximum
         // string match.
         else {
           while( max_match > min_match)
@@ -1948,10 +1944,10 @@ void Vp_File_Chooser::fileNameCB()
       fileBrowser->deselect(0);
       fileBrowser->select(first_line);
       fileBrowser->redraw();
-    } 
+    }
 
-    // ...or sdd the matching portion and highlight it with the cursor at the 
-    // end of the selection so one can press the right arrow to accept the 
+    // ...or sdd the matching portion and highlight it with the cursor at the
+    // end of the selection so one can press the right arrow to accept the
     // selection.  (Tab and End also do this for both cases.)
     else if( max_match > min_match && first_line) {
       fileName->replace(
@@ -1986,7 +1982,7 @@ void Vp_File_Chooser::fileNameCB()
     if( ( ( type_ & CREATE) || !access(fileName->value(), 0)) &&
         ( !new_filename_isdir(fileName->value()) || (type_ & DIRECTORY))) {
       okButton->activate();
-    } 
+    }
     else {
       okButton->deactivate();
     }
@@ -2010,16 +2006,16 @@ void Vp_File_Chooser::cb_preview_i( Fl_Tile*, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_fileType( o, v) -- Wrapper for the callback 
+// Vp_File_Chooser::cb_fileType( o, v) -- Wrapper for the callback
 // method for the file type choice button
 void Vp_File_Chooser::cb_fileType( Fl_Choice* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
       (o->parent()->parent()->user_data()))->cb_fileType_i( o,v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_fileType_i( *, *) -- Callback method for the 
+// Vp_File_Chooser::cb_fileType_i( *, *) -- Callback method for the
 // file type choice button.  Invokes fileTypeCB() to handle the dialog.
 void Vp_File_Chooser::cb_fileType_i( Fl_Choice*, void*)
 {
@@ -2033,7 +2029,7 @@ void Vp_File_Chooser::fileTypeCB()
   // Get the selected item
   const char *item;
   item = fileTypeChoice->text( fileTypeChoice->value());
-  
+
   // Get default patterns
   if( strcmp( item, "ASCII") == 0) {
     strcpy( pattern_, "*.{txt,lis,asc}\tAll Files (*)");
@@ -2062,7 +2058,7 @@ void Vp_File_Chooser::fileTypeCB()
   // If this isn't ASCII, turn off delimiter group and comment labels button
   if( fileType_ != 0) delimiter_hide();
   else delimiter_show();
-  
+
   // If necessary, rescan the directory.
   if( shown()) rescan();
 }
@@ -2072,12 +2068,12 @@ void Vp_File_Chooser::fileTypeCB()
 // for the show choice button
 void Vp_File_Chooser::cb_showChoice( Fl_Choice* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
       (o->parent()->parent()->user_data()))->cb_showChoice_i( o,v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_showChoice_i( *, *) -- Callback method for the show 
+// Vp_File_Chooser::cb_showChoice_i( *, *) -- Callback method for the show
 // choice button.  Invokes showChoiceCB() to handle the dialog.
 void Vp_File_Chooser::cb_showChoice_i( Fl_Choice*, void*)
 {
@@ -2105,10 +2101,10 @@ void Vp_File_Chooser::showChoiceCB()
       showChoice->add( temp);
       showChoice->value( showChoice->size() - 2);
     }
-  } 
+  }
   else if( ( patstart = strchr( item, '(')) == NULL) {
     strncpy( pattern_, item, sizeof(pattern_));
-  } 
+  }
   else {
     strncpy( pattern_, patstart + 1, sizeof( pattern_));
     if( ( patend = strrchr( pattern_, ')')) != NULL) *patend = '\0';
@@ -2132,7 +2128,7 @@ void Vp_File_Chooser::cb_window( Fl_Double_Window* o, void* v)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_window_i( *, *) -- Callback method for the main 
+// Vp_File_Chooser::cb_window_i( *, *) -- Callback method for the main
 // (double) window.
 void Vp_File_Chooser::cb_window_i( Fl_Double_Window*, void*)
 {
@@ -2147,12 +2143,12 @@ void Vp_File_Chooser::cb_window_i( Fl_Double_Window*, void*)
 // method for the cancel button.
 void Vp_File_Chooser::cb_cancelButton( Fl_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->parent()->user_data()))->cb_cancelButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_cancelButton_i( *, *) -- Callback method for the 
+// Vp_File_Chooser::cb_cancelButton_i( *, *) -- Callback method for the
 // cancel button.
 void Vp_File_Chooser::cb_cancelButton_i( Fl_Button*, void*)
 {
@@ -2163,19 +2159,19 @@ void Vp_File_Chooser::cb_cancelButton_i( Fl_Button*, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_commentLabelsButton( o, v) -- Wrapper for the callback 
-// method for the 'Comment Column labels' checkbox.  NOTE: The level of nesting 
-// in calls to parent() is important, and must reflect the actual level of 
+// Vp_File_Chooser::cb_commentLabelsButton( o, v) -- Wrapper for the callback
+// method for the 'Comment Column labels' checkbox.  NOTE: The level of nesting
+// in calls to parent() is important, and must reflect the actual level of
 // nesting of the Fl_Check_Button object in the Vp_File_Chooser object!
 void Vp_File_Chooser::cb_commentLabelsButton( Fl_Check_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_commentLabelsButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_commentLabelsButton_i( *. *) -- Callback method for the 
-// 'Comment Column Labels' checkbox.  
+// Vp_File_Chooser::cb_commentLabelsButton_i( *. *) -- Callback method for the
+// 'Comment Column Labels' checkbox.
 void Vp_File_Chooser::cb_commentLabelsButton_i( Fl_Check_Button*, void*)
 {
   if( commentLabelsButton->value()) doCommentedLabels( 1);
@@ -2183,20 +2179,20 @@ void Vp_File_Chooser::cb_commentLabelsButton_i( Fl_Check_Button*, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_configQueryButton( o, v) -- Wrapper for the callback 
-// method for the 'Only load configuation info' checkbox.  NOTE: The level 
-// of nesting in calls to parent() is important, and must reflect the actual 
-// level of nesting of the Fl_Check_Button object in the Vp_File_Chooser 
+// Vp_File_Chooser::cb_configQueryButton( o, v) -- Wrapper for the callback
+// method for the 'Only load configuation info' checkbox.  NOTE: The level
+// of nesting in calls to parent() is important, and must reflect the actual
+// level of nesting of the Fl_Check_Button object in the Vp_File_Chooser
 // object!
 void Vp_File_Chooser::cb_configQueryButton( Fl_Check_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_configQueryButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_configQueryButton_i( *, *) -- Callback method for the 
-// 'Only load configuation info' checkbox.  
+// Vp_File_Chooser::cb_configQueryButton_i( *, *) -- Callback method for the
+// 'Only load configuation info' checkbox.
 void Vp_File_Chooser::cb_configQueryButton_i( Fl_Check_Button*, void*)
 {
   if( configQueryButton->value()) isConfigOnly( 1);
@@ -2204,18 +2200,18 @@ void Vp_File_Chooser::cb_configQueryButton_i( Fl_Check_Button*, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_delimiterButtons( o, v) -- Wrapper for the callback 
+// Vp_File_Chooser:::cb_delimiterButtons( o, v) -- Wrapper for the callback
 // method for the delimiter buttons.
 void Vp_File_Chooser::cb_delimiterButtons( Fl_Round_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
       (o->parent()->parent()->parent()->user_data()))->cb_delimiterButtons_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_delimiterButtons_i( *, *) -- Callback method for the 
+// Vp_File_Chooser::cb_delimiterButtons_i( *, *) -- Callback method for the
 // delimiter buttons.  Checks label, then decides what to do.
-void Vp_File_Chooser::cb_delimiterButtons_i( Fl_Round_Button* pButton, void*) 
+void Vp_File_Chooser::cb_delimiterButtons_i( Fl_Round_Button* pButton, void*)
 {
   char buttonLabel[ 80];
   strcpy( buttonLabel, pButton->label());
@@ -2236,7 +2232,7 @@ void Vp_File_Chooser::cb_delimiterButtons_i( Fl_Round_Button* pButton, void*)
     // else delimiter_char_ = cBuf[ 0];
 
     // Ignore leading blanks and remove escape sequences, then attempt to
-    // set the delimiter character.  If the result is of zero length, set 
+    // set the delimiter character.  If the result is of zero length, set
     // the delimiter character to a blank
     char* delimiter_buf = escape_sequences_remove( &cBuf[ strspn( cBuf, " ")]);
     if( strlen( delimiter_buf) > 0) delimiter_char_ = delimiter_buf[ 0];
@@ -2252,18 +2248,18 @@ void Vp_File_Chooser::cb_delimiterButtons_i( Fl_Round_Button* pButton, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_delimiterInput( o, v) -- Wrapper for the callback 
+// Vp_File_Chooser:::cb_delimiterInput( o, v) -- Wrapper for the callback
 // method for the custom delimiter input fielc.
 void Vp_File_Chooser::cb_delimiterInput( Fl_Input* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
       (o->parent()->parent()->parent()->user_data()))->cb_delimiterInput_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_delimiterInput_i( *, *) -- Callback method for the 
+// Vp_File_Chooser::cb_delimiterInput_i( *, *) -- Callback method for the
 // custom delimiter input field.  Sets button label and delimiter character.
-void Vp_File_Chooser::cb_delimiterInput_i( Fl_Input* pButton, void*) 
+void Vp_File_Chooser::cb_delimiterInput_i( Fl_Input* pButton, void*)
 {
 	UNUSED(pButton);
   // Set the radio buttons
@@ -2273,7 +2269,7 @@ void Vp_File_Chooser::cb_delimiterInput_i( Fl_Input* pButton, void*)
   custom_delimiter->value( 1);
 
   // Ignore leading blanks and remove escape sequences, then attempt to
-  // set the delimiter character.  If the result is of zero length, set 
+  // set the delimiter character.  If the result is of zero length, set
   // the delimiter character to a blank
   char cBuf[ 80];
   strcpy( cBuf, custom_delimiter_input->value());
@@ -2292,12 +2288,12 @@ void Vp_File_Chooser::cb_delimiterInput_i( Fl_Input* pButton, void*)
 // method to for the 'Favorites Cancel' button.
 void Vp_File_Chooser::cb_favCancelButton( Fl_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_favCancelButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_favCancelButton_i( *, *) -- Callback method for the 
+// Vp_File_Chooser:::cb_favCancelButton_i( *, *) -- Callback method for the
 // 'Favorites Cancel' button.
 void Vp_File_Chooser::cb_favCancelButton_i( Fl_Button*, void*)
 {
@@ -2309,12 +2305,12 @@ void Vp_File_Chooser::cb_favCancelButton_i( Fl_Button*, void*)
 // method to for the 'Favorites Delete' button.
 void Vp_File_Chooser::cb_favDeleteButton( Fl_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_favDeleteButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_favDeleteButton_i( *, *) -- Callback method for the 
+// Vp_File_Chooser:::cb_favDeleteButton_i( *, *) -- Callback method for the
 // 'Favorites Delete' button.  Invokes favoritesCB to handle the dialog.
 void Vp_File_Chooser::cb_favDeleteButton_i( Fl_Button*, void*)
 {
@@ -2324,14 +2320,14 @@ void Vp_File_Chooser::cb_favDeleteButton_i( Fl_Button*, void*)
 //*****************************************************************************
 // Vp_File_Chooser:::cb_favDownButton( o, v) -- Wrapper for the callback
 // method to for the 'Favorites Down' button.
-void Vp_File_Chooser::cb_favDownButton(Fl_Button* o, void* v) 
+void Vp_File_Chooser::cb_favDownButton(Fl_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_favDownButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_favDownButton_i( *. *) -- Callback method for the 
+// Vp_File_Chooser:::cb_favDownButton_i( *. *) -- Callback method for the
 // 'Favorites Down' button.  Invokes favoritesCB to handle the dialog.
 void Vp_File_Chooser::cb_favDownButton_i( Fl_Button*, void*)
 {
@@ -2343,12 +2339,12 @@ void Vp_File_Chooser::cb_favDownButton_i( Fl_Button*, void*)
 // method to for the 'Favorites OK' button.
 void Vp_File_Chooser::cb_favOkButton( Fl_Return_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_favOkButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_favOkButton_i( *, *) -- Callback method for the 
+// Vp_File_Chooser:::cb_favOkButton_i( *, *) -- Callback method for the
 // 'Favorites OK' button.  Invokes favoritesCB to handle the dialog.
 void Vp_File_Chooser::cb_favOkButton_i( Fl_Return_Button*, void*)
 {
@@ -2360,12 +2356,12 @@ void Vp_File_Chooser::cb_favOkButton_i( Fl_Return_Button*, void*)
 // method to for the 'Favorites Up' button.
 void Vp_File_Chooser::cb_favUpButton( Fl_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_favUpButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::favUpButton_i( *, *) -- Callback method for the 
+// Vp_File_Chooser:::favUpButton_i( *, *) -- Callback method for the
 // 'Favorites Up' button.  Invokes favoritesCB to handle the dialog.
 void Vp_File_Chooser::cb_favUpButton_i( Fl_Button*, void*)
 {
@@ -2382,8 +2378,8 @@ void Vp_File_Chooser::cb_favoritesButton( Fl_Menu_Button* o, void* v)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_favoritesButton_i( *, *) -- Callback method for the 
-// Favorites button and pull-down menu..  Invokes favoritesCB to handle the 
+// Vp_File_Chooser::cb_favoritesButton_i( *, *) -- Callback method for the
+// Favorites button and pull-down menu..  Invokes favoritesCB to handle the
 // dialog.
 void Vp_File_Chooser::cb_favoritesButton_i( Fl_Menu_Button*, void*)
 {
@@ -2391,7 +2387,7 @@ void Vp_File_Chooser::cb_favoritesButton_i( Fl_Menu_Button*, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::favoritesButtonCB() - Handle all dialog for the favorites 
+// Vp_File_Chooser::favoritesButtonCB() - Handle all dialog for the favorites
 // button and pull-down menu.
 void Vp_File_Chooser::favoritesButtonCB()
 {
@@ -2415,34 +2411,34 @@ void Vp_File_Chooser::favoritesButtonCB()
     if( favoritesButton->size() > 104) {
       ( (Fl_Menu_Item *) favoritesButton->menu())[ 0].deactivate();
     }
-  } 
+  }
 
   // ...or invoke the favorites dialog with a null value which should
   // reinitialize the list...
   else if( selectionValue == 1) {
     favoritesCB( 0);
-  } 
+  }
 
   //... or set current directory to Filesystems/My Computer
   else if( selectionValue == 2) {
     directory( "");
-  } 
+  }
 
   // ..or remove quotes and add the current pathname
   else {
-    unquote_pathname( 
-      pathname, favoritesButton->text( selectionValue), 
+    unquote_pathname(
+      pathname, favoritesButton->text( selectionValue),
       sizeof( pathname));
     directory( pathname);
   }
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_newButton( o, v) -- Wrapper for the callback method 
+// Vp_File_Chooser::cb_newButton( o, v) -- Wrapper for the callback method
 // for the New Folder button.
 void Vp_File_Chooser::cb_newButton( Fl_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_newButton_i( o, v);
 }
 
@@ -2491,35 +2487,35 @@ void Vp_File_Chooser::newdir()
 }
 
 //*****************************************************************************
-// Vp_File_Chooser:::cb_okButton( o, v) -- Wrapper for the callback method 
+// Vp_File_Chooser:::cb_okButton( o, v) -- Wrapper for the callback method
 // for the OK button.
 void Vp_File_Chooser::cb_okButton( Fl_Return_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
       (o->parent()->parent()->parent()->user_data()))->cb_okButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_okButton_i( *, *) -- Callback method for the OK 
+// Vp_File_Chooser::cb_okButton_i( *, *) -- Callback method for the OK
 // button.  Does any callback tat is registered, then hides window.
-void Vp_File_Chooser::cb_okButton_i( Fl_Return_Button*, void*) 
+void Vp_File_Chooser::cb_okButton_i( Fl_Return_Button*, void*)
 {
   if( callback_) (*callback_)(this, data_);
   window->hide();
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_previewButton( o, v) -- Wrapper for the callback 
+// Vp_File_Chooser::cb_previewButton( o, v) -- Wrapper for the callback
 // method for the Preview checkbox.
 void Vp_File_Chooser::cb_previewButton( Fl_Check_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_previewButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_previewButton_i( *. *) -- Callback method for the 
-// Preview checkbox.  Invokes preview() with the appropriate value to handle 
+// Vp_File_Chooser::cb_previewButton_i( *. *) -- Callback method for the
+// Preview checkbox.  Invokes preview() with the appropriate value to handle
 // the dialog.
 void Vp_File_Chooser::cb_previewButton_i( Fl_Check_Button*, void*)
 {
@@ -2527,19 +2523,19 @@ void Vp_File_Chooser::cb_previewButton_i( Fl_Check_Button*, void*)
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_selectionButton( o, v) -- Wrapper for the callback 
-// method for the 'Write Selection Info' checkbox.  NOTE: The level of nesting 
-// in calls to parent() is important, and must reflect the actual level of 
+// Vp_File_Chooser::cb_selectionButton( o, v) -- Wrapper for the callback
+// method for the 'Write Selection Info' checkbox.  NOTE: The level of nesting
+// in calls to parent() is important, and must reflect the actual level of
 // nesting of the Fl_Check_Button object in the Vp_File_Chooser object!
 void Vp_File_Chooser::cb_selectionButton( Fl_Check_Button* o, void* v)
 {
-  ( (Vp_File_Chooser*) 
+  ( (Vp_File_Chooser*)
     (o->parent()->parent()->user_data()))->cb_selectionButton_i( o, v);
 }
 
 //*****************************************************************************
-// Vp_File_Chooser::cb_selectionButton_i( *. *) -- Callback method for the 
-// 'Write Selection Info' checkbox.  
+// Vp_File_Chooser::cb_selectionButton_i( *. *) -- Callback method for the
+// 'Write Selection Info' checkbox.
 void Vp_File_Chooser::cb_selectionButton_i( Fl_Check_Button*, void*)
 {
   if( selectionButton->value()) writeSelectionInfo( 1);
@@ -2578,7 +2574,7 @@ static int compare_dirnames( const char *a, const char *b)
 
 //*****************************************************************************
 // quote_pathname( *dst, *src, dstsize) -- Given a destination string, DST, a
-// surce string, SRC, and a size, DSTSIZE, for the destination string, quote a 
+// surce string, SRC, and a size, DSTSIZE, for the destination string, quote a
 // pathname for a menu.
 static void quote_pathname( char *dst, const char *src, int dstsize)
 {
@@ -2591,7 +2587,7 @@ static void quote_pathname( char *dst, const char *src, int dstsize)
       *dst++ = '\\';
       *dst++ = '/';
       src ++;
-    } 
+    }
     else {
       if( *src == '/') *dst++ = '\\';
       *dst++ = *src++;
@@ -2602,7 +2598,7 @@ static void quote_pathname( char *dst, const char *src, int dstsize)
 
 //*****************************************************************************
 // unquote_pathname( *dst, *src, dstsize) - Given a destination string, DST, a
-// source string, SRC, and a size, DSTSIZE, for the destination string, 
+// source string, SRC, and a size, DSTSIZE, for the destination string,
 // unquote a pathname for a menu.
 static void unquote_pathname( char *dst, const char *src, int dstsize)
 {
@@ -2616,7 +2612,7 @@ static void unquote_pathname( char *dst, const char *src, int dstsize)
 }
 
 //*****************************************************************************
-// isdirsep( c) -- A simple inline function to recognize directory separators 
+// isdirsep( c) -- A simple inline function to recognize directory separators
 // under Windows or a for-real OS.
 #if defined(WIN32) || defined(__EMX__) && !defined(__CYGWIN__)
   static inline int isdirsep( char c) { return c=='/' || c=='\\';}
@@ -2626,8 +2622,8 @@ static void unquote_pathname( char *dst, const char *src, int dstsize)
 
 //*****************************************************************************
 // new_filename_isdir( pathname) -- Method to determine if PATHNAME
-// corresponds to a directory.  
-static int new_filename_isdir( const char* pathname) 
+// corresponds to a directory.
+static int new_filename_isdir( const char* pathname)
 {
   // Do a quick optimization for filenames with a trailing slash...
   if( *pathname && isdirsep( pathname[ strlen( pathname) - 1])) return 1;
@@ -2640,7 +2636,7 @@ static int new_filename_isdir( const char* pathname)
   int length = strlen( pathname);
   if( length < (int)(sizeof( temp) - 1)) {
 
-    // If the pathname is shorter than four characters and begins with a 
+    // If the pathname is shorter than four characters and begins with a
     // letter and colon (example, "D:"), assume it's merely a drive letter
     // and modify it to terminate with a slash (example, "D:/")...
     if( length < 4 && isalpha( pathname[ 0]) && pathname[ 1] == ':' &&
@@ -2648,7 +2644,7 @@ static int new_filename_isdir( const char* pathname)
       temp[ 0] = pathname[ 0];
       strcpy( temp + 1, ":/");
       pathname = temp;
-    } 
+    }
 
     // ...otherwise if the pathname terminates with a directory separator.
     // strip this from the name and make sure the string is null-terminated.
@@ -2661,27 +2657,27 @@ static int new_filename_isdir( const char* pathname)
   }
   #endif   // WIN32
 
-  // The original return statement that loads the stat structure and tests 
+  // The original return statement that loads the stat structure and tests
   // the result in one fell and somewhat opaque swoop.
   // struct stat thisStat;
   // return !stat( pathname, &thisStat) && (thisStat.st_mode&0170000)==0040000;
 
-  // Define and load a STAT structure and get the return value.  If this 
+  // Define and load a STAT structure and get the return value.  If this
   // was non-zero, the load failed so return a zero
   struct stat thisStat;
   int iStatResult = stat( pathname, &thisStat);
   if( iStatResult != 0) return 0;
 
-  // Examine the content of thisStat.st_mode to determine if PATHNAME 
-  // corresponds to a directory and not a file.  This should be composed of 
+  // Examine the content of thisStat.st_mode to determine if PATHNAME
+  // corresponds to a directory and not a file.  This should be composed of
   // the following values:
-  // _S_IFREG -- Set if path refers to an ordinary file, not a directory. 
-  // _S_IREAD -- Set if path refers to a readable file or directory. 
-  // _S_IWRITE -- Set if path refers to a writable file or directory. 
-  // _S_IFDIR -- Set if path refers to a directory. 
+  // _S_IFREG -- Set if path refers to an ordinary file, not a directory.
+  // _S_IREAD -- Set if path refers to a readable file or directory.
+  // _S_IWRITE -- Set if path refers to a writable file or directory.
+  // _S_IFDIR -- Set if path refers to a directory.
   // _S_IEXEC -- Set if path refers to an executable file or a directory.
   // The simlest way to combine them would be with something like:
-  // unsigned uModeTest = 
+  // unsigned uModeTest =
   //   ( ( thisStat.st_mode & _S_IFDIR) != 0) &&
   //   ( ( thisStat.st_mode & _S_IFREG) == 0) &&
   //   ( ( thisStat.st_mode & _S_IREAD) == 0) &&
