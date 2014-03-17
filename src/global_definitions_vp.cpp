@@ -9,7 +9,7 @@
 // Classes referenced:
 //   Various BLITZ templates
 //
-// Purpose: Source code for global methods declared in 
+// Purpose: Source code for global methods declared in
 //   <global_definitions_vp.h>
 //
 // General design philosophy:
@@ -34,13 +34,13 @@
 #include "global_definitions_vp.h"
 
 //***************************************************************************
-// make_confirmation_window( text, nButtons, nLines) -- Make and manage the 
+// make_confirmation_window( text, nButtons, nLines) -- Make and manage the
 // confirmation window.  Result of 1,0,-1 => Yes, No, Cancel.
 int make_confirmation_window( const char* text, int nButtons, int nLines)
 {
   // Destroy any existing window
-  // MCL XXX rule #2: "Compile cleanly at high warning levels." 
-  if( confirmation_window != NULL) confirmation_window->hide();
+  // MCL XXX rule #2: "Compile cleanly at high warning levels."
+  if( confirmation_window != nullptr) confirmation_window->hide();
 
   // Generate dimensions
   int nHeight = 30 * nLines;
@@ -52,7 +52,7 @@ int make_confirmation_window( const char* text, int nButtons, int nLines)
   confirmation_window->begin();
   confirmation_window->selection_color( FL_BLUE);
   confirmation_window->labelsize( 10);
-  
+
   // Compose text. NOTE use of @@ in conjunction with label()
   string sMessage = "";
   sMessage.append( text);
@@ -74,7 +74,7 @@ int make_confirmation_window( const char* text, int nButtons, int nLines)
 
   // Revise format if this is not the three-button mode
   if( nButtons == 2) {
-    yes_button->resize( 90+40, nHeight-20, 60, 25); 
+    yes_button->resize( 90+40, nHeight-20, 60, 25);
     no_button->resize( 170+40, nHeight-20, 60, 25);
     cancel_button->hide();
   }
@@ -84,14 +84,14 @@ int make_confirmation_window( const char* text, int nButtons, int nLines)
     cancel_button->hide();
   }
 
-  // Finish creating and show the confirmation window.  Make sure it is 
+  // Finish creating and show the confirmation window.  Make sure it is
   // 'modal' to prevent events from being delivered to the other windows.
   confirmation_window->resizable( confirmation_window);
   confirmation_window->end();
   confirmation_window->set_modal();
   confirmation_window->show();
-  
-  // Loop: While the window is open, wait and check the read queue until the 
+
+  // Loop: While the window is open, wait and check the read queue until the
   // right widget is activated
   while( confirmation_window->shown()) {
     Fl::wait();
@@ -133,12 +133,12 @@ float pow2( float x)
 }
 
 //***************************************************************************
-// make_find_window( text, result) -- Make and manage the text search 
+// make_find_window( text, result) -- Make and manage the text search
 // window.  Ignore return value, use non-empty res parameter as outcome.
 int make_find_window( const char* text, char *res)
 {
   // Destroy any existing window
-  if( find_window != NULL) find_window->hide();
+  if( find_window != nullptr) find_window->hide();
 
   // Generate dimensions
   int nHeight = 30 * 3;
@@ -148,7 +148,7 @@ int make_find_window( const char* text, char *res)
   find_window->begin();
   find_window->selection_color( FL_BLUE);
   find_window->labelsize( 10);
-  
+
   // Compose text. NOTE use of @@ in conjunction with label()
   string sMessage = "";
   sMessage.append( text);
@@ -175,15 +175,15 @@ int make_find_window( const char* text, char *res)
   find_window->end();
   find_window->set_modal();
   find_window->show();
-  
-  // Loop: While the window is open, wait and check the read queue until the 
+
+  // Loop: While the window is open, wait and check the read queue until the
   // right widget is activated
   while( find_window->shown()) {
     Fl::wait();
     if(Fl::event_key(FL_Enter)) {
       find_window->hide();
       strcpy(res,inp->value());
-      return 1;    
+      return 1;
     }
 
     for( ; ;) {   // Is this loop needed?
@@ -213,7 +213,7 @@ int make_find_window( const char* text, char *res)
 }
 
 //***************************************************************************
-// shrink_widget_fonts( target_widget, rScale) -- Shrink fonts for widget 
+// shrink_widget_fonts( target_widget, rScale) -- Shrink fonts for widget
 // and its children.  Note kludge to round up values if rScale>1.
 void shrink_widget_fonts( Fl_Widget* target_widget, float rScale)
 {
@@ -221,9 +221,9 @@ void shrink_widget_fonts( Fl_Widget* target_widget, float rScale)
   unsigned labelsize_new = target_widget->labelsize();
   labelsize_new = (int) (rScale*labelsize_new);
   if( rScale>1) labelsize_new++;
-  target_widget->labelsize( labelsize_new);  
+  target_widget->labelsize( labelsize_new);
 
-  // Rescale text in window of Vp_Value_Input_Spin  
+  // Rescale text in window of Vp_Value_Input_Spin
 #if 0
   Vp_Value_Input_Spin* p_Vp_Spin_;
   if( p_Vp_Spin_ = dynamic_cast <Vp_Value_Input_Spin*> (target_widget)) {
