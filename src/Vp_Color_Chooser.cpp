@@ -47,7 +47,7 @@ void Vp_Color_Chooser::hsv2rgb(
     R = G = B = V;
   }
   else {
-    int i = (int)H;  
+    int i = (int)H;
     double f = H - (float)i;
     double p1 = V*(1.0-S);
     double p2 = V*(1.0-S*f);
@@ -131,7 +131,7 @@ int Vp_Color_Chooser::rgb(double R, double G, double B)
 #endif
     valuebox.damage(FL_DAMAGE_EXPOSE);}
   if (hue_ != ph || saturation_ != ps) {
-    huebox.damage(FL_DAMAGE_EXPOSE); 
+    huebox.damage(FL_DAMAGE_EXPOSE);
     valuebox.damage(FL_DAMAGE_SCROLL);
   }
   return 1;
@@ -155,7 +155,7 @@ int Vp_Color_Chooser::hsv(double H, double S, double V)
 #endif
     valuebox.damage(FL_DAMAGE_EXPOSE);}
   if (hue_ != ph || saturation_ != ps) {
-    huebox.damage(FL_DAMAGE_EXPOSE); 
+    huebox.damage(FL_DAMAGE_EXPOSE);
     valuebox.damage(FL_DAMAGE_SCROLL);
   }
   hsv2rgb(H,S,V,r_,g_,b_);
@@ -182,7 +182,7 @@ static void tohs(double x, double y, double& h, double& s) {
 }
 
 //*****************************************************************************
-// Flcc_HueBox::handle( e) -- 
+// Flcc_HueBox::handle( e) --
 int Flcc_HueBox::handle( int e)
 {
   static double ih, is;
@@ -221,7 +221,7 @@ int Flcc_HueBox::handle( int e)
 
 //*****************************************************************************
 // generate_image( void* vv, X, Y, W, buf) -- global static method
-static void generate_image(void* vv, int X, int Y, int W, uchar* buf) 
+static void generate_image(void* vv, int X, int Y, int W, uchar* buf)
 {
   Flcc_HueBox* v = (Flcc_HueBox*)vv;
   int iw = v->w()-Fl::box_dw(v->box());
@@ -243,7 +243,7 @@ static void generate_image(void* vv, int X, int Y, int W, uchar* buf)
 }
 
 //*****************************************************************************
-// Flcc_HueBox::handle_key( key) -- 
+// Flcc_HueBox::handle_key( key) --
 int Flcc_HueBox::handle_key(int key)
 {
   int w1 = w()-Fl::box_dw(box())-6;
@@ -285,7 +285,7 @@ int Flcc_HueBox::handle_key(int key)
 }
 
 //*****************************************************************************
-// Flcc_HueBox::draw() -- 
+// Flcc_HueBox::draw() --
 void Flcc_HueBox::draw()
 {
   if (damage()&FL_DAMAGE_ALL) draw_box();
@@ -314,7 +314,7 @@ void Flcc_HueBox::draw()
 ////////////////////////////////////////////////////////////////
 
 //*****************************************************************************
-// Flcc_ValueBox::handle( e) -- 
+// Flcc_ValueBox::handle( e) --
 int Flcc_ValueBox::handle( int e)
 {
   static double iv;
@@ -361,7 +361,7 @@ static void generate_vimage(void* vv, int X, int Y, int W, uchar* buf) {
 }
 
 //*****************************************************************************
-// Flcc_ValueBox::draw() -- 
+// Flcc_ValueBox::draw() --
 void Flcc_ValueBox::draw() {
   if (damage()&FL_DAMAGE_ALL) draw_box();
   Vp_Color_Chooser* c = (Vp_Color_Chooser*)parent();
@@ -380,7 +380,7 @@ void Flcc_ValueBox::draw() {
 }
 
 //*****************************************************************************
-// Flcc_ValueBox::handle_key( key) -- 
+// Flcc_ValueBox::handle_key( key) --
 int Flcc_ValueBox::handle_key(int key) {
   int h1 = h()-Fl::box_dh(box())-6;
   Vp_Color_Chooser* c = (Vp_Color_Chooser*)parent();
@@ -409,7 +409,7 @@ int Flcc_ValueBox::handle_key(int key) {
 ////////////////////////////////////////////////////////////////
 
 //*****************************************************************************
-// Vp_Color_Chooser::rgb_cb( Fl_Widget* o, void*) -- 
+// Vp_Color_Chooser::rgb_cb( Fl_Widget* o, void*) --
 void Vp_Color_Chooser::rgb_cb(Fl_Widget* o, void*)
 {
   Vp_Color_Chooser* c = (Vp_Color_Chooser*)(o->parent());
@@ -429,7 +429,7 @@ void Vp_Color_Chooser::rgb_cb(Fl_Widget* o, void*)
 }
 
 //*****************************************************************************
-// Vp_Color_Chooser::mode_cb( Fl_Widget* o, void*) -- 
+// Vp_Color_Chooser::mode_cb( Fl_Widget* o, void*) --
 void Vp_Color_Chooser::mode_cb(Fl_Widget* o, void*)
 {
   Vp_Color_Chooser* c = (Vp_Color_Chooser*)(o->parent());
@@ -511,7 +511,7 @@ public:
 };
 
 //*****************************************************************************
-// ColorChip::draw() -- 
+// ColorChip::draw() --
 void ColorChip::draw() {
   if (damage()&FL_DAMAGE_ALL) draw_box();
   fl_rectf(x()+Fl::box_dx(box()),
