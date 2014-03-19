@@ -78,7 +78,9 @@
 // Author: Creon Levit    31-JAN-2008
 // Modified: P. R. Gazis  03-OCT-2008
 //*****************************************************************
-class Vp_Value_Input_Spin : public Fl_Valuator {
+class Vp_Value_Input_Spin : 
+  public Fl_Valuator 
+{
 private:
   int ix, iy, drag, indrag,sldrag;
   int delta, deltadir;
@@ -92,7 +94,7 @@ private:
   FL_EXPORT void increment_cb(); 
   
 public:
-  FL_EXPORT Vp_Value_Input_Spin( int x,int y,int w,int h, const char *l = 0);
+  FL_EXPORT Vp_Value_Input_Spin( int in_x, int in_y, int in_w, int in_h, const char * in_l = nullptr);
   ~Vp_Value_Input_Spin();
 
   // Define Fl_Input object to hold the actual display
@@ -102,7 +104,7 @@ public:
   FL_EXPORT int handle( int);
   FL_EXPORT void resize( int, int, int, int);
 
-  void soft( char x) { soft_ = x;}
+  void soft( char in_x) { soft_ = in_x;}
   char soft() const { return soft_;}
 
   // Access functions
