@@ -48,9 +48,9 @@ char* unescape( char *orig)
     case 'b':  /* backspace */
       *orig = '\b';
       continue;
-    case 'e':  /* escape */
-      *orig = '\e';
-      continue;
+//    case 'e':  /* escape */
+//      *orig = '\e';
+//      continue;
     case 'f':  /* formfeed */
       *orig = '\f';
       continue;
