@@ -20,5 +20,5 @@ add_definitions("-DSERIALIZATION")
 
 add_executable (vp ${viewpoint_sources})
 add_dependencies(vp flews-static)
-target_link_libraries(vp flews-static ${FLTK_LIBRARY} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${CFITSIO_LIBRARIES} ${Boost_SERIALIZATION_LIBRARY} ${Boost_SYSTEM_LIBRARY} dl)
+target_link_libraries(vp flews-static ${FLTK_LIBRARY} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${CFITSIO_LIBRARIES} ${Boost_SERIALIZATION_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${ROOT_LIBRARIES})
 
