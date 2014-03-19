@@ -32,6 +32,9 @@
 #ifndef INCLUDE_LIBRARIES_VP_H
 #define INCLUDE_LIBRARIES_VP_H 1
 
+#ifndef UNUSED
+#define UNUSED(expr) do { (void)(expr); } while (0)
+#endif
 // Defines under Windows: Several defines are required to account for 
 // variable and function definitions that seem to be missing.  This is a 
 // temporary fix that should be replaced by actual source code if possible.
@@ -205,9 +208,5 @@
 
 // FITS package includes (must be last?)
 #include <fitsio.h>
-
-#ifndef UNUSED
-#define UNUSED(expr) do { (void)(expr); } while (0)
-#endif
 
 #endif   // INCLUDE_LIBRARIES_VP_H
