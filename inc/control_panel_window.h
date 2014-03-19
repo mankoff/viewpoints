@@ -179,7 +179,10 @@ class Control_Panel_Window : public Fl_Group
     // Static functions for access by Fl Widget callbacks
     static void broadcast_change( Fl_Widget *global_widget);
     static void static_extract_and_redraw( Fl_Widget *w, Control_Panel_Window *cpw)
-    { UNUSED(w); cpw->extract_and_redraw(); }
+    {
+      UNUSED(w);
+      cpw->extract_and_redraw();
+    }
     static void static_maybe_redraw( Fl_Widget *w, Control_Panel_Window *cpw)
     { UNUSED(w); cpw->maybe_redraw() ;}
     static void replot( Fl_Widget *w, Control_Panel_Window *cpw)
