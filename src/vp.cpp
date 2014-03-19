@@ -83,6 +83,8 @@
 //***************************************************************************
 
 // Include the necessary include libraries
+#include <random>
+
 #include "include_libraries_vp.h"
 #include <FL/Fl_Tooltip.H>
 #include <FL/Fl_Scroll.H>
@@ -249,7 +251,7 @@ void usage()
        << "Interpret CHAR as a field separator, default is" << endl
        << "                              "
        << "whitespace." << endl;
-  cerr << "  -f, --format={ascii,binary,fits} " << endl
+  cerr << "  -f, --format={ascii,binary,fits,root} " << endl
        << "                              "
        << "Input file format, default=ascii.  NOTE: for ASCII" << endl
        << "                              "
@@ -2340,6 +2342,7 @@ int main( int argc, char **argv)
         if( !strncmp( optarg, "ascii", 1)) dfm.inputFileType( 0);
         else if( !strncmp( optarg, "binary", 1)) dfm.inputFileType( 1);
         else if( !strncmp( optarg, "fits", 1)) dfm.inputFileType( 2);
+        else if(!strncmp(optarg, "root", 1)) dfm.inputFileType(3);
         else {
           usage();
           exit( -1);
