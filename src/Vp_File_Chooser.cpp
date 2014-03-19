@@ -25,6 +25,7 @@
 
 // Include header
 #include "Vp_File_Chooser.h"
+#include <TFile.h>
 #include <cstring>
 
 #ifndef UNUSED
@@ -788,7 +789,7 @@ void Vp_File_Chooser::fileType( int fileType_in)
 {
   fileType_ = fileType_in;
   if( fileType_ < 0) fileType_ = 0;
-  if( fileType_ > 2) fileType_ = 2;
+  if(fileType_ > 3) fileType_ = 3;
   fileTypeChoice->value( fileType_);
 
   if( fileType_ <= 0) {   // ASCII files
@@ -803,12 +804,18 @@ void Vp_File_Chooser::fileType( int fileType_in)
     commentLabelsButton->hide();
     // fitsExtensionNumber->hide();
   }
-  else if( fileType_ >= 2) {   // FITS files
+  else if(fileType_ == 2) {   // FITS files
     delimiter_box->hide();
     delimiter_group->hide();
     commentLabelsButton->hide();
     // selectionButton->hide();
     // fitsExtensionNumber->show();
+  }
+  else if (fileType_ >= 3)
+  {
+    delimiter_box->hide();
+    delimiter_group->hide();
+    commentLabelsButton->hide();
   }
 }
 
@@ -2045,6 +2052,12 @@ void Vp_File_Chooser::fileTypeCB()
     strcpy( pattern_, "*.{fit,fits}\tAll Files (*)");
     fileBrowser->filter( "*.{fit,fits}");
     fileType_ = 2;
+  }
+  else if (strstr(item,"ROOT"))
+  {
+    strcpy(pattern_, "*.root\tAll Files (*)");
+    fileBrowser->filter("*.root");
+    fileType_ = 3;
   }
   else {
     strcpy( pattern_, "*.bin\tAll Files (*)");
