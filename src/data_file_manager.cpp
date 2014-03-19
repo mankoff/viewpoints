@@ -23,6 +23,13 @@
 //***************************************************************************
 
 // Include the necessary include libraries
+#include <map>
+#include <limits>
+#include <string>
+#include <algorithm>
+#include <vector>
+
+#include <stdexcept>
 #include "include_libraries_vp.h"
 
 // Include globals
@@ -61,6 +68,8 @@ const bool include_line_number = false; // MCL XXX This should be an option
 Data_File_Manager::Data_File_Manager() :
 	delimiter_char_( ' '),
   bad_value_proxy_( 0.0),
+	input_file_type(viewpoints::ascii),
+	output_file_type(viewpoints::ascii),
   inputFileType_( 0),
 	outputFileType_( 0),
 	doAppend( 0),
@@ -181,19 +190,28 @@ int Data_File_Manager::findInputFile()
   // of this should be moved to Vp_File_Chooser
   string title;
   string pattern;
-  if( inputFileType_ == 0) {
+  if( inputFileType_ == 0)
+  {
     title = "Open data file";
     pattern = "*.{txt,lis,asc}\tAll Files (*)";
   }
-  else if( inputFileType_ == 1) {
+  else if (inputFileType_ == 1)
+  {
     title = "Open data file";
     pattern = "*.bin\tAll Files (*)";
   }
-  else if( inputFileType_ == 2) {
+  else if (inputFileType_ == 2)
+  {
     title = "Open data file";
     pattern = "*.{fit,fits}\tAll Files (*)";
   }
-  else {
+  else if (inputFileType_ == 3)
+  {
+    title = "Open data file";
+    pattern = "*.root\tAll Files (*)";
+  }
+  else
+  {
     title = "Open data file";
     pattern = "*.bin\tAll Files (*)";
   }
@@ -215,18 +233,25 @@ int Data_File_Manager::findInputFile()
 
   // Loop: Select fileSpecs until a non-directory is obtained.  NOTE: If all
   // goes well, this should be handled by the file_chooser object
-  while( 1) {
-    if( cInFileSpec != nullptr) file_chooser->directory( cInFileSpec);
+  while (1)
+  {
+    if (cInFileSpec != nullptr)
+		{
+      file_chooser->directory(cInFileSpec);
+		}
 
     // Loop: wait until the file selection is done
     file_chooser->show();
-    while( file_chooser->shown()) Fl::wait();
+    while (file_chooser->shown())
+		{
+      Fl::wait();
+		}
     cInFileSpec = file_chooser->value();
 
     // If no file was specified then quit
-    if( cInFileSpec == nullptr) {
-      cerr << "Data_File_Manager::findInputFile: "
-           << "No input file was specified" << endl;
+    if (cInFileSpec == nullptr)
+    {
+      cerr << "Data_File_Manager::findInputFile: " << "No input file was specified" << endl;
       break;
     }
 
@@ -234,12 +259,14 @@ int Data_File_Manager::findInputFile()
     // so try to open this file to see if it is a directory.  If it is, set
     // the pathname and continue.  Otherwise merely update the pathname.
     FILE* pFile = fopen( cInFileSpec, "r");
-    if( pFile == nullptr) {
+    if (pFile == nullptr)
+    {
       file_chooser->directory( cInFileSpec);
       directory( (string) cInFileSpec);
       continue;
     }
-    else {
+    else
+    {
       directory( (string) file_chooser->directory());
     }
 
@@ -249,9 +276,9 @@ int Data_File_Manager::findInputFile()
 
   // If no file was specified then report, deallocate the Vp_File_Chooser
   // object, and quit.
-  if( cInFileSpec == nullptr) {
-    cerr << "Data_File_Manager::findInputFile: "
-         << "No input file was specified" << endl;
+  if (cInFileSpec == nullptr)
+  {
+    cerr << "Data_File_Manager::findInputFile: " << "No input file was specified" << endl;
     delete file_chooser;  // WARNING! Destroys cInFileSpec!
     return -1;
   }
@@ -260,19 +287,37 @@ int Data_File_Manager::findInputFile()
   // and usage of a comment character with the column label information
   inputFileType_ = file_chooser->fileType();
   delimiter_char_ = file_chooser->delimiter_char();
-  if( file_chooser->doCommentedLabels() != 0) doCommentedLabels_ = 1;
-  else doCommentedLabels_ = 0;
+  if (file_chooser->doCommentedLabels() != 0)
+	{
+    doCommentedLabels_ = 1;
+	}
+  else
+	{
+    doCommentedLabels_ = 0;
+	}
 
   // Load the inFileSpec string
   inFileSpec.assign( (string) cInFileSpec);
   if( inputFileType_ == 0)
+	{
     cout << "Data_File_Manager::inputFile: Reading ASCII data from <";
+	}
   else if( inputFileType_ == 1)
+	{
     cout << "Data_File_Manager::findInputFile: Reading binary data from <";
+	}
   else if( inputFileType_ == 2)
+	{
     cout << "Data_File_Manager::findInputFile: Reading FITS extension from <";
+	}
+  else if (inputFileType_ == 3)
+  {
+    cout << "Data_File_Manager::findInputFile: Reading ROOT extension from <";
+  }
   else
+	{
     cout << "Data_File_Manager::findInputFile: Reading binary data from <";
+	}
   cout << inFileSpec.c_str() << ">" << endl;
 
   // Deallocate the file_chooser object
@@ -307,9 +352,9 @@ int Data_File_Manager::load_data_file()
 {
   // PRG XXX: Would it be possible or desirable to examine the file directly
   // here to determine or verify its format?
-  if( inFileSpec.length() <= 0) {
-    cout << "Data_File_Manager::load_data_file: "
-         << "No input file was specified" << endl;
+  if (inFileSpec.length() <= 0)
+  {
+    cout << "Data_File_Manager::load_data_file: " << "No input file was specified" << endl;
     return -1;
   }
 
@@ -319,7 +364,8 @@ int Data_File_Manager::load_data_file()
   int old_npoints=0, old_nvars=0;
   std::vector<Column_Info> old_column_info;
   blitz::Array<int,1> old_selected;
-  if( preserve_old_data_mode || doAppend > 0 || doMerge > 0) {
+  if (preserve_old_data_mode || doAppend > 0 || doMerge > 0)
+  {
     uHaveOldData = 1;
     old_column_info = column_info;
     old_nvars = n_vars();
@@ -337,17 +383,33 @@ int Data_File_Manager::load_data_file()
   // Read data file.If there was a problem, create default data to prevent
   // a crash, then quit before something terrible happens!  NOTE: The read
   // methods load selection information, but don't resize read_selected;
-  cout << "Data_File_Manager::load_data_file: Reading input data from <"
-       << inFileSpec.c_str() << ">" << endl;
+    cout << "Data_File_Manager::load_data_file: Reading input data from <" << inFileSpec.c_str() << ">" << endl;
   int iReadStatus = 0;
-  if( inputFileType_ == 0) iReadStatus = read_ascii_file_with_headers();
-  else if( inputFileType_ == 2) iReadStatus = read_table_from_fits_file();
-  else iReadStatus = read_binary_file_with_headers();
-  if( iReadStatus != 0) {
-    cout << "Data_File_Manager::load_data_file: "
-         << "Problems reading file <" << inFileSpec.c_str() << ">" << endl;
-    if( !uHaveOldData) create_default_data( 4);
-    else {
+  if (inputFileType_ == 0)
+  {
+    iReadStatus = read_ascii_file_with_headers();
+  }
+  else if (inputFileType_ == 2)
+  {
+    iReadStatus = read_table_from_fits_file();
+  }
+  else if (inputFileType_ == 3)
+  {
+    iReadStatus = read_tree_from_root_file();
+  }
+  else
+  {
+    iReadStatus = read_binary_file_with_headers();
+  }
+    cout << nvars << endl;
+
+  if (iReadStatus != 0)
+  {
+    cout << "Data_File_Manager::load_data_file: " << "Problems reading file <" << inFileSpec.c_str() << ">" << endl;
+    if (!uHaveOldData)
+      create_default_data(4);
+    else
+    {
       nvars = old_nvars;
       npoints = old_npoints;
       resize_global_arrays();
@@ -358,29 +420,39 @@ int Data_File_Manager::load_data_file()
     return -1;
   }
   else
-    cout << "Data_File_Manager::load_data_file: Finished reading file <"
-         << inFileSpec.c_str() << ">" << endl;
+	{
+    cout << "Data_File_Manager::load_data_file: Finished reading file <" << inFileSpec.c_str() << ">" << endl;
+	}
 
   // Resize the READ_SELECTED array here
-  if( npoints>0) read_selected.resizeAndPreserve( npoints);
+  if (npoints > 0)
+	{
+    read_selected.resizeAndPreserve(npoints);
+	}
 
   // Remove trivial columns
-  if( npoints>0 && trivial_columns_mode) remove_trivial_columns();
+  if (npoints > 0 && trivial_columns_mode)
+	{
+    remove_trivial_columns();
+	}
 
   // If only one or fewer records are available, generate default data to
   // prevent a crash, then quit before something terrible happens!
-  if( npoints <= 0 ||
-      (( doAppend == 0 && doMerge == 0) && ( nvars <= 1 || npoints <= 1))) {
-    cerr << " -WARNING: Insufficient data, " << nvars << "x" << npoints
-         << " samples.\nCheck delimiter character." << endl;
+  if ((npoints <= 0) ||
+		((doAppend == 0 && doMerge == 0) && 
+		(nvars <= 1 || npoints <= 1)))
+  {
+      cerr << " -WARNING: Insufficient data, " << nvars << "x" << npoints << " samples.\nCheck delimiter character." << endl;
     string sWarning = "";
     sWarning.append( "WARNING: Insufficient number of attributes or samples\n.");
     sWarning.append( "Check delimiter value and 'commented labels' setting.\n");
-    if( !uHaveOldData) {
+    if(!uHaveOldData)
+    {
       sWarning.append( "Generating default data.");
       create_default_data( 4);
     }
-    else {
+    else
+    {
       sWarning.append( "Restoring existing data.");
 
       nvars = old_nvars;
@@ -393,27 +465,30 @@ int Data_File_Manager::load_data_file()
     make_confirmation_window( sWarning.c_str(), 1, 3);
     return -1;
   }
-  else {
-    cout << "Data_File_Manager::load_data_file: Loaded " << npoints
-         << " samples with " << nvars << " fields" << endl;
+  else
+  {
+    cout << "Data_File_Manager::load_data_file: Loaded " << npoints << " samples with " << nvars << " fields" << endl;
   }
 
   // MCL XXX Now that we're done reading, we can update nvars to count possible
   // additional program-generated variables (presently only the line number).
-  if( include_line_number) nvars = nvars+1;
+  if (include_line_number)
+	{
+    nvars += 1;
+	}
 
   // Compare array sizes and finish the append or merge operation
-  if( doAppend > 0 | doMerge > 0) {
+  if (doAppend > 0 || doMerge > 0)
+  {
 
     // If array sizes aren't consistent, restore the old data and column
     // labels.  Otherwise, reverse old and new arrays along the relevant
     // dimensions, copy the old data to the new array, reverse the new array
     // again, and copy new column labels if this was a merge operation.
     if( ( doAppend > 0 && nvars != old_nvars) ||
-        ( doMerge > 0 && npoints != old_npoints)) {
-      cout << "Old (" << old_nvars << "x" << old_npoints
-           << ") array doesn't match new (" << nvars << "x" << npoints
-           << ") array" << endl;
+        ( doMerge > 0 && npoints != old_npoints))
+    {
+      cout << "Old (" << old_nvars << "x" << old_npoints << ") array doesn't match new (" << nvars << "x" << npoints << ") array" << endl;
 
       char cBuf[ 80];
       sprintf(
@@ -431,25 +506,29 @@ int Data_File_Manager::load_data_file()
       selected = old_selected;
       return -1;
     }
-    else if( doAppend > 0) {
+    else if( doAppend > 0)
+    {
 
       // Current (e.g., new) column info and lookup table indices in the
       // current (new) common data array must be revised first, before the
       // current and old data arrays are appended.
-      for( int j=0; j<nvars; j++) {
+      for( int j=0; j<nvars; j++)
+      {
         column_info[j].add_info_and_update_data( old_column_info[j]);
       }
 
       // Enlarge buffer that contains old data to make space for current data
       // and make sure current data buffer is the right size
       int all_npoints = npoints + old_npoints;
-      for( int j=0; j<nvars; j++) {
+      for( int j=0; j<nvars; j++)
+      {
         (old_column_info[j].points).resizeAndPreserve(all_npoints);
         (column_info[j].points).resizeAndPreserve(npoints);
       }
 
       // Append current data to old data and resize the current data buffer
-      for( int j=0; j<nvars; j++) {
+      for( int j=0; j<nvars; j++)
+      {
         (old_column_info[j].points(blitz::Range(old_npoints,all_npoints-1))) =
           column_info[j].points;
         (column_info[j].points).resize( all_npoints-1);
@@ -462,11 +541,16 @@ int Data_File_Manager::load_data_file()
       // Loop: Examine the vector of Column_Info objects to alphabetize
       // ASCII values and renumber the data.
       int nReordered = 0;
-      for( int j=0; j<nvars; j++) {
-        if( column_info[j].update_ascii_values_and_data() >=0) nReordered++;
+      for( int j=0; j<nvars; j++)
+      {
+        if (column_info[j].update_ascii_values_and_data() >= 0)
+				{
+          nReordered++;
+				}
       }
     }
-    else {
+    else
+    {
       int all_nvars = nvars + old_nvars;
 
       // This old code is retained for archival purposes to document how
@@ -484,7 +568,8 @@ int Data_File_Manager::load_data_file()
 
       // Add new columns of data to the old data buffer
       old_column_info.pop_back();
-      for( unsigned int i=0; i<column_info.size(); i++) {
+      for (unsigned int i = 0; i < column_info.size(); i++)
+      {
         old_column_info.push_back( column_info[ i]);
       }
 
@@ -501,9 +586,12 @@ int Data_File_Manager::load_data_file()
   // memory temporarily.  XXX it would be better to handle the growth/shrinkage
   // of this buffer while reading.
   if( npoints != npoints_cmd_line)
+  {
     for( int j=0; j<nvars; j++)
+    {
       (column_info[j].points).resizeAndPreserve( npoints);
-
+    }
+  }
   // Now that we know the number of variables and points we've read, we can
   // allocate and/or reallocateResize the other global arrays.  NOTE: This
   // will invoke reset_selection_arrays()
@@ -511,13 +599,18 @@ int Data_File_Manager::load_data_file()
 
   // Straighten out selection information.  WARNING: This will die horribly
   // if array sizes are not consistent
-  if( doMerge) selected = old_selected;
-  else if( doAppend) {
+  if( doMerge)
+  {
+    selected = old_selected;
+  }
+  else if( doAppend)
+  {
     int new_npoints = read_selected.rows();
     old_npoints = old_selected.rows();
 
     // Make sure arrays sizes are consistent
-    if( npoints != new_npoints + old_npoints) {
+    if (npoints != new_npoints + old_npoints)
+		{
         cerr << "Data_File_Manager::load_data_file: ERROR, "
              << "selection arrays aren't consistent!" << endl
              << "  old(" << old_npoints << ") + new(" << new_npoints
@@ -531,7 +624,10 @@ int Data_File_Manager::load_data_file()
     // selected( blitz::Range( new_npoints, npoints-1)) =
     //   old_selected( blitz::Range( 0, old_npoints-1));
   }
-  else selected = read_selected;
+  else
+  {
+    selected = read_selected;
+  }
   read_selected.free();
   old_selected.free();
 
@@ -541,8 +637,14 @@ int Data_File_Manager::load_data_file()
   // Update dataFileSpec, set saved file flag, and report success
   dataFileSpec = inFileSpec;
   isAsciiData = 1-inputFileType_;   // COnversion needed for legacy reasons
-  if( doAppend > 0 | doMerge > 0) isSavedFile_ = 0;
-  else isSavedFile_ = 1;
+  if( doAppend > 0 || doMerge > 0)
+  {
+    isSavedFile_ = 0;
+  }
+  else
+  {
+    isSavedFile_ = 1;
+  }
   return 0;
 }
 
@@ -559,11 +661,15 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
 
   // If requested, examine the line, count the number of values, and use this
   // information to generate a set of default column labels.
-  if( doDefault != 0) {
+  if (doDefault != 0)
+  {
 
     // If the delimiter character is not a tab, replace all tabs in the
     // LINE string with spaces
-    if( delimiter_char_ != '\t') replace( sLine.begin(), sLine.end(), '\t', ' ');
+    if (delimiter_char_ != '\t')
+		{
+      replace(sLine.begin(), sLine.end(), '\t', ' ');
+		}
 
     // Loop: Insert the LINE string into a stream, define a buffer, read and
     // count successive tokens, generate default column labels and load the
@@ -572,8 +678,10 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
     std::stringstream ss( sLine);
     std::string buf;
     Column_Info column_info_buf;
-    if( delimiter_char_ == ' ') {
-      while( ss >> buf) {
+    if (delimiter_char_ == ' ')
+    {
+      while (ss >> buf)
+      {
         nvars++;
         char cbuf[ 80];
         (void) sprintf( cbuf, "%d", nvars);
@@ -583,8 +691,10 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
         column_info.push_back( column_info_buf);
       }
     }
-    else {
-      while( getline( ss, buf, delimiter_char_)) {
+    else
+    {
+      while (getline(ss, buf, delimiter_char_))
+      {
         nvars++;
         char cbuf[ 80];
         (void) sprintf( cbuf, "%d", nvars);
@@ -600,11 +710,15 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
   }
 
   // ...otherwise, examine the input line to extract column labels.
-  else {
+  else
+  {
 
     // Discard the leading comment character, if any, of the SLINE string.
     // The rest of the line is assumed to contain column labels
-    if( sLine.find_first_of( "!#%") == 0) sLine.erase( 0, 1);
+    if (sLine.find_first_of("!#%") == 0)
+		{
+      sLine.erase(0, 1);
+		}
 
     // Loop: Insert the SLINE string into a stream, define a buffer, read
     // successive labels into the buffer, then load them into the vector of
@@ -615,17 +729,23 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
     std::string buf;
     Column_Info column_info_buf;
     if( delimiter_char_ == ' ')
-      while( ss >> buf) {
+      while (ss >> buf)
+			{
         column_info_buf.label = string( buf);
         column_info.push_back( column_info_buf);
       }
-    else {
-      while( getline( ss, buf, delimiter_char_)) {
+    else
+		{
+      while( getline( ss, buf, delimiter_char_))
+			{
         string::size_type notwhite = buf.find_first_not_of( " ");
         buf.erase( 0, notwhite);
         notwhite = buf.find_last_not_of( " \n");
         buf.erase( notwhite+1);
-        if( buf.size() <= 0) buf = "Dummy";
+        if (buf.size() <= 0)
+				{
+					buf = "Dummy";
+				}
         column_info_buf.label = string( buf);
         column_info.push_back( column_info_buf);
       }
@@ -636,7 +756,8 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
 
   // If there were more than NVARS_CMD_LINE variables in the file, truncate
   // the vector of Column_Info objects, reset NVARS, and warn the user.
-  if( nvars_cmd_line > 0 && nvars > nvars_cmd_line) {
+  if( nvars_cmd_line > 0 && nvars > nvars_cmd_line)
+	{
     column_info.erase( column_info.begin()+nvars_cmd_line, column_info.end());
     nvars = column_info.size();
     cerr << " -WARNING: Too many variables, truncated list to " << nvars
@@ -647,7 +768,8 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
   // low or high, report error, close input file, and quit.  Otherwise
   // report success.
   // if( nvars <= 1) {
-  if( doMerge == 0 && nvars <= 1) {
+  if (doMerge == 0 && nvars <= 1)
+	{
     cerr << " -WARNING, insufficient number of columns (" << nvars
          << "), check for correct delimiter character"
          << endl;
@@ -658,7 +780,8 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
     return -1;
   }
   // if( nvars > MAXVARS) {
-  if( nvars > maxvars_) {
+  if (nvars > maxvars_)
+	{
     cerr << " -WARNING, too many data columns, "
          << "increase MAXVARS and recompile"
          << endl;
@@ -672,7 +795,8 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
   // If requested, add a column to contain line numbers but don't increment
   // NVARS.  Note: this is old code thatmay no longer wirk
   Column_Info column_info_buf;
-  if( include_line_number) {
+  if( include_line_number)
+	{
     column_info_buf.label = string( "-line number-");
     column_info.push_back( column_info_buf);
   }
@@ -686,22 +810,33 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
   // label information
   nLabels = column_info.size();
   cout << " -Read " << nLabels << "/" << nLabels;
-  if( delimiter_char_ == ' ') cout << " whitespace-delimited ";
-  else if( delimiter_char_ == ',') cout << " comma-delimited ";
-  else cout << " custom-delimited ";
+  if (delimiter_char_ == ' ')
+	{
+    cout << " whitespace-delimited ";
+	}
+  else if (delimiter_char_ == ',')
+	{
+    cout << " comma-delimited ";
+	}
+  else
+	{
+    cout << " custom-delimited ";
+	}
   cout << "column_labels:" << endl;
 
   // Clever output formatting to keep line lengths under control.  NOTE:
   // This will misbehave if some label is more than 80 characters long.
   cout << "  ";
   int nLineLength = 4;
-  for( unsigned int i=0; i < column_info.size(); i++ ) {
-    nLineLength += 2+(column_info[ i].label).length();
-    if( nLineLength > 80) {
+  for (unsigned int i_iter=0; i_iter < column_info.size(); i_iter++ )
+	{
+    nLineLength += 2 + (column_info[i_iter].label).length();
+    if (nLineLength > 80)
+		{
       cout << endl << "  ";
-      nLineLength = 4 + (column_info[ i].label).length();
+      nLineLength = 4 + (column_info[i_iter].label).length();
     }
-    cout << "  (" << column_info[ i].label << ")";
+    cout << "  (" << column_info[i_iter].label << ")";
   }
   cout << endl;
 
@@ -709,7 +844,8 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
   // SELECTION_LABEL.  Note that since NVARS was not incremented, this
   // will be the column BEFORE the new final column labelled '-nothing-'.
   readSelectionInfo_ = 0;
-  if( (column_info[nvars-1].label).compare( 0, SELECTION_LABEL.size(), SELECTION_LABEL) == 0) {
+  if( (column_info[nvars-1].label).compare( 0, SELECTION_LABEL.size(), SELECTION_LABEL) == 0)
+	{
     readSelectionInfo_ = 1;
     cout << "   -Read selection info-" << endl;
   }
@@ -727,20 +863,25 @@ void Data_File_Manager::extract_column_types( string sLine)
 {
   // If the delimiter character is not a tab, replace tabs with spaces
   if( delimiter_char_ != '\t')
+  {
     replace( sLine.begin(), sLine.end(), '\t', ' ');
+  }
 
   // Loop: Insert the string into a stream and read it
-  std::stringstream ss( sLine);
-  unsigned isBadData = 0;
+  std::stringstream ss(sLine);
   string sToken;
   // double xValue;
-  for( int j=0; j<nvars; j++) {
-
+  for( int j=0; j<nvars; j++)
+  {
     // Get the next word.  NOTE: whitespace-delimited and character-
     // delimited files must be handled differently.  PROBLEM: This may not
     // handle missing values correctly, if at all.
-    if( delimiter_char_ == ' ') ss >> sToken;
-    else {
+    if( delimiter_char_ == ' ')
+    {
+      ss >> sToken;
+    }
+    else
+    {
       std::string buf;
       getline( ss, buf, delimiter_char_);
 
@@ -749,8 +890,12 @@ void Data_File_Manager::extract_column_types( string sLine)
       buf.erase( 0, notwhite);
       notwhite = buf.find_last_not_of( " ");
       buf.erase( notwhite+1);
-      if( buf.size() <= 0) sToken = string( "BAD_VALUE_PROXY");
-      else {
+      if( buf.size() <= 0)
+      {
+        sToken = string( "BAD_VALUE_PROXY");
+      }
+      else
+      {
         stringstream bufstream;
         bufstream << buf;
         bufstream >> sToken;
@@ -758,22 +903,22 @@ void Data_File_Manager::extract_column_types( string sLine)
     }
 
     // Issue warning and quit if this line doesn't contain enough data
-    if( ss.eof() && j<nvars-1) {
+    if( ss.eof() && j<nvars-1)
+    {
       cerr << " -WARNING, extract_column_types reports "
            << "not enough data on first line!" << endl
            << "  skipping entire line." << endl;
-      isBadData = 1;
       break;
     }
 
     // Issue warning and quit if this line contains unreadable data.  NOTE:
     // This should never happen, because error flags were cleared above.
-    if( !ss.good() && j<nvars-1) {
+    if( !ss.good() && j<nvars-1)
+    {
       cerr << " -WARNING, extract_column_types reports unreadable data "
            << "(binary or ASCII?) on first line at column " << j+1
            << "," << endl
            << "  skipping entire line." << endl;
-      isBadData = 1;
       break;
     }
 
@@ -793,14 +938,23 @@ void Data_File_Manager::extract_column_types( string sLine)
     int hasASCII = 0;
     std::istringstream inpStream( sToken);
     double inpValue = 0.0;
-    if( inpStream >> inpValue) hasASCII = 0;
-    else hasASCII = 1;
+    if( inpStream >> inpValue)
+		{
+			hasASCII = 0;
+		}
+    else
+		{
+			hasASCII = 1;
+		}
 
     // Treat the string 'NaN' as numerical.  Yes, it might be better to
     // convert sToken to uppercase, but I'm lazy
     if( sToken.compare( "NAN") == 0 ||
         sToken.compare( "NaN") == 0 ||
-        sToken.compare( "nan") == 0) hasASCII = 0;
+        sToken.compare( "nan") == 0)
+    {
+      hasASCII = 0;
+    }
 
     // Load information into the vector of Column_Info objects
     column_info[ j].hasASCII = hasASCII;
@@ -815,7 +969,8 @@ void Data_File_Manager::extract_column_types( string sLine)
 int Data_File_Manager::remove_column_of_selection_info()
 {
   int nColumns = column_info.size();
-  if( readSelectionInfo_) {
+  if( readSelectionInfo_)
+	{
     int iTarget = nColumns-1;
     vector<Column_Info>::iterator pTarget = column_info.end();
     iTarget--;
@@ -846,18 +1001,22 @@ int Data_File_Manager::read_ascii_file_with_headers()
 
   // STEP 1: Either read from stdin, bypassing openning of input file, or
   // attempt to open input file and make sure it exists.
-  if( read_from_stdin) {
+  if( read_from_stdin)
+	{
     inStream = &cin;
   }
-  else {
+  else
+	{
     inFile.open( inFileSpec.c_str(), ios::in);
-    if( inFile.bad() || !inFile.is_open()) {
+    if( inFile.bad() || !inFile.is_open())
+		{
       cerr << "read_ascii_file_with_headers:" << endl
            << " -ERROR, couldn't open <" << inFileSpec.c_str()
            << ">" << endl;
       return 1;
     }
-    else {
+    else
+		{
       cout << "read_ascii_file_with_headers:" << endl
            << " -Opened <" << inFileSpec.c_str() << ">" << endl;
     }
@@ -874,13 +1033,18 @@ int Data_File_Manager::read_ascii_file_with_headers()
   std::string line = "";
   std::string lastHeaderLine = "";
   int nRead = 0, nHeaderLines = 0;
-  for( int iLine = 0; iLine < MAX_HEADER_LINES; iLine++) {
-    if( inStream->eof() != 0) break;
-    (void) getline( *inStream, line, '\n');
+  for( int iLine = 0; iLine < MAX_HEADER_LINES; iLine++)
+	{
+    if (inStream->eof() != 0)
+		{
+			break;
+		}
+    getline( *inStream, line, '\n');
     nRead++;
 
     // Skip empty lines without updating the LASTHEADERLINE buffer
-    if( line.length() == 0) {
+    if (line.length() == 0)
+    {
       nHeaderLines++;
       continue;
     }
@@ -888,7 +1052,8 @@ int Data_File_Manager::read_ascii_file_with_headers()
     // If this line is supposed to be skipped or if it begins with a comment
     // character, skip it and update the LASTHEADERLINE buffer
     if( iLine < nSkipHeaderLines ||
-        line.length() == 0 || line.find_first_of( "!#%") == 0) {
+        line.length() == 0 || line.find_first_of( "!#%") == 0)
+		{
       lastHeaderLine = line;
       nHeaderLines++;
       continue;
@@ -913,23 +1078,32 @@ int Data_File_Manager::read_ascii_file_with_headers()
   // flag as described above.
   int nLabels = 0;
   unsigned uReadNextLine = 1;
-  if( doCommentedLabels_) {
+  if( doCommentedLabels_)
+	{
     uReadNextLine = 0;
     if( nHeaderLines == 0 || lastHeaderLine.length() == 0)
+		{
       nLabels = extract_column_labels( line, 1);
-    else nLabels = extract_column_labels( lastHeaderLine, 0);
+		}
+    else
+		{
+			nLabels = extract_column_labels( lastHeaderLine, 0);
+		}
   }
-  else {
+  else
+	{
     nLabels = extract_column_labels( line, 0);
     extract_column_types( line);
-    if( n_ascii_columns() <= 0 && nLabels > 0) {
+    if (n_ascii_columns() <= 0 && nLabels > 0)
+		{
       uReadNextLine = 0;
       extract_column_labels( line, 1);
     }
   }
 
   // If there were problems, close file and quit
-  if( nLabels < 0 && !read_from_stdin) {
+  if (nLabels < 0 && !read_from_stdin)
+	{
     cout << "Data_File_Manager::read_ascii_file_with_headers: "
          << "Couldn't identify any column labels." << endl;
     inFile.close();
@@ -942,30 +1116,51 @@ int Data_File_Manager::read_ascii_file_with_headers()
   // Now we know the number of variables, NVARS, so if we also know the
   // number of points (e.g. from the command line) we can size the main
   // points array once and for all, and not waste memory.
-  if( npoints_cmd_line > 0) npoints = npoints_cmd_line;
+  if( npoints_cmd_line > 0)
+	{
+		npoints = npoints_cmd_line;
+	}
   // else npoints = MAXPOINTS;
-  else npoints = maxpoints_;
+  else
+	{
+		npoints = maxpoints_;
+	}
   nDataColumns_ = nvars;
-  if( include_line_number) nDataColumns_++;  // Add column for line number
-  if( readSelectionInfo_) nDataColumns_--;   // Don't store selection info
-  for( int j=0; j<nDataColumns_; j++)
-    (column_info[j].points).resize( npoints);
+  if (include_line_number)
+	{
+    nDataColumns_++;  // Add column for line number
+	}
+  if (readSelectionInfo_)
+	{
+    nDataColumns_--;  // Don't store selection info
+	}
+
+  for (int j_iter = 0; j_iter < nDataColumns_; j_iter++)
+	{
+    (column_info[j_iter].points).resize(npoints);
+	}
 
   // Loop: Read successive lines from the file
   int nSkip = 0;
   nDataRows_ = 0;
   int nTestCycle = 0, nUnreadableData = 0;
-  while( !inStream->eof() && nDataRows_<npoints) {
+  while (!inStream->eof() && nDataRows_ < npoints)
+  {
 
     // Get the next line, check for EOF, and increment accounting information
-    if( uReadNextLine) {
-      (void) getline( *inStream, line, '\n');
-      if( inStream->eof()) break;  // Break here to make accounting work right
+    if (uReadNextLine)
+    {
+      getline(*inStream, line, '\n');
+      if (inStream->eof())
+			{
+        break;  // Break here to make accounting work right
+			}
       nRead++;
     }
 
     // Skip blank lines and comment lines
-    if( line.length() == 0 || line.find_first_of( "!#%") == 0) {
+    if (line.length() == 0 || line.find_first_of("!#%") == 0)
+    {
       nSkip++;
       uReadNextLine = 1;
       continue;
@@ -976,7 +1171,10 @@ int Data_File_Manager::read_ascii_file_with_headers()
     // Invoke member function to examine the first line of data to identify
     // columns that contain ASCII values and load this information into the
     // vector of column_info objects
-    if( nDataRows_ == 0) extract_column_types( line);
+    if (nDataRows_ == 0)
+		{
+      extract_column_types(line);
+		}
 
     // If the delimiter character is not a tab, replace tabs with spaces
     if( delimiter_char_ != '\t')
@@ -987,24 +1185,31 @@ int Data_File_Manager::read_ascii_file_with_headers()
     unsigned isBadData = 0;
     double xValue;
     string sToken;
-    for( int j=0; j<nvars; j++) {
+    for (int j_iter = 0; j_iter < nvars; j_iter++)
+    {
 
       // Read the next word as double or a string, depending on whether or
       // not this column contains ASCII values.  NOTE: whitespace-delimited
       // and character-delimited files must be handled differently.
       // PROBLEM: This isn't handling missing values correctly
-      if( delimiter_char_ == ' ') {
-        // if( column_info[j].hasASCII == 0) ss >> xValue;
+      if (delimiter_char_ == ' ')
+      {
+        // if( column_info[j_iter].hasASCII == 0) ss >> xValue;
         // else ss >> sToken;
         ss >> sToken;
-        if( column_info[j].hasASCII == 0) {
+        if (column_info[j_iter].hasASCII == 0)
+        {
           stringstream bufstream;
           bufstream << sToken;
           bufstream >> xValue;
-          if( sToken.compare( 0, 3, "NaN") == 0) xValue = bad_value_proxy_;
+          if (sToken.compare(0, 3, "NaN") == 0)
+					{
+            xValue = bad_value_proxy_;
+					}
         }
       }
-      else {
+      else
+			{
         std::string buf;
         getline( ss, buf, delimiter_char_);
 
@@ -1013,20 +1218,32 @@ int Data_File_Manager::read_ascii_file_with_headers()
         buf.erase( 0, notwhite);
         notwhite = buf.find_last_not_of( " ");
         buf.erase( notwhite+1);
-        if( buf.size() <= 0) xValue = bad_value_proxy_;
-        else {
+        if (buf.size() <= 0)
+				{
+          xValue = bad_value_proxy_;
+				}
+        else
+        {
           stringstream bufstream;
           bufstream << buf;
-          if( column_info[j].hasASCII == 0) {
+          if (column_info[j_iter].hasASCII == 0)
+          {
             bufstream >> xValue;
-            if( buf.compare( 0, 3, "NaN") == 0) xValue = bad_value_proxy_;
+            if (buf.compare(0, 3, "NaN") == 0)
+						{
+              xValue = bad_value_proxy_;
+          	}
           }
-          else bufstream >> sToken;
+          else
+					{
+            bufstream >> sToken;
+					}
         }
       }
 
       // Skip lines that don't appear to contain enough data
-      if( ss.eof() && j<nvars-1) {
+      if( ss.eof() && j_iter<nvars-1)
+			{
         cerr << " -WARNING, not enough data on line " << nRead
              << ", skipping this line!" << endl;
         isBadData = 1;
@@ -1038,33 +1255,48 @@ int Data_File_Manager::read_ascii_file_with_headers()
       // cases inspect the SS stringstream to check for values of nullptr that
       // imply certain types of bad data and/or missing values and replace
       // these with a default value and clear the error flags if necessary.
-      if( !readSelectionInfo_ || j < nvars-1) {
-        if( !ss) {
-          column_info[j].points(nDataRows_) = bad_value_proxy_;
+      if (!readSelectionInfo_ || j_iter < nvars - 1)
+      {
+        if (!ss)
+        {
+          column_info[j_iter].points(nDataRows_) = bad_value_proxy_;
           ss.clear();
         }
-        else {
+        else
+        {
 
           // If this is numerical data, load it directly, otherwise invoke
           // the member function of Column_Info to determine the order in
           // which ASCII values appeared and load that order as data.
-          if( column_info[j].hasASCII == 0)
-            column_info[j].points(nDataRows_) = (float) xValue;
+          if (column_info[j_iter].hasASCII == 0)
+					{
+            column_info[j_iter].points(nDataRows_) = float(xValue);
+					}
           else
-            column_info[j].points(nDataRows_) = column_info[j].add_value( sToken);
+					{
+            column_info[j_iter].points(nDataRows_) = column_info[j_iter].add_value(sToken);
+					}
         }
       }
-      else {
-        if( !ss) ss.clear();
-        else read_selected( nDataRows_) = (int) xValue;
+      else
+      {
+        if (!ss)
+		  	{
+          ss.clear();
+		  	}
+        else
+		  	{
+          read_selected(nDataRows_) = static_cast<int>(xValue);
+		  	}
       }
 
       // Check for unreadable data and flag this line to be skipped.  NOTE:
       // This should never happen, because error flags were cleared above.
-      if( !ss.good() && j<nvars-1) {
+      if (!ss.good() && j_iter < nvars - 1)
+			{
         cerr << " -WARNING, unreadable data "
              << "(binary or ASCII?) at line " << nRead
-             << " column " << j+1 << "," << endl
+             << " column " << j_iter+1 << "," << endl
              << "  skipping entire line." << endl;
         nUnreadableData++;
         isBadData = 1;
@@ -1073,20 +1305,23 @@ int Data_File_Manager::read_ascii_file_with_headers()
     }
 
     // Loop: Check for bad data flags and flag this line to be skipped
-    for( int j=0; j<nDataColumns_; j++) {
-      if( column_info[j].points(nDataRows_) < -90e99) {
+    for( int j_iter =0; j_iter < nDataColumns_; j_iter++)
+		{
+      if (column_info[j_iter].points(nDataRows_) < -90e99)
+			{
         cerr << " -WARNING, bad data flag (<-90e99) at line " << nRead
-             << ", column " << j << " - skipping entire line\n";
+             << ", column " << j_iter << " - skipping entire line\n";
         isBadData = 1;
         break;
       }
     }
 
     // Check for too much unreadable data
-    if( nTestCycle >= MAX_NTESTCYCLES) {
-      if( nUnreadableData >= MAX_NUNREADABLELINES) {
-        cerr << " -ERROR: " << nUnreadableData << " out of " << nTestCycle
-             << " lines of unreadable data at line " << nDataRows_+1 << endl;
+    if (nTestCycle >= MAX_NTESTCYCLES)
+    {
+      if (nUnreadableData >= MAX_NUNREADABLELINES)
+      {
+        cerr << " -ERROR: " << nUnreadableData << " out of " << nTestCycle << " lines of unreadable data at line " << nDataRows_ + 1 << endl;
         sErrorMessage = "Too much unreadable data in an ASCII file";
         return 1;
       }
@@ -1094,7 +1329,8 @@ int Data_File_Manager::read_ascii_file_with_headers()
     }
 
     // If data were good, increment the number of lines
-    if( !isBadData) {
+    if (!isBadData)
+    {
       nDataRows_++;
       if( (nDataRows_+1)%10000 == 0)
         cerr << "  Read " << nDataRows_+1 << " rows of data." << endl;
@@ -1120,12 +1356,14 @@ int Data_File_Manager::read_ascii_file_with_headers()
   // that user made a mistake, and the column labels were actually in the
   // first uncommented line, so ask the user if this was intentional.  If
   // it wasn't, generate default data and quit so user can try again.
-  if( doCommentedLabels_ != 0 && n_ascii_columns() >= nvars) {
+  if (doCommentedLabels_ != 0 && n_ascii_columns() >= nvars)
+  {
     string sWarning = "";
     sWarning.append( "WARNING: All columns appear to be ASCII, as if\n");
     sWarning.append( "the line of column labels was left uncommented.\n");
     sWarning.append( "Do you wish to read it as is?");
-    if( make_confirmation_window( sWarning.c_str(), 3, 3) <= 0) {
+    if (make_confirmation_window(sWarning.c_str(), 3, 3) <= 0)
+    {
       return -1;
     }
   }
@@ -1134,8 +1372,12 @@ int Data_File_Manager::read_ascii_file_with_headers()
   // values and renumber the data.
   int nReordered = 0;
   npoints = nDataRows_;
-  for( int j=0; j<nDataColumns_; j++) {
-    if( column_info[j].update_ascii_values_and_data() >=0) nReordered++;
+  for (int j_iter = 0; j_iter < nDataColumns_; j_iter++)
+  {
+    if (column_info[j_iter].update_ascii_values_and_data() >= 0)
+		{
+      nReordered++;
+		}
   }
 
   // DIAGNOSTIC: Examine column_info again
@@ -1175,13 +1417,23 @@ int Data_File_Manager::read_ascii_file_with_headers()
   // report results of the read operation to the console
   nvars = nDataColumns_;
   npoints = nDataRows_;
-  for( int j=0; j<nvars; j++)
-    (column_info[j].points).resizeAndPreserve( npoints);
+  for(int j_iter=0; j_iter < nvars; j_iter++)
+	{
+    (column_info[j_iter].points).resizeAndPreserve( npoints );
+	}
 
   cout << " -Finished reading " << nvars << "x" << npoints
        << " data block with ";
-  if( readSelectionInfo_ == 0) cout << "no ";
-  else cout << " added column of ";
+
+  if (readSelectionInfo_ == 0)
+	{
+    cout << "no ";
+	}
+  else
+	{
+    cout << " added column of ";
+	}
+
   cout << "selection information." << endl;
   cout << "  " << nHeaderLines
        << " header + " << nDataRows_
@@ -1189,8 +1441,14 @@ int Data_File_Manager::read_ascii_file_with_headers()
        << " skipped lines = " << nRead << " total." << endl;
 
   // Close input file or stdin and report success
-  if( !read_from_stdin) inFile.close();
-  else read_from_stdin = false;
+  if (!read_from_stdin)
+	{
+    inFile.close();
+	}
+  else
+	{
+    read_from_stdin = false;
+	}
   return 0;
 }
 
@@ -1215,7 +1473,8 @@ int Data_File_Manager::read_binary_file_with_headers()
 	//this should be using unique_ptr
 	//with a call to fclose on destruction;
 
-  if( pInFile == nullptr) {
+  if( pInFile == nullptr)
+	{
     cerr << "read_binary_file_with_headers: ERROR" << endl
          << " -Couldn't open binary file <" << inFileSpec.c_str()
          << ">" << endl;
@@ -1233,7 +1492,8 @@ int Data_File_Manager::read_binary_file_with_headers()
   char cBuf[ MAX_HEADER_LENGTH];
 	//I don't think this correct (unsure though);
 	//ferror(FILE * stream) should be checked if read fails
-  if ( fgets( cBuf, MAX_HEADER_LENGTH, pInFile) == nullptr ) {
+  if ( fgets( cBuf, MAX_HEADER_LENGTH, pInFile) == nullptr )
+	{
        const char * msg = strerror(errno);
        cerr <<  "while reading file "
             <<  "<"  << inFileSpec.c_str() << "> "
@@ -1241,7 +1501,9 @@ int Data_File_Manager::read_binary_file_with_headers()
        fclose( pInFile);
        make_confirmation_window( msg, 1);
        return 1;
-  } else if( strlen(cBuf) >= int(MAX_HEADER_LENGTH)) {
+  }
+	else if( strlen(cBuf) >= int(MAX_HEADER_LENGTH)) 
+	{
     cerr << " -ERROR: Header string is too long in "
          <<  "<" << inFileSpec.c_str() << ">, "
          << "increase MAX_HEADER_LENGTH and recompile"
@@ -1261,7 +1523,8 @@ int Data_File_Manager::read_binary_file_with_headers()
   // of columns, followed by successive lines that contain column labels,
   // column types, and lookup tables for any ASCII values that may be
   // associated with data for that column.
-  if( strstr( line.c_str(), BINARY_FILE_WITH_ASCII_VALUES_LABEL.c_str())) {
+  if (strstr(line.c_str(), BINARY_FILE_WITH_ASCII_VALUES_LABEL.c_str()))
+  {
 
     // Initialize the static member vector of Column_Info objects
     int nLabels = 0;
@@ -1283,9 +1546,11 @@ int Data_File_Manager::read_binary_file_with_headers()
     inpStream >> nColumns;
 
     // Loop: Read successive tab-delimited lines and extract column info
-    for( int i=0; i<nColumns; i++) {
+    for( int i_iter = 0; i_iter < nColumns; i_iter++)
+		{
       char * status = fgets( cBuf, MAX_HEADER_LENGTH, pInFile);
-      if ( status == nullptr ) {
+      if ( status == nullptr )
+			{
            const char * msg = strerror(errno);
            cerr <<  "while reading file "
                 <<  "<"  << inFileSpec.c_str() << "> "
@@ -1308,15 +1573,22 @@ int Data_File_Manager::read_binary_file_with_headers()
       // Get the column type (not used)
       getline( sLineBuf, buf, this_delimiter_);
       int nCR = buf.find_first_of( '\n');
-      if( nCR > 0) buf = buf.substr( 0, nCR);
+      if (nCR > 0)
+			{
+        buf = buf.substr(0, nCR);
+			}
 
       // Examine the rest of the line to extract ASCII values, if any
       int nValues = 0;
       column_info_buf.hasASCII = 0;
-      while( getline( sLineBuf, buf, this_delimiter_)) {
+      while( getline( sLineBuf, buf, this_delimiter_))
+			{
         nValues++;
         int nextCR = buf.find_first_of( '\n');
-        if( nextCR > 0) buf = buf.substr( 0, nextCR);
+        if( nextCR > 0)
+				{
+					buf = buf.substr( 0, nextCR);
+				}
         column_info_buf.hasASCII = 1;
         column_info_buf.add_value( buf);
       }
@@ -1329,7 +1601,8 @@ int Data_File_Manager::read_binary_file_with_headers()
     // Check the last column of data to see if it is the selection label,
     // SELECTION_LABEL.
     readSelectionInfo_ = 0;
-    if( (column_info[nvars-1].label).compare( 0, SELECTION_LABEL.size(), SELECTION_LABEL) == 0) {
+    if ((column_info[nvars - 1].label).compare(0, SELECTION_LABEL.size(), SELECTION_LABEL) == 0)
+    {
       readSelectionInfo_ = 1;
       cout << "   -Read selection info-" << endl;
     }
@@ -1348,17 +1621,20 @@ int Data_File_Manager::read_binary_file_with_headers()
          << " with " << nLabels
          << " fields (columns) per record (row)" << endl;
   }
-  else {
+  else
+  {
 
     // Save existing delimiter character, then examine the line.  If it
     // contains tabs, temporarily set the deliminer character to a tab.
     // Otherwise set it to whitespace.
     char saved_delimiter_char_ = delimiter_char_;
-    if( line.find( '\t') == std::string::npos || line.size() <= line.find( '\t')) {
+    if (line.find('\t') == std::string::npos || line.size() <= line.find('\t'))
+    {
       cout << " -Header is WHITESPACE delimited" << endl;
       delimiter_char_ = ' ';
     }
-    else {
+    else
+    {
       cout << " -Header is TAB delimited" << endl;
       delimiter_char_ = '\t';
     }
@@ -1378,26 +1654,42 @@ int Data_File_Manager::read_binary_file_with_headers()
   // Now we know the number of variables (nvars), so if we know the number of
   // points (e.g. from the command line) we can size the main points array
   // once and for all, and not waste memory.
-  if( npoints_cmd_line > 0) npoints = npoints_cmd_line;
+  if (npoints_cmd_line > 0)
+	{
+    npoints = npoints_cmd_line;
+	}
   // else npoints = MAXPOINTS;
-  else npoints = maxpoints_;
+  else
+	{
+    npoints = maxpoints_;
+	}
+
   nDataColumns_ = nvars;
-  if( include_line_number) ++nDataColumns_;   // Add column for line number
-  if( readSelectionInfo_) --nDataColumns_;    // Don't store selection info
+  if( include_line_number)
+	{
+		++nDataColumns_;   // Add column for line number
+	}
+  if( readSelectionInfo_)
+	{
+		--nDataColumns_;    // Don't store selection info
+	}
 
   // Check for problems, then resize current buffer
   int n_column_info = column_info.size();
   // if( nvars > MAXVARS || nDataColumns_ > MAXVARS ||
   //     n_column_info > MAXVARS || nDataColumns_ > n_column_info) {
-  if( nvars > maxvars_ || nDataColumns_ > maxvars_ ||
-      n_column_info > maxvars_ || nDataColumns_ > n_column_info) {
+  if (nvars > maxvars_ || nDataColumns_ > maxvars_ ||
+      n_column_info > maxvars_ || nDataColumns_ > n_column_info)
+	{
     cerr << " -WARNING, too many data columns, "
          << "restoring original data"
          << endl;
     return 1;
   }
-  for( int j=0; j< nDataColumns_; j++)
-    (column_info[j].points).resize( npoints);
+  for( int j_iter=0; j_iter< nDataColumns_; j_iter++)
+	{
+    (column_info[j_iter].points).resize(npoints);
+	}
 
   // Warn if the input buffer is non-contiguous.
   // if( !points.isStorageContiguous()) {
@@ -1411,13 +1703,15 @@ int Data_File_Manager::read_binary_file_with_headers()
   // assert( ordering == COLUMN_MAJOR || ordering == ROW_MAJOR);
 
   // Read file in Column Major order (e.g., row by row)...
-  if( isColumnMajor == 1) {
+  if( isColumnMajor == 1)
+	{
     cout << " -Attempting to read binary file in column-major order" << endl;
 
     // Define input buffers and make sure they're contiguous
     blitz::Array<float,1> vars( nvars);
     blitz::Range NVARS( 0, nvars-1);
-    if( !vars.isStorageContiguous()) {
+    if (!vars.isStorageContiguous())
+		{
       cerr << " -ERROR: Tried to read into a noncontiguous buffer."
            << endl;
       fclose( pInFile);
@@ -1427,23 +1721,26 @@ int Data_File_Manager::read_binary_file_with_headers()
     }
 
     // Loop: Read up to NPOINTS successive rows from file
-    for( int i=0; i<npoints; i++) {
+    for( int i_iter=0; i_iter < npoints; i_iter++)
+		{
 
       // Read the next NVAR values using conventional C-style fread.
-      unsigned int ret =
+      unsigned ret =
         fread( (void *)(vars.data()), sizeof(float), nvars, pInFile);
 
       // Check for normal termination
-      if( ret == 0 || feof( pInFile)) {
-        cerr << " -Finished reading file at row[ " << i
+      if (ret == 0 || feof( pInFile))
+			{
+        cerr << " -Finished reading file at row[ " << i_iter
              << "] with ret, inFile.eof() = ( " << ret
              << ", " << feof( pInFile) << ")" << endl;
         break;
       }
 
       // If wrong number of values was returned, report error.
-      if( ret != (unsigned int) nvars) {
-        cerr << " -ERROR reading row[ " << i+1 << "], "
+      if (ret !=  unsigned(nvars))
+			{
+        cerr << " -ERROR reading row[ " << i_iter+1 << "], "
              << "returned values " << ret
              << " NE number of variables " << nvars << endl;
         fclose( pInFile);
@@ -1452,17 +1749,27 @@ int Data_File_Manager::read_binary_file_with_headers()
       }
 
       // Load data array and report progress
-      if( !readSelectionInfo_) {
-        for( int j=0; j<nvars; j++) column_info[j].points(i) = vars(j);
+      if (!readSelectionInfo_) 
+			{
+        for( int j_iter = 0; j_iter < nvars; j_iter++) 
+				{
+					column_info[j_iter].points(i_iter) = vars(j_iter);
+				}
       }
-      else {
-        for( int j=0; j<nvars-1; j++) column_info[j].points(i) = vars(j);
-        read_selected( i) = (int) vars( nvars-1);
+      else
+			{
+        for( int j_iter = 0; j_iter < nvars-1; j_iter++)
+				{
+					column_info[j_iter].points(i_iter) = vars(j_iter);
+				}
+        read_selected(i_iter) = int(vars( nvars-1));
       }
 
-      nDataRows_ = i;
-      if( i>0 && (i%10000 == 0))
+      nDataRows_ = i_iter;
+      if( i_iter > 0 && (i_iter%10000 == 0))
+			{
         cout << "  Reading row " << nDataRows_ << endl;
+			}
     }
 
     // Update number of rows and report success
@@ -1472,11 +1779,13 @@ int Data_File_Manager::read_binary_file_with_headers()
 
   // ...or read file in Row Major order (e.g., column-by-column).  NOTE: For
   // this to work, we must know the correct value of NPOINTS
-  else {
+  else
+	{
     cout << " -Attempting to read binary file in row-major order "
          << "with nvars=" << nvars
          << ", npoints=" << npoints << endl;
-    if( npoints_cmd_line == 0) {
+    if( npoints_cmd_line == 0)
+		{
       cerr << " -ERROR, --npoints must be specified for"
            << " --inputformat=rowmajor"
            << endl;
@@ -1485,14 +1794,16 @@ int Data_File_Manager::read_binary_file_with_headers()
         "ERROR: NPOINTS must be specified for ROWMAJOR binary files", 1);
       return 1;
     }
-    else {
+    else
+		{
       npoints = npoints_cmd_line;
     }
 
     // Define input buffer and make sure it's contiguous
     blitz::Array<float,1> vars( npoints);
     blitz::Range NPTS( 0, npoints-1);
-    if( !vars.isStorageContiguous()) {
+    if( !vars.isStorageContiguous())
+		{
       cerr << " -ERROR, Tried to read into noncontiguous buffer."
            << endl;
       fclose( pInFile);
@@ -1501,25 +1812,28 @@ int Data_File_Manager::read_binary_file_with_headers()
       return -1;
     }
 
+		int last_column = 0;
     // Loop: Read successive columns from the file
-    int i;
-    for( i=0; i<nvars; i++) {
+    for(int i_iter = 0; i_iter < nvars; i_iter++)
+		{
 
       // Read the next NVAR values using conventional C-style fread.
-      unsigned int ret =
+      unsigned ret =
         fread( (void *)(vars.data()), sizeof(float), npoints, pInFile);
 
       // Check for normal termination
-      if( ret == 0 || feof( pInFile)) {
-        cerr << " -Finished reading file at row[ " << i
+      if( ret == 0 || feof( pInFile))
+			{
+        cerr << " -Finished reading file at row[ " << i_iter
              << "] with ret, inFile.eof() = ( " << ret
              << ", " << feof( pInFile) << ")" << endl;
         break;
       }
 
       // If wrong number of values was returned, report error.
-      if( ret != (unsigned int)npoints) {
-        cerr << " -ERROR reading column[ " << i+1 << "], "
+      if (ret != unsigned(npoints))
+			{
+        cerr << " -ERROR reading column[ " << i_iter + 1 << "], "
              << "returned values " << ret
              << " NE number of variables " << nvars << endl;
         fclose( pInFile);
@@ -1528,19 +1842,27 @@ int Data_File_Manager::read_binary_file_with_headers()
       }
 
       // Load data array and report progress
-      if( !readSelectionInfo_ && i < nvars-1) column_info[i].points = vars;
-      else {
-        column_info[i].points = vars;
+      if( !readSelectionInfo_ && i_iter < nvars-1)
+			{
+				column_info[i_iter].points = vars;
+			}
+      else
+			{
+        column_info[i_iter].points = vars;
         // read_selected( NPTS) = blitz::cast( vars( NPTS), int());
         // read_selected( NPTS) = cast<int>(vars(NPTS));
-        for( int j=0; j<npoints; j++) read_selected( j) = (int) vars( j);
+        for( int j_iter = 0; j_iter <npoints; j_iter++)
+				{
+					read_selected( j_iter) = int(vars( j_iter));
+				}
       }
-      cout << "  Reading column " << i+1 << endl;
+      cout << "  Reading column " << i_iter + 1 << endl;
+			last_column = i_iter;
     }
 
     // Update number of rows and report success
     nDataRows_ = npoints;
-    cout << " -Finished reading " << i+i
+    cout << " -Finished reading " << last_column + 1
          << " columns" << endl;
   }
 
@@ -1569,7 +1891,8 @@ int Data_File_Manager::read_table_from_fits_file()
   // Attempt to open input file and make sure it exists
   fitsfile *pFitsfile;
   int status=0;
-  if( fits_open_file( &pFitsfile, inFileSpec.c_str(), READONLY, &status)) {
+  if( fits_open_file( &pFitsfile, inFileSpec.c_str(), READONLY, &status))
+	{
     cerr << "read_table_from_fits_file: ERROR" << endl
          << " -Couldn't open FITS file <" << inFileSpec.c_str()
          << "> with status (" << status << ")" << endl;
@@ -1579,7 +1902,8 @@ int Data_File_Manager::read_table_from_fits_file()
     make_confirmation_window( sWarning.c_str(), 1, 2);
     return 1;
   }
-  else {
+  else
+	{
     cout << "read_table_from_fits_file:" << endl
          << " -Opening FITS file <" << inFileSpec.c_str()
          << ">" << endl;
@@ -1588,20 +1912,22 @@ int Data_File_Manager::read_table_from_fits_file()
   // Loop: Locate first ASCII table extension
   int hdutype;
   int iExt = -1;
-  for( int i = 2; !( fits_movabs_hdu( pFitsfile, i, &hdutype, &status)); i++) {
-
+  for (int i_iter = 2; !( fits_movabs_hdu( pFitsfile, i_iter, &hdutype, &status)); i_iter++)
+	{
     // DIAGNOSTIC
     // cout << "Data_File_Manager::read_table_from_fits_file: "
     //      << "Examining HDU[" << i
     //      << "] with status (" << status << ")" << endl;
 
     // Is this an ASCII table extension?
-    if( hdutype == ASCII_TBL) {
-      iExt = i;
+    if( hdutype == ASCII_TBL)
+		{
+      iExt = i_iter;
       break;
     }
   }
-  if( status || iExt < 0) {
+  if (status || iExt < 0)
+	{
     cerr << "read_table_from_fits_file: ERROR" << endl
          << " -Couldn't locate table extension "
          << "with status (" << status << ")" << endl;
@@ -1626,7 +1952,8 @@ int Data_File_Manager::read_table_from_fits_file()
   long local_nrows;
   int local_ncols;
   if( fits_get_num_rows( pFitsfile, &local_nrows, &status) ||
-      fits_get_num_cols( pFitsfile, &local_ncols, &status)) {
+      fits_get_num_cols( pFitsfile, &local_ncols, &status))
+	{
     cerr << "read_table_from_fits_file: ERROR" << endl
          << " -Couldn't get array size "
          << "with status (" << status << ")" << endl;
@@ -1642,12 +1969,13 @@ int Data_File_Manager::read_table_from_fits_file()
   blitz::Range NPTS( 0, npoints-1);
 
   // Make sure we don't have too many columns
-  if( nvars > maxvars_) {
+  if (nvars > maxvars_)
+	{
     cerr << " -WARNING, too many data columns, "
          << "increase MAXVARS and recompile"
          << endl;
 
-    char cBuf[ 80];
+    char cBuf[ 80];//why using c-style output :(
     sprintf(
       cBuf, "WARNING: Too many data columns ( %i > %i).\n", nvars, maxvars_);
     string sWarning = "";
@@ -1658,14 +1986,14 @@ int Data_File_Manager::read_table_from_fits_file()
   }
 
   // Make sure we don't have too many rows
-  if( npoints > maxpoints_) {
+  if( npoints > maxpoints_) 
+	{
     cerr << " -WARNING, too many rows of data, "
          << "increase MAXPOINTS and recompile"
          << endl;
 
     char cBuf[ 80];
-    sprintf(
-      cBuf, "WARNING: Too many data points ( %i > %i).\n", npoints, maxpoints_);
+    sprintf(cBuf, "WARNING: Too many data points (%i > %i).\n", npoints, maxpoints_);
     string sWarning = "";
     sWarning.append( cBuf);
     sWarning.append( "Restoring old data.");
@@ -1681,26 +2009,39 @@ int Data_File_Manager::read_table_from_fits_file()
 
   // Report HDU type to the console for diagnostic purposes
   if( hdutype == ASCII_TBL)
+	{
     cout << "Data_File_Manager::read_table_from_fits_file: "
          << "ASCII table extension, (" << npoints << "x" << nvars
          << ")" << endl;
+	}
   else if( hdutype == BINARY_TBL)
+	{
     cout << "Data_File_Manager::read_table_from_fits_file: "
          << "binary table extension, (" << npoints << "x" << nvars
          << ")" << endl;
+	}
   else
+	{
     cout << "Data_File_Manager::read_table_from_fits_file: "
          << "WARNING, unrecognized hdutype (" << hdutype << ")" << endl;
+	}
 
   // Loop: Extract column names, using the fact that fits_get_colname
   // always returns the next name that matches the template.
   ncols = 0;
   status = 0;
-  for( int i=0; i<nvars; i++) {
+
+  for( int i_iter=0; i_iter < nvars; i_iter++)
+	{
     char cname[ 80];
-    int icol;
-    char pattern[sizeof("*")];
-    strcpy(pattern,"*");
+    int icol = i_iter;//changed this to take the loop variable;
+		//originally this was not being initialized :(
+    char pattern[sizeof("*")];//this seems odd
+    strcpy(pattern,"*");      //(1) char pattern[sizeof("*")];
+															//    creates an array to hold the c-string
+															//    "*\0"
+															//(2) strcpy(pattern,"*") copies "*\0" into that
+															//    array.
     fits_get_colname( pFitsfile, CASEINSEN, pattern, cname, &icol, &status);
 
     // DIAGNOSTIC
@@ -1708,11 +2049,14 @@ int Data_File_Manager::read_table_from_fits_file()
     //      << "column[" << i << "].name (" << cname
     //      << ") with status (" << status << ")" << endl;
 
-    if( status == COL_NOT_FOUND) break;
+    if (status == COL_NOT_FOUND)
+		{
+			break;
+		}
 
     Column_Info column_info_buf;
     column_info_buf.label = string( cname);
-    column_info.push_back( column_info_buf);
+    column_info.push_back(column_info_buf);
     ncols++;
 
     // DIAGNOSTIC
@@ -1721,7 +2065,10 @@ int Data_File_Manager::read_table_from_fits_file()
     //      << (column_info[i].label).c_str()
     //      << ")" << endl;
   }
-  if( ncols < nvars) {
+
+
+  if (ncols < nvars)
+	{
     cerr << "read_table_from_fits_file: ERROR" << endl
          << " -Couldn't find enough columns (" << ncols << "/" << nvars
          << ") with status (" << status << ")" << endl;
@@ -1734,7 +2081,8 @@ int Data_File_Manager::read_table_from_fits_file()
 
   // Examine last column to see if it contains selection information
   readSelectionInfo_ = 0;
-  if( (column_info[nvars-1].label).compare( 0, SELECTION_LABEL.size(), SELECTION_LABEL) == 0) {
+  if ((column_info[nvars - 1].label).compare(0, SELECTION_LABEL.size(), SELECTION_LABEL) == 0)
+  {
     readSelectionInfo_ = 1;
     cout << "   -Read selection info-" << endl;
   }
@@ -1769,13 +2117,15 @@ int Data_File_Manager::read_table_from_fits_file()
   // This will misbehave if some label is more than 80 characters long.
   cout << "  ";
   int nLineLength = 4;
-  for( unsigned int i=0; i < column_info.size(); i++ ) {
-    nLineLength += 2+(column_info[ i].label).length();
-    if( nLineLength > 80) {
+  for (unsigned int i_iter = 0; i_iter < column_info.size(); i_iter++)
+  {
+    nLineLength += 2 + (column_info[i_iter].label).length();
+    if (nLineLength > 80)
+    {
       cout << endl << "  ";
-      nLineLength = 4 + (column_info[ i].label).length();
+      nLineLength = 4 + (column_info[i_iter].label).length();
     }
-    cout << "  " << column_info[ i].label;
+    cout << "  " << column_info[i_iter].label;
   }
   cout << endl;
 
@@ -1807,10 +2157,11 @@ int Data_File_Manager::read_table_from_fits_file()
   // cout << "DIAGNOSTIC: Allocated storage for " << npoints_alloc
   //      << " pointers" << endl;
 
-  for( int i=0; i<npoints_alloc; i++) {
+  for( int i_iter = 0; i_iter < npoints_alloc; i_iter++)
+	{
     // cout << "  -Allocate[" << i << "/" << npoints_alloc
     //      << "] with " << nchars << " chars" << endl;
-    cstring_array[i] = (char*) malloc(nchars + 1);
+    cstring_array[i_iter] = (char*) malloc(nchars + 1);
   }
 
   // DIAGNOSTIC
@@ -1819,7 +2170,8 @@ int Data_File_Manager::read_table_from_fits_file()
 
   // Loop: Read successive columns
   status = 0;
-  for( int colnum=1; colnum<=nvars; colnum++) {
+  for (int colnum = 1; colnum <= nvars; colnum++)
+	{
 
     // DIAGNOSTIC
     // cout << "Data_File_Manager::read_table_from_fits_file: "
@@ -1829,8 +2181,9 @@ int Data_File_Manager::read_table_from_fits_file()
     // Get column info
     int typecode;
     long repeat, width;
-    if( fits_get_coltype(
-          pFitsfile, colnum, &typecode, &repeat, &width, &status)) {
+    if (fits_get_coltype(
+          pFitsfile, colnum, &typecode, &repeat, &width, &status))
+		{
       cerr << "read_table_from_fits_file: ERROR" << endl
            << " -Couldn't find type for column[" << colnum << "/" << nvars
            << "] with status (" << status << ")" << endl;
@@ -1850,7 +2203,8 @@ int Data_File_Manager::read_table_from_fits_file()
     int frow = 1, felem = 1;
     int nelem = npoints;
     int anynull;
-    if( typecode == TSHORT) {
+    if (typecode == TSHORT)
+		{
       short shortnull = 0;
       // short *shortarray = new short[ npoints];
       short* shortarray;
@@ -1864,22 +2218,29 @@ int Data_File_Manager::read_table_from_fits_file()
       // column_info[colnum-1].points(NPTS) = blitz::cast( abuffer( 1, NPTS), float());
       // for( int j=0; j<npoints; j++) column_info[colnum-1].points(j) = (float) abuffer(j);
       // for( int j=0; j<npoints; j++) column_info[colnum-1].points(j) = shortarray[j];
-      for( int j=0; j<npoints; j++) column_info[colnum-1].points(j) = shortarray[j];
+      for (int j_iter = 0; j_iter < npoints; j_iter++)
+			{
+				column_info[colnum-1].points(j_iter) = shortarray[j_iter];
+			}
       // delete[] shortarray;
       free( shortarray);
     }
-    if( typecode == TLONG) {
+    if (typecode == TLONG)
+		{
       long longnull = 0;
       long* longarray;
       longarray = (long*) malloc( npoints * sizeof(long));
       fits_read_col(
         pFitsfile, typecode, colnum, frow, felem, nelem,
         &longnull, longarray, &anynull, &status);
-      for( int j=0; j<npoints; j++)
-        column_info[colnum-1].points(j) = (float) longarray[j];
+      for( int j_iter=0; j_iter < npoints; j_iter++)
+			{
+        column_info[colnum-1].points(j_iter) = float(longarray[j_iter]);
+			}
       free( longarray);
     }
-    else if( typecode == TFLOAT) {
+    else if( typecode == TFLOAT)
+		{
       float floatnull = 0;
       float* floatarray;
       floatarray = (float*) malloc( npoints * sizeof(float));
@@ -1891,18 +2252,22 @@ int Data_File_Manager::read_table_from_fits_file()
       column_info[colnum-1].points(NPTS) = abuffer( 0, NPTS);
       free( floatarray);
     }
-    else if( typecode == TDOUBLE) {
+    else if (typecode == TDOUBLE)
+		{
       double doublenull = 0;
       double* doublearray;
       doublearray = (double*) malloc( npoints * sizeof(double));
       fits_read_col(
         pFitsfile, typecode, colnum, frow, felem, nelem,
         &doublenull, doublearray, &anynull, &status);
-      for( int j=0; j<npoints; j++)
-        column_info[colnum-1].points(j) = (float) doublearray[j];
+      for (int j_iter = 0; j_iter < npoints; j_iter++)
+      {
+        column_info[colnum - 1].points(j_iter) = float(doublearray[j_iter]);
+      }
       free( doublearray);
     }
-    else {
+    else
+		{
 
       // DIAGNOSTIC
       // cout << "Data_File_Manager::read_table_from_fits_file: "
@@ -1912,10 +2277,11 @@ int Data_File_Manager::read_table_from_fits_file()
       fits_read_col_str(
         pFitsfile, colnum, frow, felem, nelem,
         strnull, cstring_array, &anynull, &status);
-      for( int j=0; j<npoints; j++) {
+      for( int j_iter = 0; j_iter < npoints; j_iter++)
+			{
         // cout << "  -sToken[" << j << "] (" << cstring_array[j] << ")" << endl;
-        string sToken = string( cstring_array[j]);
-        column_info[colnum-1].points(j) =
+        string sToken = string( cstring_array[j_iter]);
+        column_info[colnum-1].points(j_iter) =
           column_info[colnum-1].add_value( sToken);
       }
       column_info[colnum-1].hasASCII = 1;
@@ -1923,8 +2289,12 @@ int Data_File_Manager::read_table_from_fits_file()
 
     // If this is selection information, load selection array
     if( readSelectionInfo_ != 0 && colnum == nvars)
-      for( int j=0; j<npoints; j++)
-        read_selected(j) = (int) column_info[colnum-1].points(j);
+		{
+      for( int j_iter = 0; j_iter < npoints; j_iter++)
+			{
+        read_selected(j_iter) = int(column_info[colnum-1].points(j_iter));
+			}
+		}
 
     // DIAGNOSTIC
     cout << "Data_File_Manager::read_table_from_fits_file: "
@@ -1940,9 +2310,10 @@ int Data_File_Manager::read_table_from_fits_file()
   // MUST use MALLOC and FREE to allocate and deallocate arrays of char
   // strings for use with fits_read_col.  Like the memory allocation, this
   // code is extremely delicate!
-  for( int i=0; i<npoints_alloc; i++) {
+  for( int i_iter=0; i_iter < npoints_alloc; i_iter++)
+	{
     // cout << "  -Deallocate[" << i << "/" << npoints_alloc << "]" << endl;
-    free( cstring_array[i]);
+    free( cstring_array[i_iter]);
   }
   free( cstring_array);
 
@@ -1992,12 +2363,35 @@ int Data_File_Manager::findOutputFile()
   // Generate query text and list file extensions, etc for this file type
   string title;
   string pattern;
-  if( writeAllData_ != 0) title = "Write all data to file";
-  else title = "Write selected data to file";
-  if( outputFileType_ == 0) pattern = "*.{txt,lis,asc}\tAll Files (*)";
-  else if( outputFileType_ == 1) pattern = "*.bin\tAll Files (*)";
-  else if( outputFileType_ == 2) pattern = "*.{fit,fits}\tAll Files (*)";
-  else pattern = "*.bin\tAll Files (*)";
+  if (writeAllData_ != 0)
+	{
+		title = "Write all data to file";
+	}
+  else
+	{
+		title = "Write selected data to file";
+	}
+
+  if (outputFileType_ == 0)
+	{
+    pattern = "*.{txt, lis, asc}\tAll Files (*)";
+	}
+  else if (outputFileType_ == 1)
+	{
+    pattern = "*.bin\tAll Files (*)";
+	}
+  else if (outputFileType_ == 2)
+	{
+    pattern = "*.{fit, fits}\tAll Files (*)";
+	}
+  else if (outputFileType_ == 3)
+	{
+		pattern = "*.root\tAllFiles (*)";
+	}
+  else
+	{
+		pattern = "*.bin\tAll Files (*)";
+	}
 
   // Initialize output filespec.  NOTE: cOutFileSpec is defined as const
   // char* for use with Vp_File_Chooser, which means it could be destroyed
@@ -2014,23 +2408,36 @@ int Data_File_Manager::findOutputFile()
   file_chooser->fileType( outputFileType_);
 
   // Loop: Select succesive filespecs until a non-directory is obtained
-  while( 1) {
+  while (1)
+  {
     // if( cOutFileSpec != nullptr) file_chooser->directory( cOutFileSpec);
 
     // Loop: wait until the selection is done, then extract the value.  NOTE:
     // This usage of while and Fl::wait() seems strange.
     file_chooser->show();
-    while( file_chooser->shown()) Fl::wait();
+    while (file_chooser->shown())
+		{
+      Fl::wait();
+		}
     cOutFileSpec = file_chooser->value();
 
     // If no file was specified then quit
-    if( cOutFileSpec == nullptr) break;
+    if (cOutFileSpec == nullptr)
+		{
+      break;
+		}
 
     // If this is a new file, it can't be opened for read
     int isNewFile = 0;
     FILE* pFile = fopen( cOutFileSpec, "r");
-    if( pFile == nullptr) isNewFile= 1;
-    else fclose( pFile);
+    if (pFile == nullptr)
+		{
+      isNewFile = 1;
+		}
+    else
+		{
+      fclose(pFile);
+		}
 
     // Attempt to open an output stream to make sure the file can be opened
     // for write.  If it can't, assume that cOutFileSpec was a directory and
@@ -2041,7 +2448,8 @@ int Data_File_Manager::findOutputFile()
       ofstream os;
       // os.open( cOutFileSpec, ios::out|ios::trunc);
       os.open( cOutFileSpec, ios::out|ios::app);
-      if( os.fail()) {
+			if(os.fail())
+    	{
         cerr << " -DIAGNOSTIC: This should trigger on error opening "
              << cOutFileSpec << "for write" << endl;
         file_chooser->directory( cOutFileSpec);
@@ -2054,7 +2462,10 @@ int Data_File_Manager::findOutputFile()
     #endif // __WIN32__
 
     // Presumably this test should be OS-independant
-    if( isNewFile != 0) break;
+    if (isNewFile != 0)
+		{
+      break;
+		}
 
     // OLD CODE: If this is a new file, it can't be opened for read, and
     // we're done
@@ -2075,8 +2486,14 @@ int Data_File_Manager::findOutputFile()
     // If this was a 'CANCEL' request, return without doing anything.  If
     // this was a 'YES' request, move on.  Otherwise, make sure we're in
     // the right directory and try again.
-    if( iConfirmResult < 0) return -1;
-    if( iConfirmResult > 0) break;
+    if (iConfirmResult < 0)
+		{
+      return -1;
+		}
+    if (iConfirmResult > 0)
+		{
+      break;
+		}
   }
 
   // Obtain file name using the FLTK member function.  This code doesn't work,
@@ -2087,20 +2504,34 @@ int Data_File_Manager::findOutputFile()
   // Get file type and content information
   outputFileType_ = file_chooser->fileType();
   delimiter_char_ = file_chooser->delimiter_char();
-  if( file_chooser->writeSelectionInfo() != 0) writeSelectionInfo_ = 1;
-  else writeSelectionInfo_ = 0;
-  if( file_chooser->doCommentedLabels() != 0) doCommentedLabels_ = 1;
-  else doCommentedLabels_ = 0;
+  if (file_chooser->writeSelectionInfo() != 0)
+	{
+		writeSelectionInfo_ = 1;
+	}
+  else
+	{
+		writeSelectionInfo_ = 0;
+	}
+  if (file_chooser->doCommentedLabels() != 0)
+	{
+		doCommentedLabels_ = 1;
+	}
+  else
+	{
+		doCommentedLabels_ = 0;
+	}
 
   // Load outFileSpec
   int iResult = 0;
-  if( cOutFileSpec == nullptr) {
+  if (cOutFileSpec == nullptr)
+  {
     outFileSpec = "";
     cout << "Data_File_Manager::findOutputFile: "
          << "closed with no output file specified" << endl;
     iResult = -1;
   }
-  else{
+  else
+	{
     outFileSpec.assign( (string) cOutFileSpec);
     if( outputFileType_ == 0)
       cout << "Data_File_Manager::findOutputFile: Writing ASCII data to <";
@@ -2139,10 +2570,27 @@ int Data_File_Manager::save_data_file( string in_outFileSpec)
 int Data_File_Manager::save_data_file()
 {
   int result = 0;
-  if( outputFileType_ == 0) result = write_ascii_file_with_headers();
-  else if( outputFileType_ == 2) result = write_table_to_fits_file();
-  else result = write_binary_file_with_headers();
-  if( result == 0) {
+  if (outputFileType_ == 0)
+  {
+    result = write_ascii_file_with_headers();
+  }
+  else if (outputFileType_ == 2)
+	{
+    result = write_table_to_fits_file();
+	}
+  else if (outputFileType_ == 3)
+  {
+    result = write_table_to_root_file();
+    // result = -1;
+    // result = write_table_to_root_file();
+  }
+  else
+  {
+    result = write_binary_file_with_headers();
+  }
+
+  if (result == 0)
+  {
     isSavedFile_ = 1;
     dataFileSpec = outFileSpec;
     // isAsciiData = (outputFileType_ == 0);
@@ -2159,19 +2607,22 @@ int Data_File_Manager::save_data_file()
 int Data_File_Manager::write_ascii_file_with_headers()
 {
   // Make sure a file name was specified, create and write the file
-  if( outFileSpec.length() <= 0){
+  if( outFileSpec.length() <= 0)
+	{
     cout << "Data_File_Manager::write_ascii_file_with_headers "
          << "reports that no file was specified" << endl;
     return -1;
   }
-  else {
+  else
+	{
     blitz::Array<float,1> vars( nvars);
     blitz::Range NVARS( 0, nvars-1);
 
     // Open output stream and report any problems
     ofstream os;
     os.open( outFileSpec.c_str(), ios::out|ios::trunc);
-    if( os.fail()) {
+    if (os.fail())
+		{
       cerr << " -ERROR opening " << outFileSpec.c_str()
            << " for ASCII write" << endl;
       return -1;
@@ -2186,13 +2637,26 @@ int Data_File_Manager::write_ascii_file_with_headers()
 
     // Loop: Write comment character to include column labels to the header
     char first_char = ' ';
-    if( doCommentedLabels_) first_char = '!';
-    for( int i=0; i < nvars_out; i++ ) {
-      if( i == 0) os << first_char << setw( 12) << column_info[ i].label;
-      else os << delimiter_char_ << " " << setw( 13) << column_info[ i].label;
-      // else os << " " << setw( 13) << column_info[ i].label;
+    if (doCommentedLabels_)
+		{
+			first_char = '!';
+		}
+    for (int i_iter = 0; i_iter < nvars_out; i_iter++)
+    {
+      if (i_iter == 0)
+			{
+        os << first_char << setw(12) << column_info[i_iter].label;
+			}
+      else
+			{
+        os << delimiter_char_ << " " << setw(13) << column_info[i_iter].label;
+			}
+      // else os << " " << setw( 13) << column_info[ i_iter].label;
     }
-    if( writeSelectionInfo_ != 0) os << delimiter_char_ << " " << SELECTION_LABEL;
+    if (writeSelectionInfo_ != 0)
+		{
+      os << delimiter_char_ << " " << SELECTION_LABEL;
+		}
     os << endl;
 
     // Loop: Write successive ASCII records to the data block using the
@@ -2202,11 +2666,17 @@ int Data_File_Manager::write_ascii_file_with_headers()
     os.precision( 14);
     os.unsetf( ios::scientific); // force floatfield to default
     int rows_written = 0;
-    for( int irow = 0; irow < npoints; irow++) {
-      if( writeAllData_ != 0 || selected( irow) > 0) {
-        for( int jcol = 0; jcol < nvars_out; jcol++) {
+    for (int irow = 0; irow < npoints; irow++)
+    {
+      if (writeAllData_ != 0 || selected(irow) > 0)
+      {
+        for (int jcol = 0; jcol < nvars_out; jcol++)
+        {
           // if( jcol > 0) os << " ";
-          if( jcol > 0) os << delimiter_char_ << " ";
+          if (jcol > 0)
+					{
+            os << delimiter_char_ << " ";
+					}
 
           // Process numerical and ASCII values differently
           if( column_info[jcol].hasASCII == 0)
@@ -2214,7 +2684,10 @@ int Data_File_Manager::write_ascii_file_with_headers()
           else
             os << column_info[jcol].ascii_value( (int) column_info[jcol].points(irow));
         }
-        if( writeSelectionInfo_ != 0) os << delimiter_char_ << " " << selected( irow);
+        if (writeSelectionInfo_ != 0)
+				{
+          os << delimiter_char_ << " " << selected(irow);
+				}
         os << endl;
         rows_written++;
       }
@@ -2235,12 +2708,14 @@ int Data_File_Manager::write_ascii_file_with_headers()
 int Data_File_Manager::write_binary_file_with_headers()
 {
   // Make sure a file name was specified, create and write the file
-  if( outFileSpec.length() <= 0){
+  if (outFileSpec.length() <= 0)
+	{
     cout << "Data_File_Manager::write_binary_file_with_headers "
          << "reports that no file was specified" << endl;
     return -1;
   }
-  else {
+  else
+	{
 
     // Do not write out "line-number" column (header or data)
     // it gets created automatically when a file is read in
@@ -2251,12 +2726,11 @@ int Data_File_Manager::write_binary_file_with_headers()
 
     // Open output stream and report any problems
     ofstream os;
-    os.open(
-      outFileSpec.c_str(),
-      ios::out|ios::trunc|ios::binary);
+    os.open(outFileSpec.c_str(), ios::out | ios::trunc | ios::binary);
       // fstream::out | fstream::trunc | fstream::binary);
 
-    if( os.fail()) {
+    if (os.fail())
+		{
       cerr << " -ERROR opening " << outFileSpec.c_str()
            << "for binary write" << endl;
       return -1;
@@ -2267,30 +2741,41 @@ int Data_File_Manager::write_binary_file_with_headers()
     // BINARY_FILE_WITH_ASCII_VALUES_LABEL and number of columns followed by
     // successice tab-separated lines of lines of column info.  Otherwise
     // write an old-style file.  Note: Everything is tab-delimited
-    if( n_ascii_columns() > 0) {
+    if( n_ascii_columns() > 0) 
+		{
 
       // Define number of columns for output, including selection info
       int nColumns = nvars_out;
-      if( writeSelectionInfo_ != 0) nColumns++;
+      if( writeSelectionInfo_ != 0)
+			{
+				nColumns++;
+			}
 
       // Write type specifier followed by number of columns
       os << BINARY_FILE_WITH_ASCII_VALUES_LABEL.c_str() << '\t' << nColumns;
       os << endl;
 
       // Loop: Write one line for each column of data
-      for( int i=0; i<nvars_out; i++) {
-        os << (column_info[i].label).c_str() << '\t';
+      for( int i_iter=0; i_iter<nvars_out; i_iter++)
+			{
+        os << (column_info[i_iter].label).c_str() << '\t';
 
         // Write the data type (not used) and ASCII values, if any
-        if( column_info[i].hasASCII <= 0) {
+        if (column_info[i_iter].hasASCII <= 0)
+				{
           os << "TFLOAT";
         }
-        else {
+        else
+				{
           os << "TSTRING" << '\t';
-          int nValues = n_ascii_values(i);
-          for( int j=0; j<nValues; j++) {
-            os << (column_info[i].ascii_value(j)).c_str();
-            if( j < nValues-1) os << '\t';
+          int nValues = n_ascii_values(i_iter);
+          for (int j_iter=0; j_iter < nValues; j_iter++)
+					{
+            os << (column_info[i_iter].ascii_value(j_iter)).c_str();
+            if( j_iter < nValues-1)
+						{
+							os << '\t';
+						}
           }
         }
         os << endl;
@@ -2298,33 +2783,50 @@ int Data_File_Manager::write_binary_file_with_headers()
 
       // If selection info are to be written, add an additional column
       if( writeSelectionInfo_ != 0)
+			{
         os << SELECTION_LABEL << '\t' << "TLONG" << endl;
+			}
     }
-    else {
+    else
+    {
 
       // Loop: Write tab-delimited column labels to the header.  Each label
       // is followed by a space to make sure the file can be read by early
       // versions of viewpoints that didn't look for tabs.
-      for( int i=0; i < nvars_out; i++ ) {
-        os << column_info[ i].label << " ";
-        if( i<nvars-1) os << '\t';
+      for (int i_iter = 0; i_iter < nvars_out; i_iter++)
+			{
+        os << column_info[i_iter].label << " ";
+        if (i_iter < nvars - 1)
+				{
+					os << '\t';
+				}
       }
-      if( writeSelectionInfo_ != 0) os << '\t' << " " << SELECTION_LABEL;
+      if( writeSelectionInfo_ != 0)
+			{
+				os << '\t' << " " << SELECTION_LABEL;
+			}
       os << endl;
     }
 
     // Loop: Write data and report any problems
     int nBlockSize = nvars*sizeof(float);
     int rows_written = 0;
-    for( int i=0; i<npoints; i++) {
-      if( writeAllData_ != 0 || selected( i) > 0) {
-        for( int j=0; j<nvars; j++) vars(j) = column_info[j].points(i);
+    for( int i_iter=0; i_iter<npoints; i_iter++)
+		{
+      if( writeAllData_ != 0 || selected(i_iter) > 0)
+			{
+        for( int j_iter=0; j_iter<nvars; j_iter++)
+				{
+					vars(j_iter) = column_info[j_iter].points(i_iter);
+				}
         os.write( (const char*) vars.data(), nBlockSize);
-        if( writeSelectionInfo_ != 0) {
-          float fselection = (float) (selected(i));
+        if( writeSelectionInfo_ != 0)
+				{
+          float fselection = float(selected(i_iter));
           os.write((const char*)&fselection, sizeof(float));
         }
-        if( os.fail()) {
+        if( os.fail())
+				{
           cerr << "Error writing to" << outFileSpec.c_str() << endl;
           string sWarning = "";
           sWarning.append( "WARNING: Error writing to file\n");
@@ -2362,12 +2864,14 @@ int Data_File_Manager::write_table_to_fits_file()
   int status;
 
   // Make sure a file name was specified, create and write the file
-  if( sFileSpec.length() <= 0){
+  if (sFileSpec.length() <= 0)
+	{
     cout << "Data_File_Manager::write_table_to_fits_file "
          << "reports that no file was specified" << endl;
     return -1;
   }
-  else {
+  else
+	{
     // The findOutputFile method tries to open the output file to see if it
     // exists and verify that it's a file rathar than a directory.  This
     // will produce an empty file, which must be deleted because the FITS
@@ -2380,7 +2884,8 @@ int Data_File_Manager::write_table_to_fits_file()
 
     // Attempt to delete file.  If this fails, open it, make sure it's
     // closed, call fits_delete_file, and try again.
-    if( 0 != unlink( sFileSpec.c_str())) {
+    if( 0 != unlink( sFileSpec.c_str()))
+		{
       cout << "Data_File_Manager::write_table_to_fits_file: " << endl
            << "  WARNING: Couldn't unlink: " << sFileSpec.c_str()
            << " due to: " << strerror(errno) << endl;
@@ -2397,17 +2902,23 @@ int Data_File_Manager::write_table_to_fits_file()
       cout << "  Called fits_delete_file with status (" << status
            << ")" << endl;
       if( 0 != unlink( sFileSpec.c_str()))
+			{
         cout << "  WARNING: Second unlink: " << sFileSpec.c_str()
              << " failed with: " << strerror(errno) << endl;
+			}
       else
+			{
         cout << "Data_File_Manager::write_table_to_fits_file: " << endl
              << "  Second unlink of " << sFileSpec.c_str()
              << " succeeded" << endl;
+			}
     }
     else
+		{
         cout << "Data_File_Manager::write_table_to_fits_file: " << endl
              << "  First unlink of " << sFileSpec.c_str()
              << " succeeded" << endl;
+		}
 
     status=0;
     fits_open_file( &pFitsfile, sFileSpec.c_str(), READWRITE, &status);
@@ -2415,7 +2926,8 @@ int Data_File_Manager::write_table_to_fits_file()
          << status << ") vs (" << FILE_NOT_OPENED << ")" << endl;
 
     // If file already exists, destroy, recreate, and open it
-    if( status == FILE_NOT_OPENED) {
+    if( status == FILE_NOT_OPENED)
+		{
       remove( sFileSpec.c_str());
       status = 0;
       fits_create_file( &pFitsfile, sFileSpec.c_str(), &status);
@@ -2426,12 +2938,14 @@ int Data_File_Manager::write_table_to_fits_file()
     }
 
     // If an error occured, close file and quit
-    if( status == 0) {
+    if( status == 0)
+		{
       cout << "Data_File_Manager::write_table_to_fits_file: "
            << "Opened (" << sFileSpec.c_str()
            << ") as FITS file for output." << endl;
     }
-    else {
+    else
+		{
       if( status != FILE_NOT_OPENED) fits_close_file( pFitsfile, &status);
       cerr << "Data_File_Manager::write_table_to_fits_file: ERROR, "
          << "couldn't open ( "<< sFileSpec.c_str()
@@ -2459,30 +2973,40 @@ int Data_File_Manager::write_table_to_fits_file()
   ttype = (char**) malloc( tfields * (sizeof *ttype));
   tform = (char**) malloc( tfields * (sizeof *tform));
   tunit = (char**) malloc( tfields * (sizeof *tunit));
-  for( int i=0; i<tfields; i++) {
-    if( i<nvars) {
-      ttype[i] = (char*) malloc( (column_info[i].label).size() + 1);
-      tform[i] = (char*) malloc( 10);
-      tunit[i] = (char*) malloc( 1);
-      strcpy( ttype[i], (column_info[i].label).c_str());
-      if( column_info[i].hasASCII <= 0) strcpy( tform[i], "E14.6");
-      else strcpy( tform[i], tform_ascii);
-      strcpy( tunit[i], "\0");
+
+  for (int i_iter = 0; i_iter < tfields; i_iter++)
+  {
+    if (i_iter < nvars)
+    {
+      ttype[i_iter] = (char*) malloc( (column_info[i_iter].label).size() + 1);
+      tform[i_iter] = (char*) malloc( 10);
+      tunit[i_iter] = (char*) malloc( 1);
+      strcpy( ttype[i_iter], (column_info[i_iter].label).c_str());
+      if (column_info[i_iter].hasASCII <= 0)
+			{
+        strcpy(tform[i_iter], "E14.6");
+			}
+      else
+			{
+        strcpy(tform[i_iter], tform_ascii);
+			}
+      strcpy( tunit[i_iter], "\0");
     }
-    else {
-      ttype[i] = (char*) malloc( 18);
-      tform[i] = (char*) malloc( 3);
-      tunit[i] = (char*) malloc( 1);
-      strcpy( ttype[i], SELECTION_LABEL.c_str());
-      strcpy( tform[i], "I8");
-      strcpy( tunit[i], "\0");
+    else
+    {
+      ttype[i_iter] = (char*) malloc( 18);
+      tform[i_iter] = (char*) malloc( 3);
+      tunit[i_iter] = (char*) malloc( 1);
+      strcpy( ttype[i_iter], SELECTION_LABEL.c_str());
+      strcpy( tform[i_iter], "I8");
+      strcpy( tunit[i_iter], "\0");
     }
   }
   char extname[] = "VP_OUTPUT_ASCII";
 
   // Append a new empty ASCII table onto the FITS file
   if(
-    fits_create_tbl(
+  	 fits_create_tbl(
       pFitsfile, ASCII_TBL, local_nrows, tfields, ttype, tform, tunit,
       extname, &status)) {
     fits_close_file( pFitsfile, &status);
@@ -2493,10 +3017,11 @@ int Data_File_Manager::write_table_to_fits_file()
   }
 
   // Deallocate arrays with field information
-  for( int i=0; i<tfields; i++) {
-    free(ttype[i]);
-    free(tform[i]);
-    free(tunit[i]);
+  for (int i_iter = 0; i_iter < tfields; i_iter++)
+  {
+    free(ttype[i_iter]);
+    free(tform[i_iter]);
+    free(tunit[i_iter]);
   }
   free(ttype);
   free(tform);
@@ -2525,33 +3050,38 @@ int Data_File_Manager::write_table_to_fits_file()
 
   // Loop: Write attributes to their respective columns
   int ifield = 0;
-  for( int i=0; i<tfields; i++) {
-    ifield = i+1;
-    if( i<nvars) {
+  for( int i_iter=0; i_iter<tfields; i_iter++)
+	{
+    ifield = i_iter+1;
+    if( i_iter<nvars) {
 
       // Load and write non-ASCII data as float, otherwise look up and write
       // ASCII values
-      if( column_info[i].hasASCII <= 0) {
-        for( int j=0; j<npoints; j++) floatarray[j] = column_info[i].points(j);
-        fits_write_col(
-          pFitsfile, TFLOAT, ifield, firstrow, firstelem, npoints,
-          floatarray, &status);
+      if( column_info[i_iter].hasASCII <= 0)
+			{
+        for( int j_iter=0; j_iter < npoints; j_iter++)
+				{
+					floatarray[j_iter] = column_info[i_iter].points(j_iter);
+				}
       }
-      else {
-        for( int j=0; j<npoints; j++)
-          strcpy( cstring_array[j], (column_info[i].ascii_value(j)).c_str());
-        fits_write_col(
-          pFitsfile, TSTRING, ifield, firstrow, firstelem, npoints,
-          cstring_array, &status);
+      else
+			{
+        for( int j_iter = 0; j_iter < npoints; j_iter++)
+				{
+          strcpy( cstring_array[j_iter], (column_info[i_iter].ascii_value(j_iter)).c_str());
+				}
       }
     }
-    else {
+    else
+		{
       cout << "DIAGNOSTIC: Saving selection information" << endl;
-      for( int j=0; j<npoints; j++) longarray[j] = selected( j);
-      fits_write_col(
-        pFitsfile, TLONG, ifield, firstrow, firstelem, npoints,
-        longarray, &status);
+      for( int j_iter = 0; j_iter < npoints; j_iter++)
+			{
+				longarray[j_iter] = selected(j_iter);
+			}
     }
+		fits_write_col(pFitsfile, TLONG, ifield, firstrow, 
+		               firstelem, npoints, longarray, &status);
   }
 
   // Deallocate space
@@ -2563,7 +3093,9 @@ int Data_File_Manager::write_table_to_fits_file()
   // MUST use MALLOC and FREE to allocate and deallocate arrays of char
   // strings for use with fits_read_col.  Like the memory allocation, this
   // code is extremely delicate!
-  for( int i=0; i<npoints_alloc; i++) free( cstring_array[i]);
+  for( int i_iter=0; i_iter<npoints_alloc; i_iter++){
+		free( cstring_array[i_iter]);
+	}
   free( cstring_array);
 
   // Report success to console
@@ -2607,7 +3139,10 @@ void Data_File_Manager::edit_column_info( Fl_Widget *o, void * user_data = nullp
 void Data_File_Manager::edit_column_info_i( Fl_Widget *o)
 {
 	UNUSED(o);
-  if( edit_labels_window != nullptr) edit_labels_window->hide();
+  if( edit_labels_window != nullptr)
+	{
+		edit_labels_window->hide();
+	}
 
   // Create the 'Tools|Edit Column Labels' window
   Fl::scheme( "plastic");  // optional
@@ -2654,10 +3189,15 @@ void Data_File_Manager::edit_column_info_i( Fl_Widget *o)
 // exists, then refresh list of column labels
 void Data_File_Manager::refresh_edit_column_info()
 {
-  if( edit_labels_window == nullptr) return;
+  if( edit_labels_window == nullptr)
+	{
+		return;
+	}
   edit_labels_widget->clear();
-  for( int i=0; i<nvars; i++)
-    edit_labels_widget->add( (column_info[ i].label).c_str());
+  for( int i_iter=0; i_iter<nvars; i_iter++)
+	{
+    edit_labels_widget->add( (column_info[ i_iter].label).c_str());
+	}
 }
 
 //***************************************************************************
@@ -2673,19 +3213,26 @@ void Data_File_Manager::delete_labels( Fl_Widget *o, void* user_data)
   cout << "Data_File_Manager::delete_labels: checked "
        << edit_labels_widget->nchecked() << "/"
        << edit_labels_widget->nitems() << " items" << endl;
-  for( int i=0; i<nvars; i++) {
-    cout << "Label[ " << i << "]: (" << column_info[i].label << ") ";
-    if( edit_labels_widget->checked(i+1)) cout << "CHECKED";
+  for( int i_iter=0; i_iter<nvars; i_iter++)
+	{
+    cout << "Label[ " << i_iter << "]: (" << column_info[i_iter].label << ") ";
+    if( edit_labels_widget->checked(i_iter+1))
+		{
+			cout << "CHECKED";
+		}
     cout << endl;
   }
 
   // If no boxes were checked then quit
   int nChecked = edit_labels_widget->nchecked();
   int nRemain = nvars - nChecked;
-  if( nChecked <= 0) return;
-  if( nRemain <=1) {
-    make_confirmation_window(
-      "WARNING: Attempted to delete too many columns", 1);
+  if (nChecked <= 0)
+	{
+    return;
+	}
+  if (nRemain <= 1)
+  {
+    make_confirmation_window("WARNING: Attempted to delete too many columns", 1);
     return;
   }
 
@@ -2693,7 +3240,8 @@ void Data_File_Manager::delete_labels( Fl_Widget *o, void* user_data)
   // objects to make sure we began with one more column label ('-nothing')
   // than the number of variables.
   int nColumnInfos = column_info.size();
-  if( nColumnInfos != nvars+1) {
+  if( nColumnInfos != nvars+1)
+	{
      cerr << "WARNING: Data_File_Manager::delete_labels was called with "
           << nColumnInfos
           << " columns and a final label of ("
@@ -2706,20 +3254,24 @@ void Data_File_Manager::delete_labels( Fl_Widget *o, void* user_data)
   // the array of ranked points used to perform scaling and normalization?
   blitz::Range NPOINTS( 0, npoints-1);
   int ivar = 0;
-  for( int i=0; i<nvars; i++) {
-    if( edit_labels_widget->checked(i+1) <= 0) {
+  for( int i_iter=0; i_iter<nvars; i_iter++)
+	{
+    if( edit_labels_widget->checked(i_iter+1) <= 0)
+		{
       column_info[ivar].isRanked = 0;
 
       Column_Info column_info_buf;  // Why is this necessary?
-      column_info_buf = column_info[i];
+      column_info_buf = column_info[i_iter];
       column_info[ivar] = column_info_buf;
       ivar++;
     }
   }
+
   nvars = ivar;
-  for( int i=0; i<nvars; i++) {
-    (column_info[i].points).resizeAndPreserve(npoints);
-    (column_info[i].ranked_points).resizeAndPreserve(npoints);
+  for( int i_iter=0; i_iter<nvars; i_iter++)
+	{
+    (column_info[i_iter].points).resizeAndPreserve(npoints);
+    (column_info[i_iter].ranked_points).resizeAndPreserve(npoints);
   }
 
   column_info.resize( nvars);
@@ -2731,7 +3283,8 @@ void Data_File_Manager::delete_labels( Fl_Widget *o, void* user_data)
   // objects to make sure we finished with one more column label
   // ('-nothing') than the number of variables.
   nColumnInfos = column_info.size();
-  if( nColumnInfos != nvars+1) {
+  if( nColumnInfos != nvars+1)
+	{
      cerr << "WARNING: Data_File_Manager::delete_labels finished with "
           << nColumnInfos
           << " columns and a final label of ("
@@ -2788,16 +3341,21 @@ void Data_File_Manager::remove_trivial_columns()
 
   // Loop: Examine the data array column by colums and remove any columns for
   // which all values are identical.
-  while( current < nvars-1) {
-    if( blitz::all( column_info[current].points(NPTS) == column_info[current].points(0))) {
-      cout << "skipping trivial column "
-           << column_info[ current].label << endl;
-      for( int j=current; j<nvars-1; j++) column_info[ j] = column_info[ j+1];
+  while (current < nvars - 1)
+  {
+    if (blitz::all(column_info[current].points(NPTS) == column_info[current].points(0)))
+    {
+      cout << "skipping trivial column " << column_info[current].label << endl;
+      for (int j_iter = current; j_iter < nvars - 1; j_iter++)
+			{
+        column_info[j_iter] = column_info[j_iter + 1];
+			}
       removed_columns.push_back( iRemoved);
       nvars--;
       assert( nvars>0);
     }
-    else {
+    else
+    {
       current++;
     }
     iRemoved++;
@@ -2808,21 +3366,24 @@ void Data_File_Manager::remove_trivial_columns()
 
     // Report what columns were removed
     cout << "Removed " << nvars_save - nvars << " columns:";
-    for( unsigned int i=0; i<removed_columns.size(); i++) {
+    for( unsigned int i_iter=0; i_iter<removed_columns.size(); i_iter++)
+		{
       int nLineLength = 8;
-      nLineLength += 1+(column_info[ i].label).length();
+      nLineLength += 1+(column_info[ i_iter].label).length();
       if( nLineLength > 80) {
         cout << endl << "   ";
-        nLineLength = 2 + (column_info[ i].label).length();
+        nLineLength = 2 + (column_info[ i_iter].label).length();
       }
-      cout << " " << column_info[ i].label;
+      cout << " " << column_info[ i_iter].label;
     }
     cout << endl;
 
     // Resize array and report results
     // XXX need to trim column_info to size nvars+1
-    for( int i=0; i<nvars; i++)
-      (column_info[i].points).resizeAndPreserve(npoints);
+    for( int i_iter=0; i_iter<nvars; i_iter++)
+		{
+      (column_info[i_iter].points).resizeAndPreserve(npoints);
+		}
     column_info[ nvars].label = string( "-nothing-");
     cout << "new data array has " << nvars
          << " columns." << endl;
@@ -2838,17 +3399,20 @@ void Data_File_Manager::resize_global_arrays()
 
   // If line numbers are to be included as another field (column) of data
   // array, create them as the last column.
-  if( include_line_number) {
-    for (int i=0; i<npoints; i++) {
-      column_info[nvars-1].points(i) = (float)(i+1);
+  if( include_line_number)
+	{
+    for (int i_iter=0; i_iter<npoints; i_iter++)
+		{
+      column_info[nvars-1].points(i_iter) =float(i_iter+1);
     }
   }
 
   // Resize and reinitialize list of ranked points to reflect the fact that
   // no ranking has been done.
-  for( int i=0; i<nvars; i++) {
-    (column_info[i].ranked_points).resize(npoints);
-    column_info[i].isRanked = 0;
+  for( int i_iter=0; i_iter<nvars; i_iter++)
+	{
+    (column_info[i_iter].ranked_points).resize(npoints);
+    column_info[i_iter].isRanked = 0;
   }
 
   // Resize and reinitialize selection related arrays and flags.
@@ -2867,20 +3431,28 @@ void Data_File_Manager::resize_global_arrays()
 void Data_File_Manager::create_default_data( int nvars_in)
 {
   // Protect against screwy values of nvars_in
-  if( nvars_in < 2) return;
+  if (nvars_in < 2)
+	{
+    return;
+	}
   nvars = nvars_in;
+
   // if( nvars > MAXVARS) nvars = MAXVARS;
-  if( nvars > maxvars_) nvars = maxvars_;
+  if (nvars > maxvars_)
+	{
+    nvars = maxvars_;
+	}
 
   // Loop: Initialize and load the column labels, including the final label
   // that says 'nothing'.
   column_info.erase( column_info.begin(), column_info.end());
   Column_Info column_info_buf;
-  for( int i=0; i<nvars; i++) {
+  for (int i_iter = 0; i_iter < nvars; i_iter++)
+  {
     ostringstream buf;
     buf << "default_"
         << setw( 3) << setfill( '0')
-        << i
+        << i_iter
         << setfill( ' ') << " ";
     column_info_buf.label = string( buf.str());
     column_info.push_back( column_info_buf);
@@ -2891,13 +3463,15 @@ void Data_File_Manager::create_default_data( int nvars_in)
   // Report column labels
   cout << " -column_labels:";
   int nLineLength = 17;
-  for( unsigned int i=0; i < column_info.size(); i++ ) {
-    nLineLength += 1+(column_info[ i].label).length();
-    if( nLineLength > 80) {
+  for (unsigned int i_iter = 0; i_iter < column_info.size(); i_iter++)
+  {
+    nLineLength += 1 + (column_info[i_iter].label).length();
+    if (nLineLength > 80)
+    {
       cout << endl << "   ";
-      nLineLength = 4 + (column_info[ i].label).length();
+      nLineLength = 4 + (column_info[i_iter].label).length();
     }
-    cout << " " << column_info[ i].label;
+    cout << " " << column_info[i_iter].label;
   }
   cout << endl;
   cout << " -Generated default header with " << nvars
@@ -2906,23 +3480,25 @@ void Data_File_Manager::create_default_data( int nvars_in)
   // Resize data array to avoid the madening frustration of segmentation
   // errors!  Important!
   npoints = 3;
-  for( int i=0; i<nvars; i++)
-    (column_info[i].points).resize(npoints);
+  for (int i_iter = 0; i_iter < nvars; i_iter++)
+	{
+    (column_info[i_iter].points).resize(npoints);
+	}
 
   // Loop: load each variable with 0 and 1.  These two loops are kept separate
   // for clarity and to facilitate changes
-  for( int i=0; i<nvars; i++) {
-    column_info[i].points( 0) = 0.0;
-    column_info[i].points( 1) = 0.5;
-    column_info[i].points( 2) = 1.0;
+  for (int i_iter = 0; i_iter < nvars; i_iter++)
+  {
+    column_info[i_iter].points(0) = 0.0;
+    column_info[i_iter].points(1) = 0.5;
+    column_info[i_iter].points(2) = 1.0;
   }
 
   // Resize global arrays
   resize_global_arrays();
 
   // Report results
-  cout << "Generated default data with " << npoints
-       << " points and " << nvars << " variables" << endl;
+  cout << "Generated default data with " << npoints << " points and " << nvars << " variables" << endl;
 }
 
 
@@ -2931,8 +3507,14 @@ void Data_File_Manager::create_default_data( int nvars_in)
 // column jcol.
 string Data_File_Manager::ascii_value( int jcol, int ival)
 {
-  if( column_info[jcol].hasASCII == 0) return string( "NUMERIC_VALUE_VP");
-  if( 0>jcol || jcol >= nvars) return string( "BAD_COLUMN_INDEX_VP");
+  if (column_info[jcol].hasASCII == 0)
+	{
+    return string("NUMERIC_VALUE_VP");
+	}
+  if (0 > jcol || jcol >= nvars)
+	{
+    return string("BAD_COLUMN_INDEX_VP");
+	}
   return column_info[jcol].ascii_value(ival);
 }
 
@@ -2941,10 +3523,19 @@ string Data_File_Manager::ascii_value( int jcol, int ival)
 // column jcol.  String is passed by value for efficiency.
 int Data_File_Manager::ascii_value_index( int jcol, string &sToken)
 {
-  if( column_info[jcol].hasASCII == 0) return -1;
-  if( 0>jcol || jcol >= nvars) return -1;
+  if (column_info[jcol].hasASCII == 0)
+	{
+    return -1;
+	}
+  if (0 > jcol || jcol >= nvars)
+	{
+    return -1;
+	}
   map<string,int>::iterator iter = (column_info[jcol].ascii_values_).find(sToken);
-  if( iter != (column_info[jcol].ascii_values_).end()) return iter->second;
+  if (iter != (column_info[jcol].ascii_values_).end())
+	{
+    return iter->second;
+	}
   return -1;
 }
 
@@ -2991,30 +3582,43 @@ int Data_File_Manager::inputFileType()
 void Data_File_Manager::inputFileType( int i)
 {
   inputFileType_ = i;
-  if( inputFileType_ < 0) inputFileType_ = 0;
-  if( inputFileType_ > 2) inputFileType_ = 2;
+  if (inputFileType_ < 0)
+	{
+    inputFileType_ = 0;
+	}
+  if (inputFileType_ > 3)
+	{
+    inputFileType_ = 2;
+	}
 }
 
 //***************************************************************************
 // Data_File_Manager::maxpoints() -- Set maximum number of points (rows) and
 // make sure it's reasonable.
-void Data_File_Manager::maxpoints( int i)
+void Data_File_Manager::maxpoints(int in_i)
 {
-  if( i < npoints) {
-    if( make_confirmation_window(
-          "This will delete some points.\n  Do you wish to continue?") <= 0)
-    return;
+  if (in_i < npoints)
+  {
+    if (make_confirmation_window("This will delete some points.\n  Do you wish to continue?") <= 0)
+    {
+      return;
+    }
   }
 
-  maxpoints_ = i;
-  if( maxpoints_ < 2) maxpoints_ = 2;
+  maxpoints_ = in_i;
+  if (maxpoints_ < 2)
+	{
+		maxpoints_ = 2;
+	}
 
   // If necessary, shrink the current buffer
-  if( npoints > maxpoints_) {
+  if (npoints > maxpoints_)
+  {
     npoints = maxpoints_;
-    for( int vars_iter=0; vars_iter<nvars; ++vars_iter)
-      (column_info[vars_iter].points).resizeAndPreserve(npoints);
-
+    for (int i_iter = 0; i_iter < nvars; i_iter++)
+    {
+      (column_info[i_iter].points).resizeAndPreserve(npoints);
+    }
     // Selection arrays should be resized as well
   }
 }
@@ -3022,19 +3626,26 @@ void Data_File_Manager::maxpoints( int i)
 //***************************************************************************
 // Data_File_Manager::maxvars() -- Set maximum number of variables (columns)
 // and make sure it's reasonable.
-void Data_File_Manager::maxvars(int i)
+void Data_File_Manager::maxvars(int in_i)
 {
-  if( i < nvars) {
+  if( in_i < nvars)
+  {
     if( make_confirmation_window(
           "This will delete some columns.\n  Do you wish to continue?") <= 0)
-    return;
+    {
+      return;
+    }
   }
 
-  maxvars_ = i;
-  if( maxvars_ < 2) maxvars_ = 2;
+  maxvars_ = in_i;
+  if( maxvars_ < 2)
+  {
+    maxvars_ = 2;
+  }
 
   // If necessary, nuke columns
-  if( nvars > maxvars_) {
+  if( nvars > maxvars_)
+  {
     nvars = maxvars_;
     vector<Column_Info>::iterator pTarget = column_info.begin();
     for( int vars_iter=0; vars_iter<=nvars; ++vars_iter)
@@ -3051,8 +3662,12 @@ void Data_File_Manager::maxvars(int i)
 int Data_File_Manager::n_ascii_columns()
 {
   int result = 0;
-  for( unsigned int i=0; i<column_info.size(); i++) {
-    if( column_info[i].hasASCII >0) result++;
+  for (unsigned int i_iter = 0; i_iter < column_info.size(); i_iter++)
+  {
+    if (column_info[i_iter].hasASCII > 0)
+		{
+			++result;
+		}
   }
   return result;
 }
@@ -3071,7 +3686,10 @@ int Data_File_Manager::n_vars()
 // data).
 int Data_File_Manager::n_points()
 {
-  if( column_info.size() <= 1) return 0;
+  if (column_info.size() <= 1)
+	{
+    return 0;
+	}
   return (column_info[0].points).rows();
 }
 
@@ -3101,6 +3719,426 @@ int Data_File_Manager::outputFileType()
 void Data_File_Manager::outputFileType( int i)
 {
   outputFileType_ = i;
-  if( outputFileType_ < 0) outputFileType_ = 0;
-  if( outputFileType_ > 1) outputFileType_ = 1;
+  if (outputFileType_ < 0)
+	{
+    outputFileType_ = 0;
+	}
+  if (outputFileType_ > 1)
+	{
+    outputFileType_ = 1;
+	}
+}
+
+
+int Data_File_Manager::read_tree_from_root_file()
+{
+  m_root_file_handle = std::shared_ptr<TFile>(TFile::Open(inFileSpec.c_str()));
+
+  if (m_root_file_handle == std::shared_ptr<TFile>(nullptr))
+  {
+    throw std::runtime_error("TFile::Open returned a nullptr.");
+  }
+  if (!(m_root_file_handle->IsOpen()) || m_root_file_handle->IsZombie())
+  {
+    // should derive from the runtime_error, and throw appropriately -> but for now runtime_error is okay
+    throw std::runtime_error("TFile::Open returned a bad File");
+  }
+
+  cout << "ROOT file version: = " << m_root_file_handle->GetVersion() << endl;
+  m_root_file_handle->ls();
+  column_info.clear();
+  column_info.erase(column_info.begin(), column_info.end());
+
+  // std::list<std::string, TTree *> directory_location_of_ttree;
+  // would allow me to store
+  // all TTree's found in the file. The I could prompt the user.
+  TKey  * current_key = nullptr;
+  TTree * a_tree      = nullptr;
+  TIter key_iterator(m_root_file_handle->GetListOfKeys());
+
+  // if (current_key_class->InheritsFrom(TDirectory::Class()))
+  // {
+  // std::cout << "ROOT file contains directories. Currently ignoring." << endl;
+  // move this to a directory iterator.
+  // will need to prompt user to handle which TTree to access.
+  // using directory structure to distinguish
+  // }
+  // else
+
+  while ((current_key = static_cast<TKey *> (key_iterator())))
+  {
+    TClass * current_key_class = gROOT->GetClass(current_key->GetClassName());
+    if (current_key_class->InheritsFrom(TTree::Class()))
+    {
+      a_tree = static_cast<TTree *> (current_key->ReadObj());
+      break;// get a hold of first TTree found in the file.
+    }
+  }
+
+  TObjArray * leaves_array = static_cast<TObjArray *> (a_tree->GetListOfLeaves());// TObjArray * branches_array = static_cast<TObjArray *> (a_tree->GetListOfBranches());
+  const size_t leaves_array_size = leaves_array->GetEntriesFast();
+
+  if (leaves_array_size == numeric_limits<size_t>::max())
+    throw std::range_error("array_size is equal to numerical_limits<int>::max()");
+
+  std::vector<size_t> leaf_length(leaves_array_size, 0);
+  std::vector<size_t> leaf_len(leaves_array_size, 0);
+  // reserve a vector of size() == leaves_array_size
+  // Have it zeroed
+  // is a leaf is declared: array[#] in a root file
+  // 
+
+  std::vector < std::string > vector_of_leaf_names;
+  std::vector < std::string > vector_of_columns_names;
+  // the full list of columns
+
+  std::map <std::string, size_t >      map_leaf_name_to_maximum_size;
+  std::map <std::string, std::string > map_leaf_name_to_size_leaf_name;
+
+  std::map <std::string, std::vector<int>> map_leaf_name_to_int_storage;  // this storage will be used by the TTree
+  std::map <std::string, std::vector<float>> map_leaf_name_to_float_storage;  // this storage will be used by the TTree
+  std::map <std::string, std::vector<double>> map_leaf_name_to_double_storage;// this storage will be used by the TTree
+
+  std::map<std::string, TBranch *> map_leaf_name_to_tbranch;
+
+  size_t number_of_columns = 0;
+  string leaf_name = "";
+  Column_Info column_info_buffer;
+
+  for (size_t i_iter = 0; i_iter < leaves_array_size; ++i_iter)
+  {
+    // TLeaf* GetLeafCounter(Int_t& countval) const
+    // -- Return a pointer to the counter of this leaf.
+    // 
+    // If leaf name has the form var[nelem], where nelem is alphanumeric, then
+    //  if nelem is a leaf name, return countval = 1 and the pointer to
+    //     the leaf named nelem, otherwise return 0.
+    // If leaf name has the form var[nelem], where nelem is a digit, then
+    //    return countval = nelem and a nullptr pointer.
+    // If leaf name has the form of a multi dimenantion array (eg var[nelem][nelem2]
+    //    where nelem and nelem2 are digits) then
+    //    return countval = product of all dimension size and a nullptr pointer.
+    // If leaf name has the form var[... (and do not match the previous 2
+    //    cases) return countval = -1 and nullptr pointer;
+    // Otherwise return countval=1 and a nullptr pointer.
+
+    TLeaf * leaf = static_cast<TLeaf *> (leaves_array->At(i_iter));
+
+    leaf_name = leaf->GetName();
+
+    TLeaf * size_leaf = 0;
+    Int_t count_value = 0;
+
+    leaf_length[i_iter] = leaf->GetMaximum();
+    leaf_len[i_iter]    = leaf->GetLen();
+    size_leaf           = leaf->GetLeafCounter(count_value);
+
+    cout << "===============" << endl;
+    cout << leaf->GetName() << endl;
+    cout << "===============" << endl;
+    cout << "leaf_length  = " << leaf_length[i_iter] << "\t";
+    cout << "leaf_len     = " << leaf_len[i_iter] << "\t";
+    cout << "count_value  = " << count_value << "\t" << "size_leaf   = ";
+    if (size_leaf)
+    {
+      cout << size_leaf->GetName() << endl;
+      cout << size_leaf->GetMaximum() << endl;
+      cout << size_leaf->GetMinimum() << endl;
+    }
+    else
+    {
+      cout << 0 << endl;
+    }
+    cout << "===============" << endl;
+
+    if (leaf_length[i_iter] > 10)
+    {
+      continue;
+    }
+    if (size_leaf && size_leaf->GetMaximum() > 10)
+    {
+      continue;
+    }
+    if (leaf_name.find("NH") != std::string::npos)
+    {
+      continue;
+    }
+    // if (leaf_name.find("Neu") != std::string::npos) continue;
+
+    vector_of_leaf_names.push_back(leaf_name);
+    map_leaf_name_to_tbranch[leaf_name] = 0;
+
+    // determine the storage space required for each leaf being considered
+    if (count_value == 1 && !size_leaf)
+    {
+      if (leaf_len[i_iter] > 1)
+      {
+        map_leaf_name_to_maximum_size[leaf_name] = leaf_len[i_iter];
+      }
+      else if (leaf_len[i_iter] == 0 || leaf_len[i_iter] == 1)
+      {
+        map_leaf_name_to_maximum_size[leaf_name] = 1;
+      }
+    }
+    else if (count_value == 1 && size_leaf)
+    {
+      map_leaf_name_to_size_leaf_name[leaf_name] = size_leaf->GetName();
+      map_leaf_name_to_maximum_size[leaf_name] = size_leaf->GetMaximum();
+    }
+    else if (count_value > 1)
+    {
+      map_leaf_name_to_maximum_size[leaf_name] = count_value;
+    }
+
+    // create the columns necessary
+    if (map_leaf_name_to_maximum_size[leaf_name] == 1)
+    {
+      column_info_buffer.label = leaf_name;
+      column_info.push_back(column_info_buffer);
+      ++number_of_columns;
+    }
+    else if (map_leaf_name_to_maximum_size[leaf_name] > 1)
+    {
+      for (size_t j_iter = 0; j_iter < map_leaf_name_to_maximum_size[leaf_name]; ++j_iter)
+      {
+        column_info_buffer.label = leaf_name + boost::lexical_cast<std::string>(j_iter);
+        column_info.push_back(column_info_buffer);
+        ++number_of_columns;
+      }
+    }
+
+    // Pre-allocate storage space for leaf access. Using the maximum determined size
+    // Then is sets the Address for the tree to write to storage space.
+    if (leaf->InheritsFrom(TLeafF::Class()))
+    {
+      map_leaf_name_to_float_storage[leaf_name] = std::vector<float>(map_leaf_name_to_maximum_size[leaf_name], 0.);
+      a_tree->SetBranchAddress(leaf_name.c_str(), &(map_leaf_name_to_float_storage[leaf_name][0]), &(map_leaf_name_to_tbranch[leaf_name]));
+    }
+    else if (leaf->InheritsFrom(TLeafI::Class()))
+    {
+      map_leaf_name_to_int_storage[leaf_name] = std::vector<int>(map_leaf_name_to_maximum_size[leaf_name], 0);
+      a_tree->SetBranchAddress(leaf_name.c_str(), &(map_leaf_name_to_int_storage[leaf_name][0]), &(map_leaf_name_to_tbranch[leaf_name]));
+    }
+    else if (leaf->InheritsFrom(TLeafD::Class()))
+    {
+      map_leaf_name_to_double_storage[leaf_name] = std::vector<double>(map_leaf_name_to_maximum_size[leaf_name], 0.);
+      a_tree->SetBranchAddress(leaf_name.c_str(), &(map_leaf_name_to_double_storage[leaf_name][0]), &(map_leaf_name_to_tbranch[leaf_name]));
+    }
+    else if (leaf->InheritsFrom(TLeafB::Class()))
+    {
+      map_leaf_name_to_int_storage[leaf_name] = std::vector<int>(map_leaf_name_to_maximum_size[leaf_name], 0);
+      a_tree->SetBranchAddress(leaf_name.c_str(), &(map_leaf_name_to_int_storage[leaf_name][0]), &(map_leaf_name_to_tbranch[leaf_name]));
+    }
+  }
+
+  // Add a final column label that says 'nothing'.
+  column_info_buffer.label = string("-nothing-");
+  column_info.push_back(column_info_buffer);
+
+  // Report column labels
+  cout << " -column_labels:";
+  int nLineLength = 17;
+
+  for (unsigned int i = 0; i < column_info.size(); i++)
+  {
+    nLineLength += 1 + (column_info[i].label).length();
+    if (nLineLength > 80)
+    {
+      cout << endl << "   ";
+      nLineLength = 4 + (column_info[i].label).length();
+    }
+    cout << " " << column_info[i].label << endl;
+  }
+
+  cout << "Number of Variables = " << number_of_columns << endl;
+
+  int entries = a_tree->GetEntries();
+  cout << "Number of rows in tree = " << entries << endl;
+  npoints = std::min(entries, maxpoints_);
+  nvars = number_of_columns;
+
+  nDataColumns_ = number_of_columns;
+  nDataRows_ = npoints;
+
+  for (size_t j = 0; j < number_of_columns; ++j)
+  {
+    (column_info[j].points).resize(npoints);
+    (column_info[j].hasASCII) = 0;
+  }
+  a_tree->GetEntry(0);// Load the entries
+
+
+  float data_value = 0.;
+  size_t maximum_array_size = 0;
+  size_t current_array_size = 0;
+  int dummy_size(0);
+
+  for (int i = 0; i < npoints; ++i)
+  {
+    int current_column = 0;
+    a_tree->GetEntry(i);// Load the entries
+
+    for (std::vector<std::string>::iterator pos = vector_of_leaf_names.begin(); 
+         pos != vector_of_leaf_names.end(); 
+         ++pos)
+    {
+      string & current_leaf_name = (*pos);
+      TLeaf * leaf = a_tree->GetLeaf(current_leaf_name.c_str());
+      current_array_size = maximum_array_size = map_leaf_name_to_maximum_size[current_leaf_name];
+
+      if (leaf->GetLeafCounter(dummy_size))
+      {
+        current_array_size = map_leaf_name_to_int_storage[map_leaf_name_to_size_leaf_name[current_leaf_name]].at(0);
+        // sets the current_array_size to the value retrieved from the tree
+      }
+
+      if (leaf->InheritsFrom(TLeafF::Class()))
+      {
+        for (size_t vector_pos = 0; vector_pos < maximum_array_size; ++vector_pos)
+        {
+          data_value = map_leaf_name_to_float_storage[current_leaf_name].at(vector_pos);
+          if (vector_pos >= current_array_size)
+          {
+            data_value = 0.;
+          }
+          // Add data_value to a particular column/row position.
+          column_info[current_column++].points(i) = data_value;
+        }
+      }
+      else if (leaf->InheritsFrom(TLeafI::Class()))
+      {
+        for (size_t vector_pos = 0; vector_pos < maximum_array_size; ++vector_pos)
+        {
+          data_value = map_leaf_name_to_int_storage[current_leaf_name].at(vector_pos);
+          if (vector_pos >= current_array_size)
+          {
+            data_value = 0.;
+          }
+          // Add data_value to a particular column/row position.
+          column_info[current_column++].points(i) = data_value;
+        }
+      }
+      else if (leaf->InheritsFrom(TLeafB::Class()))
+      {
+        for (size_t vector_pos = 0; vector_pos < maximum_array_size; ++vector_pos)
+        {
+          data_value = map_leaf_name_to_int_storage[current_leaf_name].at(vector_pos);
+          if (vector_pos >= current_array_size)
+          {
+            data_value = 0.;
+          }
+          // Add data_value to a particular column/row position.
+          column_info[current_column++].points(i) = data_value;
+        }
+      }
+      else if (leaf->InheritsFrom(TLeafD::Class()))
+      {
+        for (size_t vector_pos = 0; vector_pos < maximum_array_size; ++vector_pos)
+        {
+          data_value = map_leaf_name_to_double_storage[current_leaf_name].at(vector_pos);
+          if (vector_pos >= current_array_size)
+          {
+            data_value = 0.;
+          }
+          // Add data_value to a particular column/row position.
+          column_info[current_column++].points(i) = data_value;
+        }
+      }// end loop over numerical leaf types (TLeafF, TLeafD, TLeafI)
+    }
+  }
+
+  // Resize global arrays
+  resize_global_arrays();
+  m_root_file_handle->Close();
+  return 0;
+}
+
+
+int Data_File_Manager::write_table_to_root_file()
+{
+  if (outFileSpec.length() <= 0)
+  {
+    cout << "Data_File_Manager::write_table_to_root_file() " << "reports that no file was specified" << endl;
+    return -1;
+  }
+
+  blitz::Array<float, 1> vars(nvars);
+  blitz::Range NVARS(0, nvars - 1);
+
+  // (1) Don't require ofstream (since root has that handled by default
+  // (2) Probably should just create a map and use it to specify the location of values
+  // 
+
+  // Easiest method: (IMHO)
+  // Get list of variables;
+  // Create std::map<std::string, float> variable_string_to_current_row_value;
+  // Fill map per row, use row->event
+
+  // Do not write out "line-number" column (header or data)
+  // it gets created automatically when a file is read in
+  int nvars_out = include_line_number ? nvars - 1 : nvars;
+  std::map<std::string, float> variable_string_to_current_row_value;
+  std::string current_column_label;
+
+  bool is_selected = false;
+  UNUSED(is_selected);
+
+  TFile * root_file = new TFile(outFileSpec.c_str(), "RECREATE");
+
+  if (!root_file->IsOpen() || root_file->IsZombie())
+  {
+    cout << "Error opening file. State is not open or is a Zombie" << endl;
+    exit(-1);
+  }// this is bad way of handling a problem. However in this instance its probably beneficial to just error early.
+
+  TTree output_tree("output_tree", "Output of variables loaded into viewpoints.");
+
+  for (int i = 0; i < nvars_out; ++i)
+  {
+    current_column_label = column_info[i].label;
+    variable_string_to_current_row_value.insert(std::make_pair(current_column_label, 0.0f));
+    output_tree.Branch(current_column_label.c_str(), &(variable_string_to_current_row_value[current_column_label]), (current_column_label + "/F").c_str());
+  }
+
+  // output_tree.Branch("is_selected", &is_selected, "is_selected/I");// later revisions will need to modify this
+  // to make sure there is no variable is_selected
+  // I could add the date if necessary to avoid any confusion
+
+  int rows_written = 0;
+  for (int irow = 0; irow < npoints; irow++)
+  {
+    if (writeAllData_ != 0 || selected(irow) > 0)
+    {
+      for (int jcol = 0; jcol < nvars_out; jcol++)
+      {
+        if (column_info[jcol].hasASCII == 0)
+        {
+          variable_string_to_current_row_value[column_info[jcol].label] = column_info[jcol].points(irow);
+        }
+        else
+        {
+          // currently ignoring ascii values
+          // column_info[jcol].ascii_value((int) column_info[jcol].points(irow));
+        }
+
+        // if (writeSelectInfo_ != 0)
+        // {
+        // selected(irow);
+        // }
+
+      }
+
+      output_tree.Fill();
+      ++rows_written;
+    }
+  }
+
+  output_tree.Write();
+  cout << "wrote " << rows_written << " rows of " << nvars << " variables to ascii file " << outFileSpec.c_str() << endl;
+
+
+  root_file->Write();
+  root_file->Close();
+
+  return 0;
 }

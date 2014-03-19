@@ -61,7 +61,7 @@ Fl_Menu_Item Control_Panel_Window::normalization_style_menu_items[] = {
   { "partial rank", 0, 0, (void *) NORMALIZATION_PARTIAL_RANK, 0, 0, 0, 0, 0},
   { "gaussianize",  0, 0, (void *) NORMALIZATION_GAUSSIANIZE,  0, 0, 0, 0, 0},
   { "randomize",    0, 0, (void *) NORMALIZATION_RANDOMIZE,    0, 0, 0, 0, 0},
-  { 0,              0, 0, (void *) 0,                          0, 0, 0, 0, 0}
+  { nullptr,        0, nullptr,    nullptr,                    0, 0, 0, 0, 0}
 };
 
 // Define an array of menu items for the text ordering style menus.
@@ -69,7 +69,7 @@ Fl_Menu_Item Control_Panel_Window::text_ordering_style_menu_items[] = {
   { "lexicographic", 0, 0, (void *) NORMALIZATION_NONE,         0, 0, 0, 0, 0},
   { "frequency",     0, 0, (void *) NORMALIZATION_MINMAX,       0, FL_MENU_INACTIVE, 0, 0, 0},
   { "order in file", 0, 0, (void *) NORMALIZATION_ZEROMAX,      0, FL_MENU_INACTIVE, 0, 0, 0},
-  { 0,               0, 0, (void *) 0,                          0, 0, 0, 0, 0}
+  { nullptr,         0, nullptr,    nullptr,                    0, 0, 0, 0, 0}
 };
 
 //***************************************************************************
@@ -91,15 +91,16 @@ Control_Panel_Window::Control_Panel_Window() :
 	luminosity_save_( 1.0),
 	point_size_save_( 0.0),
   scale_points_save_( 0),
-	transform_style_save_( 0), index( 0)
+  transform_style_save_(0),
+  index(0)
 {}
 
 //***************************************************************************
 // Control_Panel_Window::Control_Panel_Window( x, y, w, h) --  Default
 // constructor.  Do nothing except call the constructor for the parent
 // class, Fl_Group.
-Control_Panel_Window::Control_Panel_Window(
-  int x, int y, int w, int h) : Fl_Group( x, y, w, h)
+Control_Panel_Window::Control_Panel_Window(int in_x, int in_y, int in_w, int in_h) : 
+  Fl_Group( in_x, in_y, in_w, in_h)
 {}
 
 //***************************************************************************
@@ -404,7 +405,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
     // cout << "label " << i
     //      << " = " << (column_info[i].label).c_str() << endl;
     // varindex_menu_items[i].label((const char *) ((column_info[i].label).c_str()));
-    varindex_menu_items[i].label( (const char *) (pdfm->column_label(i)).c_str());
+    varindex_menu_items[i].label(pdfm->column_label(i).c_str());
     varindex_menu_items[i].user_data((void *)i);
   }
   varindex_menu_items[nvars+1].label(0);

@@ -628,7 +628,10 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
       do_restore_settings = 1;
       do_restore_positions = 1;
       // Reset brushes because load resets brush sizes
-      for( int j=0; j<NBRUSHES; j++) brushes[j]->reset();
+      for( int j_iter = 0; j_iter < NBRUSHES; j_iter++)
+			{
+				brushes[j_iter]->reset();
+			}
     }
     else if( strncmp( widgetTitle, "Restore", 7) == 0) {
       thisOperation = REFRESH_WINDOWS;
@@ -642,8 +645,12 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     // redraw all of these plots.  NOTE: If this is not done, and one
     // attempts to preserve some panels without redrawing them, VBO usage
     // could fail.
-    if( thisOperation == NEW_DATA) {
-      for( int i=0; i<nplots; i++) pws[i]->hide();
+    if (thisOperation == NEW_DATA)
+		{
+      for( int i_iter = 0; i_iter<nplots; i_iter++)
+			{
+				pws[i_iter]->hide();
+			}
       nplots_old = 0;
     }
   }
@@ -692,17 +699,19 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
   Plot_Window pws_save[ MAXPLOTS+1];
   cout << "manage_plot_window_array: saving information for " << nplots_save
        << " windows" << endl;
-  for( int i=0; i<nplots_save; i++) {
-    pws[i]->make_state();
-    pws_save[i].copy_state( pws[i]);
+  for( int i_iter = 0; i_iter < nplots_save; i_iter++)
+	{
+    pws[i_iter]->make_state();
+    pws_save[i_iter].copy_state( pws[i_iter]);
   }
 
   // Save an array of Control_Panel_Window objects with axis, normalization,
   // and transform style information of the existing control panels
   Control_Panel_Window cps_save[ MAXPLOTS+1];
-  for( int i=0; i<nplots_save; i++) {
-    cps[i]->make_state();
-    cps_save[i].copy_state( cps[i]);
+  for( int i_iter=0; i_iter < nplots_save; i_iter++)
+	{
+    cps[i_iter]->make_state();
+    cps_save[i_iter].copy_state(cps[i_iter]);
   }
 
   // Save position and size of control panel windows so these can be used to
@@ -720,9 +729,10 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
 
   // Save an array of Brush objects with information of the existing brushes
   Brush brushes_save[ NBRUSHES];
-  for( int i=0; i<NBRUSHES; i++) {
-    brushes[i]->make_state();
-    brushes_save[i].copy_state( brushes[i]);
+  for( int i_iter=0; i_iter<NBRUSHES; i_iter++)
+	{
+    brushes[i_iter]->make_state();
+    brushes_save[i_iter].copy_state(brushes[i_iter]);
   }
 
   // Recalculate the number of plots
@@ -730,19 +740,25 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
 
   // Clear children of the control panel tab widget to delete old tabs
   // cpt->clear();  // for some reason this crashes now, so we hack as follows:
-  for( int i=0; i<nplots_save+1; i++) {
+  for( int i_iter=0; i_iter < nplots_save+1; i_iter++)
+	{
     cpt->remove(0);
   }
 
+  int ivar = 0;
+  int jvar = 1;
   // Create and add the virtual sub-panels, each group under a tab, one
   // group per plot.
-  for( int i=0; i<nplots; i++) {
-    int row = i/ncols;
-    int col = i%ncols;
+  for( int i_iter = 0; i_iter < nplots; i_iter++)
+	{
+    int row = i_iter/ncols;
+    int col = i_iter%ncols;
 
     // Account for the 'borderless' option
     if( borderless)
+		{
       top_frame = bottom_frame = left_frame = right_frame = 1;
+		}
 
     // Determine default plot window size for regular and laptop mode
     // int pw_w =
@@ -750,7 +766,10 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     //       (main_w+left_frame+right_frame+right_safe+left_safe+20)) / ncols) -
     //   (left_frame + right_frame);
     int scaled_main_w = w_save+6;
-    if( laptop_mode) scaled_main_w = (int) (laptop_scale*main_w);
+    if( laptop_mode)
+		{
+			scaled_main_w = int(laptop_scale*main_w);
+		}
     int pw_w =
       ( ( number_of_screens*Fl::w() -
           (scaled_main_w+left_frame+right_frame+right_safe+left_safe+20)) / ncols) -
@@ -769,23 +788,23 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
 
     // Create a label for this tab
     ostringstream oss;
-    oss << "" << i+1;
+    oss << "" << i_iter+1;
     string labstr = oss.str();
 
     // Set the pointer to the current group to the tab widget defined by
     // create_control_panel and add a new virtual control panel under this
     // tab widget
     Fl_Group::current( cpt);
-    cps[i] = new Control_Panel_Window( cp_widget_x, cp_widget_y, main_w - 6, cp_widget_h);
-    cps[i]->index = i;
-    cps[i]->copy_label( labstr.c_str());
-    cps[i]->labelsize( 10);
-    cps[i]->resizable( cps[i]);
-    cps[i]->make_widgets( cps[i]);
+    cps[i_iter] = new Control_Panel_Window( cp_widget_x, cp_widget_y, main_w - 6, cp_widget_h);
+    cps[i_iter]->index = i_iter;
+    cps[i_iter]->copy_label( labstr.c_str());
+    cps[i_iter]->labelsize( 10);
+    cps[i_iter]->resizable( cps[i_iter]);
+    cps[i_iter]->make_widgets( cps[i_iter]);
 
     // End the group here so that we can create new plot windows at the top
     // level, then set the pointer to the current group to the top level.
-    cps[i]->end();
+    cps[i_iter]->end();
     Fl_Group::current( 0);
 
     // If this was an INITIALIZE, REFRESH_WINDOWS, or NEW_DATA operation,
@@ -795,79 +814,100 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     // shown() and hide() calls work.
     if( thisOperation == INITIALIZE ||
         thisOperation == REFRESH_WINDOWS ||
-        thisOperation == NEW_DATA) {
-      if( i >= nplots_old) {
-        DEBUG(cout << "Creating new plot window " << i << endl);
-        pws[i] = new Plot_Window( pw_w, pw_h, i);
-        cps[i]->pw = pws[i];
-        pws[i]->cp = cps[i];
+        thisOperation == NEW_DATA)
+		{
+      if( i_iter >= nplots_old)
+			{
+        DEBUG(cout << "Creating new plot window " << i_iter << endl);
+        pws[i_iter] = new Plot_Window( pw_w, pw_h, i_iter);
+        cps[i_iter]->pw = pws[i_iter];
+        pws[i_iter]->cp = cps[i_iter];
       }
-      else {
-        pws[i]->index = i;
-        cps[i]->pw = pws[i];
-        pws[i]->cp = cps[i];
-        pws[i]->size( pw_w, pw_h);
+      else 
+			{
+        pws[i_iter]->index = i_iter;
+        cps[i_iter]->pw = pws[i_iter];
+        pws[i_iter]->cp = cps[i_iter];
+        pws[i_iter]->size( pw_w, pw_h);
       }
-      pws[i]->copy_label( labstr.c_str());
-      pws[i]->position(pw_x, pw_y);
-      pws[i]->row = row;
-      pws[i]->column = col;
-      pws[i]->end();
+      pws[i_iter]->copy_label( labstr.c_str());
+      pws[i_iter]->position(pw_x, pw_y);
+      pws[i_iter]->row = row;
+      pws[i_iter]->column = col;
+      pws[i_iter]->end();
     }
 
     // Always link the plot window and its associated virtual control panel
-    assert( (pws[i]->index == i) && (cps[i]->index == i));
-    cps[i]->pw = pws[i];
-    pws[i]->cp = cps[i];
+    assert( (pws[i_iter]->index == i_iter) && (cps[i_iter]->index == i_iter));
+    cps[i_iter]->pw = pws[i_iter];
+    pws[i_iter]->cp = cps[i_iter];
 
     // Always invoke Plot_Window::upper_triangle_incr to determine which
     // variables to plot in new panels.
-    int ivar, jvar;
-    if( i==0) {
+//    std::random_device rd;
+//    std::mt19937 engine(rd());
+//    std::uniform_int_distribution<> dist(0,nvars-1);
+
+//    int ivar = dist(engine);
+//    int jvar = 0;
+//    do
+//    {
+//      jvar = dist(engine);
+//    } while (jvar == ivar);
+
+    if( i_iter==0)
+		{
       ivar = 0;
       jvar = 1;
 
       // If this is an initialize operation, then the plot window array is being
       // created, the tabs should come up free of context.  It also might be
       // desirable that the first plot's tab be shown with its axes locked.
-      if( thisOperation == INITIALIZE) {
-        cps[i]->hide();
+      if( thisOperation == INITIALIZE)
+			{
+        cps[i_iter]->hide();
       }
     }
-    else Plot_Window::upper_triangle_incr( ivar, jvar, nvars);
+    else
+		{
+			Plot_Window::upper_triangle_incr( ivar, jvar, nvars);
+		}
 
 #ifdef SERIALIZATION
     // If there has been an explicit request to restore the saved control
     // panel settings or the number of plots has changed, restore those
     // settings, then generate any new settings that may be required.
-    if( do_restore_settings != 0 ||
-        nplots != (nplots_old && i<nplots_old)) {
+    if( (do_restore_settings != 0) ||
+        ((nplots != nplots_old) && (i_iter < nplots_old)))
+    {
 
       // Make sure axis indices are in range
-      cps_save[i].restrict_axis_indices( nvars-1, nvars-1, nvars);
+      cps_save[i_iter].restrict_axis_indices( nvars-1, nvars-1, nvars);
 
-      cps[i]->copy_state( &cps_save[i]);
-      cps[i]->load_state();
+      cps[i_iter]->copy_state( &cps_save[i_iter]);
+      cps[i_iter]->load_state();
     }
     else {
-      cps[i]->varindex1->value(ivar);
-      cps[i]->varindex2->value(jvar);
-      cps[i]->varindex3->value(nvars);
+      cps[i_iter]->varindex1->value(ivar);
+      cps[i_iter]->varindex2->value(jvar);
+      cps[i_iter]->varindex3->value(nvars);
     }
 #else // SERIALIZATION
-    cps[i]->varindex1->value(ivar);
-    cps[i]->varindex2->value(jvar);
-    cps[i]->varindex3->value(nvars);
+    cps[i_iter]->varindex1->value(ivar);
+    cps[i_iter]->varindex2->value(jvar);
+    cps[i_iter]->varindex3->value(nvars);
 #endif //SERIALIZATION
 
     // KLUDGE: If there has been an explicit request to restore the saved
     // control panel settings or the number of plots has changed, restore the
     // brush settings, but only do this once, during the first iteration.
     // XXX PRG: This seems unreliable.  Is there a better place to put this?
-    if( i==0 && (do_restore_settings != 0 || nplots != nplots_old)) {
-      for( int j=0; j<NBRUSHES; j++) {
-        brushes[i]->copy_state( &brushes_save[i]);
-        brushes[i]->load_state();
+    if( i_iter==0 && (do_restore_settings != 0 || nplots != nplots_old))
+    {
+      for( int j_iter=0; j_iter < NBRUSHES; j_iter++)
+      {
+        brushes[i_iter]->copy_state( &brushes_save[i_iter]);
+        brushes[i_iter]->load_state();
       }
     }
 
@@ -878,17 +918,20 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     // member functions to initialize and draw panels.
     if( thisOperation == INITIALIZE ||
         thisOperation == REFRESH_WINDOWS ||
-        thisOperation == NEW_DATA) {
-      if( npoints > 1) {
-        pws[i]->extract_data_points();
-        pws[i]->reset_view();
+        thisOperation == NEW_DATA)
+		{
+      if( npoints > 1)
+			{
+        pws[i_iter]->extract_data_points();
+        pws[i_iter]->reset_view();
       }
-      pws[i]->size_range( 10, 10);
-      pws[i]->resizable( pws[i]);
+      pws[i_iter]->size_range( 10, 10);
+      pws[i_iter]->resizable( pws[i_iter]);
     }
-    else {   // RELOAD no longer supported!
-      pws[i]->initialize();
-      pws[i]->extract_data_points();
+    else
+		{   // RELOAD no longer supported!
+      pws[i_iter]->initialize();
+      pws[i_iter]->extract_data_points();
     }
 
     // OLD KLUDGE: If this is a "append", "merge", "reload file" or "restore
@@ -903,8 +946,10 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
      // If the do_restore_positions flag was set by an 'append', 'merge',
      // 'reload file', or 'restore panels' operation, restire old window
      // positions.
-    if( do_restore_positions != 0) {
-      for( int restore_iter=0; restore_iter<nplots_save; restore_iter++) {
+    if( do_restore_positions != 0)
+		{
+      for( int restore_iter=0; restore_iter<nplots_save; restore_iter++)
+			{
         pws[restore_iter]->copy_state( &pws_save[restore_iter]);
         pws[restore_iter]->load_state();
 
@@ -918,19 +963,23 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     }
 
     // Account for the 'borderless' option
-    if( borderless) pws[i]->border(0);
+    if( borderless)
+		{
+			pws[i_iter]->border(0);
+		}
 
     // Make sure the window has been shown and check again to make absolutely
-    // sure it is resizable.  NOTE: pws[i]->show() with no arguments is not
+    // sure it is resizable.  NOTE: pws[i_iter]->show() with no arguments is not
     // sufficient when windows are created.
-    if( !pws[i]->shown()) {
-      DEBUG(cout << "showing plot window " << i << endl);
-        pws[i]->show( global_argc, global_argv);
+    if( !pws[i_iter]->shown())
+		{
+      DEBUG(cout << "showing plot window " << i_iter << endl);
+        pws[i_iter]->show( global_argc, global_argv);
     }
-    pws[i]->resizable( pws[i]);
+    pws[i_iter]->resizable( pws[i_iter]);
 
     // Turn on the 'show' capability of Plot_Window::reset_view();
-    pws[i]->do_reset_view_with_show = 1;
+    pws[i_iter]->do_reset_view_with_show = 1;
   }
 
   // Set the color arrays to make sure points get drawn.
@@ -940,7 +989,12 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
   // produce strange behavior) to rid of any superfluous plot windows
   // along with their contexts.
   if( nplots < nplots_old)
-    for( int i=nplots; i<nplots_old; i++) pws[i]->hide();
+	{
+    for( int i_iter=nplots; i_iter<nplots_old; i_iter++)
+		{
+			pws[i_iter]->hide();
+		}
+	}
 
   // Create a master control panel to encompass all the tabs
   create_broadcast_group ();
@@ -948,10 +1002,12 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
   // If this is laptop mode, shrink fonts and loop through children of the
   // control palenl tab to rescale control panel windows, including the
   // 'All' window, which may not be available through cp[nplots]
-  if( thisOperation != INITIALIZE && laptop_mode) {
+  if( thisOperation != INITIALIZE && laptop_mode)
+	{
     shrink_widget_fonts( cpt, laptop_scale);
-    for( int i=0; i<cpt->children(); i++) {
-      (cpt->child(i))->resize( x_save, y_save, w_save, h_save);
+    for( int i_iter=0; i_iter<cpt->children(); i_iter++)
+		{
+      (cpt->child(i_iter))->resize( x_save, y_save, w_save, h_save);
     }
   }
 }
@@ -1571,10 +1627,13 @@ void change_all_axes( Fl_Widget *o)
 	UNUSED(o);
   // Loop: Examine successive plots and change the axes of those for which
   // the x or y axis is unlocked.
-  for( int i=0; i<nplots; i++) {
-    if( !( cps[i]->lock_axis1_button->value() &&
-           cps[i]->lock_axis2_button->value()))
-      pws[i]->change_axes( 0);
+  for( int i_iter = 0; i_iter < nplots; i_iter++)
+  {
+    if( !( cps[i_iter]->lock_axis1_button->value() &&
+           cps[i_iter]->lock_axis2_button->value()))
+    {
+      pws[i_iter]->change_axes( 0);
+    }
   }
   Plot_Window::redraw_all_plots(0);
 }
@@ -1653,10 +1712,12 @@ void read_data( Fl_Widget* o, void* user_data)
   else if( ( strstr( (char *) user_data, "reload") != nullptr) &&
       (dfm.input_filespec()).length() > 0) {
   }
-  else{
+  else
+  {
     int iQueryStatus = 0;
     iQueryStatus = dfm.findInputFile();
-    if( iQueryStatus != 0) {
+    if(iQueryStatus != 0)
+    {
       cout << "No input file was selected" << endl;
       return;
     }
@@ -1769,23 +1830,25 @@ int load_initial_state( string configFileSpec)
     // limitations of the constructors for these classes.
     Control_Panel_Window *cps_input[ MAXPLOTS+1];
     inputArchive >> BOOST_SERIALIZATION_NVP( cps_input);
-    for( int i=0; i<nplots; i++) {
-      cps[i]->copy_state( cps_input[ i]);
-      cps[i]->load_state();
+    for(int i_iter=0; i_iter<nplots; i_iter++) {
+      cps[i_iter]->copy_state(cps_input[i_iter]);
+      cps[i_iter]->load_state();
     }
     Plot_Window *pws_input[ MAXPLOTS+1];
     inputArchive >> BOOST_SERIALIZATION_NVP( pws_input);
-    for( int i=0; i<nplots; i++) {
-      pws[i]->copy_state( pws_input[ i]);
-      pws[i]->load_state();
+    for(int i_iter=0; i_iter<nplots; i_iter++)
+    {
+      pws[i_iter]->copy_state(pws_input[i_iter]);
+      pws[i_iter]->load_state();
     }
 
     // STEP 8/8) Do the same thing for brushes
     Brush *brushes_input[ NBRUSHES];
     inputArchive >> BOOST_SERIALIZATION_NVP( brushes_input);
-    for( int i=0; i<NBRUSHES; i++) {
-      brushes[i]->copy_state( brushes_input[ i]);
-      brushes[i]->load_state();
+    for(int i_iter=0; i_iter<NBRUSHES; i_iter++)
+		{
+      brushes[i_iter]->copy_state(brushes_input[i_iter]);
+      brushes[i_iter]->load_state();
     }
 
     // Set user_data to indicate that this is a RESIZE operation, then i
@@ -1991,23 +2054,23 @@ int load_state( Fl_Widget* o)
     // limitations of the constructors for these classes.
     Control_Panel_Window *cps_input[ MAXPLOTS+1];
     inputArchive >> BOOST_SERIALIZATION_NVP( cps_input);
-    for( int i=0; i<nplots; i++) {
-      cps[i]->copy_state( cps_input[ i]);
-      cps[i]->load_state();
+    for (int i_iter=0; i_iter < nplots; i_iter++) {
+      cps[i_iter]->copy_state( cps_input[i_iter]);
+      cps[i_iter]->load_state();
     }
     Plot_Window *pws_input[ MAXPLOTS+1];
     inputArchive >> BOOST_SERIALIZATION_NVP( pws_input);
-    for( int i=0; i<nplots; i++) {
-      pws[i]->copy_state( pws_input[ i]);
-      pws[i]->load_state();
+    for( int i_iter=0; i_iter < nplots; i_iter++) {
+      pws[i_iter]->copy_state( pws_input[i_iter]);
+      pws[i_iter]->load_state();
     }
 
     // STEP 8/8) Do the same thing for brushes
     Brush *brushes_input[ NBRUSHES];
     inputArchive >> BOOST_SERIALIZATION_NVP( brushes_input);
-    for( int i=0; i<NBRUSHES; i++) {
-      brushes[i]->copy_state( brushes_input[ i]);
-      brushes[i]->load_state();
+    for( int i_iter=0; i_iter < NBRUSHES; i_iter++) {
+      brushes[i_iter]->copy_state( brushes_input[i_iter]);
+      brushes[i_iter]->load_state();
     }
 
     // Set user_data to indicate that this is a RESIZE operation, then i
@@ -2198,11 +2261,13 @@ void redraw_if_changing( void *dummy)
 {
 	UNUSED(dummy);
   // DEBUG( cout << "in redraw_if_changing" << endl) ;
-  for( int i=0; i<nplots; i++) {
+  for( int i_iter=0; i_iter < nplots; i_iter++)
+	{
     // DEBUG ( cout << "  i=" << i << ", needs_redraw=" << pws[i]->needs_redraw << endl );
-    if( cps[i]->spin->value() || pws[i]->needs_redraw) {
-      pws[i]->redraw();
-      pws[i]->needs_redraw = 0;
+    if( cps[i_iter]->spin->value() || pws[i_iter]->needs_redraw)
+		{
+      pws[i_iter]->redraw();
+      pws[i_iter]->needs_redraw = 0;
     }
   }
   Fl::repeat_timeout(0.01, redraw_if_changing);
@@ -2221,8 +2286,9 @@ void reset_selection_arrays()
   nselected = 0;
   selection_is_inverted = false;
   Plot_Window::indices_selected = 0;
-  for( int i=0; i<npoints; i++) {
-    Plot_Window::indices_selected(0,i) = i;
+  for( int i_iter=0; i_iter < npoints; i_iter++)
+	{
+    Plot_Window::indices_selected(0,i_iter) = i_iter;
   }
 }
 

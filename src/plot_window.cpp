@@ -109,8 +109,8 @@ Plot_Window::Plot_Window() :
 // Plot_Window::Plot_Window( w, h) -- Constructor.  Increment count of plot
 // windows, resize arrays, and set mode.  This constructor sets a flag to
 // tell the package to show the windows as part on a RESET_VIEW operation.
-Plot_Window::Plot_Window( int w, int h, int new_index) :
-  Fl_Gl_Window( w, h), do_reset_view_with_show( 0)
+Plot_Window::Plot_Window( int in_w, int in_h, int new_index) :
+  Fl_Gl_Window( in_w, in_h), do_reset_view_with_show( 0)
 {
   // Set flag, update count, and invoke initialzation method
   count++;
@@ -215,34 +215,45 @@ void Plot_Window::change_axes( int nchange)
 
   // Loop: Examine control panel tabs and increment axis counts only for plots
   // with x or y axis unlocked.  This is not ideal.
-  for( int i=0; i<nplots; i++) {
-    if( !cps[i]->lock_axis1_button->value() || !cps[i]->lock_axis2_button->value())
+  for( int iter_i=0; iter_i < nplots; iter_i++)
+  {
+    if( !cps[iter_i]->lock_axis1_button->value() || !cps[iter_i]->lock_axis2_button->value())
+    {
       nchange++;
+    }
   }
   // cout << "for window " << index << " nchange=" << nchange << endl;
 
   // Get variable indices for this panel, then change variable indices for
   // axes that are not locked.  MCL observes that this code seems a little
   // verbose
-  int i=cp->varindex1->value();
-  int j=cp->varindex2->value();
+  int index_1 = cp->varindex1->value();
+  int index_2 = cp->varindex2->value();
   // cout << "  (i,j) before = (" << i << "," << j << ")" << endl;
 
-  if (!cp->lock_axis1_button->value() && !cp->lock_axis2_button->value()) {
-    for( int k=0; k<nchange; k++) upper_triangle_incr( i, j, nvars);
-    cp->varindex1->value(i);
-    cp->varindex2->value(j);
+  if (!cp->lock_axis1_button->value() && !cp->lock_axis2_button->value())
+  {
+    for( int k=0; k<nchange; k++)
+    {
+      upper_triangle_incr( index_1, index_2, nvars);
+    }
+    cp->varindex1->value(index_1);
+    cp->varindex2->value(index_2);
   }
-  else if (!cp->lock_axis1_button->value()) {
-    for( int k=0; k<nchange; k++) {
-      i = (i+1)%nvars;
-      cp->varindex1->value(i);
+  else if (!cp->lock_axis1_button->value())
+  {
+    for( int k=0; k < nchange; k++)
+    {
+      index_1 = (index_1+1)%nvars;
+      cp->varindex1->value(index_1);
     }
   }
-  else if (!cp->lock_axis2_button->value()) {
-    for( int k=0; k<nchange; k++) {
-      j = (j+1)%nvars;
-      cp->varindex2->value(j);
+  else if (!cp->lock_axis2_button->value())
+  {
+    for( int k=0; k<nchange; k++)
+    {
+      index_2 = (index_2+1)%nvars;
+      cp->varindex2->value(index_2);
     }
   }
 
@@ -267,34 +278,42 @@ void Plot_Window::update_linked_transforms()
   // Loop: Find other plot windows that have any of the same axis indices
   // active and the same normalization style, update the appropriate
   // translation and scale values for them.
-  for( int i=0; i<nplots; i++) {
-    Plot_Window *p = pws[i];
+  for( int iter_i = 0; iter_i < nplots; iter_i++)
+  {
+    Plot_Window *p = pws[iter_i];
 
     // Don't need to update ourself
-    if( p == this) continue;
+    if( p == this)
+    {
+      continue;
+    }
 
     // Finally, figure out what me may want to change and how
     if( p->cp->varindex1->value() == axis1 &&
-        p->cp->x_normalization_style->value() == style1) {
+        p->cp->x_normalization_style->value() == style1)
+    {
       p->xscale = xscale;
       p->xcenter = xcenter;
       p->needs_redraw = 1;
     }
     else if( p->cp->varindex1->value() == axis2 &&
-             p->cp->x_normalization_style->value() == style2) {
+             p->cp->x_normalization_style->value() == style2)
+    {
       p->xscale = yscale;
       p->xcenter = ycenter;
       p->needs_redraw = 1;
     }
 
     if( p->cp->varindex2->value() == axis1 &&
-        p->cp->y_normalization_style->value() == style1) {
+        p->cp->y_normalization_style->value() == style1)
+    {
       p->yscale = xscale;
       p->ycenter = xcenter;
       p->needs_redraw = 1;
     }
     else if( p->cp->varindex2->value() == axis2 &&
-             p->cp->y_normalization_style->value() == style2) {
+             p->cp->y_normalization_style->value() == style2)
+    {
       p->yscale = yscale;
       p->ycenter = ycenter;
       p->needs_redraw = 1;
@@ -313,318 +332,323 @@ int Plot_Window::handle( int event)
 {
   // Current plot window (button pushes, mouse drags, etc) must get redrawn
   // before others so that selections get colored correctly.  Ugh.
-  switch( event) {
+  switch(event)
+  {
     active_plot = index;
-
     // Mouse button push
-    case FL_PUSH:
-      DEBUG(cout << "FL_PUSH at " << xprev << ", " << yprev << endl);
+  case FL_PUSH:
+    DEBUG(cout << "FL_PUSH at " << xprev << ", " << yprev << endl);
+    // Show the control panel associated with this plot window.
+    cpt->value(cps[this->index]);
+    xprev = Fl::event_x();
+    yprev = Fl::event_y();
 
-      // Show the control panel associated with this plot window.
-      cpt->value(cps[this->index]);
-      xprev = Fl::event_x();
-      yprev = Fl::event_y();
+    // Center of double clicks
+    if( Fl::event_clicks() > 0)
+    {
+      center_on_click( xprev, yprev);
+      return 1;
+    }
+    // middle button pushed => start zoom
+    if( (Fl::event_state() == FL_BUTTON2) ||
+        (Fl::event_state() == (FL_BUTTON1 | FL_CTRL)))
+    {
+      // XXX wish this worked
+      //        xzoomcenter = (float)xprev;
+      //        xzoomcenter = + (2.0*(xzoomcenter/(float)w()) -1.0) ; // window -> [-1,1]
+      //        yzoomcenter = (float)yprev;
+      //        yzoomcenter = - (2.0*(yzoomcenter/(float)h()) -1.0) ; // window -> [-1,1]
+    }
+    // right button pushed => start translating
+    else if( Fl::event_state(FL_BUTTON3) ||
+            (Fl::event_state() == (FL_BUTTON1 | FL_ALT)))
+    {
+      show_center_glyph = 1;
+      needs_redraw = 1;
+    }
+    // left button pushed => start new selection, or start translating
+    // the old selection
+    else if( Fl::event_state() == FL_BUTTON1)
+    {
+      // determine current and previous active plot windows
+      static Plot_Window *previous_plot, *current_plot = nullptr;
+      previous_plot = current_plot;
+      current_plot = this;
 
-      // Center of double clicks
-      if( Fl::event_clicks() > 0) {
-        center_on_click( xprev, yprev);
+      // determine current and previous active brushes
+      static Brush *previous_brush, *current_brush = nullptr;
+      previous_brush = current_brush;
+      current_brush =  dynamic_cast <Brush*> (brushes_tab->value());
+      assert (current_brush);
+
+      newly_selected(blitz::Range(0,npoints-1)) = 0;
+      // extend the selection under the following circumstances, otherwise replace.
+      if (current_brush->add_to_selection->value() || // current_brush->paint->value() || ???
+          current_brush != previous_brush ||
+          current_plot != previous_plot)
+      {
+        previously_selected( blitz::Range(0,npoints-1)) = selected( blitz::Range( 0, npoints-1));
+      }
+
+      xdown = (float)xprev;
+      xdown = + (2.0*(xdown/(float)w()) -1.0) ; // window -> [-1,1]
+      xdown = xdown / xscale;
+      xdown = xdown + xcenter;
+
+      ydown = (float)yprev;
+      ydown = - (2.0*(ydown/(float)h()) -1.0) ; // window -> [-1,1]
+      ydown = ydown/yscale;
+      ydown = ydown + ycenter;
+
+      xtracked = xdown;
+      ytracked = ydown;
+      selection_changed = 1;
+      handle_selection ();
+      redraw_all_plots (index);
+    }
+    return 1;
+
+  // Mouse drag
+  case FL_DRAG:
+    DEBUG (printf ("FL_DRAG, event_state: %x\n", Fl::event_state()));
+    xcur = Fl::event_x();
+    ycur = Fl::event_y();
+
+    xdragged = xcur - xprev;
+    ydragged = -(ycur - yprev);
+    xprev = xcur;
+    yprev = ycur;
+
+    // drag with right mouse (or alt-left-mouse) => translate the view
+    if( Fl::event_state(FL_BUTTON3) ||
+        (Fl::event_state(FL_BUTTON1) && Fl::event_state(FL_ALT)))
+    {
+      float xmove = xdragged*(1/xscale)*(2.0/w());
+      float ymove = ydragged*(1/yscale)*(2.0/h());
+      xcenter -= xmove;
+      ycenter -= ymove;
+      DEBUG ( cout << "translating (xcenter, ycenter) = (" << xcenter << ", " << ycenter << ")" << endl);
+      // redraw ();
+      show_center_glyph = 1;
+      needs_redraw = 1;
+      update_linked_transforms ();
+    }
+    // drag with middle-mouse (or c-left-mouse) => scale the view
+    else if( Fl::event_state(FL_BUTTON2) ||
+            (Fl::event_state(FL_BUTTON1) && Fl::event_state(FL_CTRL)))
+    {
+      if( scale_histogram)
+      {
+        xhscale *= 1 + xdragged*(2.0/w());
+        yhscale *= 1 + ydragged*(2.0/h());
+      }
+      else
+      {
+        xscale *= 1 + xdragged*(2.0/w());
+        yscale *= 1 + ydragged*(2.0/h());
+        zscale *= 1 + 0.5 * (xdragged*(2.0/w()) + ydragged*(2.0/h()));  // XXX hack.
+        DEBUG ( cout << "scaling (xscale, yscale) = (" << xscale << ", " << yscale << ")" << endl);
+      }
+      // redraw();
+      needs_redraw = 1;
+      update_linked_transforms ();
+    }
+    // drag with left mouse => continue selecting
+    else if( Fl::event_state(FL_BUTTON1))
+    {
+      // shift key down => move entire selection
+      if( Fl::event_key(FL_Shift_L) || Fl::event_key(FL_Shift_R))
+      {
+        xdown += xdragged*(1/xscale)*(2.0/w());
+        ydown += ydragged*(1/yscale)*(2.0/h());
+        xtracked += xdragged*(1/xscale)*(2.0/w());
+        ytracked += ydragged*(1/yscale)*(2.0/h());
+      }
+      // no shift key => move corner of selection
+      else
+      {
+        xtracked = + (2.0*(xcur/(float)w()) -1.0) ; // window -> [-1,1]
+        xtracked = xtracked / xscale;
+        xtracked = xtracked + xcenter;
+
+        ytracked = - (2.0*(ycur/(float)h()) -1.0) ; // window -> [-1,1]
+        ytracked = ytracked/yscale;
+        ytracked = ytracked + ycenter;
+      }
+
+      // printf ("FL_DRAG & FL_BUTTON1, event_state: %x  isdrag = %d  xdragged=%f  ydragged=%f\n", Fl::event_state(), isdrag, xdragged, ydragged);
+      if( ( fabs(xdragged)+fabs(ydragged))>0)
+      {
+        selection_changed = 1;
+        if( defer_redraws_button->value())
+        {
+          redraw_one_plot ();
+        }
+        else
+        {
+          handle_selection ();
+          redraw_all_plots (index);
+        }
+      }
+    }
+    screen_to_world (-1, -1, wmin[0], wmin[1]);
+    screen_to_world (+1, +1, wmax[0], wmax[1]);
+    return 1;
+  // Mouse button up
+  case FL_RELEASE:
+    DEBUG (cout << "FL_RELEASE at " << Fl::event_x() << ", " << Fl::event_y() << endl);
+    if( show_center_glyph)
+    {
+      show_center_glyph = 0;
+    }
+    if (defer_redraws_button->value())
+    {
+      handle_selection();
+      redraw_all_plots(index);
+    }
+    else
+    {
+      redraw_one_plot();
+    }
+    return 1;
+
+  // keypress, key is in Fl::event_key(), ascii in Fl::event_text().  Return
+  // 1 if you understand/use the keyboard event, 0 otherwise...
+  case FL_KEYDOWN:
+    DEBUG ( cout << "FL_KEYDOWN, event_key() = " << Fl::event_key() << endl);
+    // XXX should figure out how to share shortcuts between plot windows and
+    // control panels... later
+    switch( Fl::event_key())
+    {
+    // exit
+    case 'q':
+      if( expert_mode || make_confirmation_window( "Quit?  Are you sure?") > 0)
+      {
+        exit( 0);
+      }
+      else
+      {
         return 1;
       }
-
-      // middle button pushed => start zoom
-      if( (Fl::event_state() == FL_BUTTON2) ||
-          (Fl::event_state() == (FL_BUTTON1 | FL_CTRL))) {
-
-      // XXX wish this worked
-#if 0
-        xzoomcenter = (float)xprev;
-        xzoomcenter = + (2.0*(xzoomcenter/(float)w()) -1.0) ; // window -> [-1,1]
-        yzoomcenter = (float)yprev;
-        yzoomcenter = - (2.0*(yzoomcenter/(float)h()) -1.0) ; // window -> [-1,1]
-#endif
-      }
-
-      // right button pushed => start translating
-      else if( Fl::event_state(FL_BUTTON3) ||
-               (Fl::event_state() == (FL_BUTTON1 | FL_ALT)) ) {
-        show_center_glyph = 1;
-        needs_redraw = 1;
-      }
-
-      // left button pushed => start new selection, or start translating
-      // the old selection
-      else if( Fl::event_state() == FL_BUTTON1) {
-
-        // determine current and previous active plot windows
-        static Plot_Window *previous_plot, *current_plot = nullptr;
-        previous_plot = current_plot;
-        current_plot = this;
-
-        // determine current and previous active brushes
-        static Brush *previous_brush, *current_brush = nullptr;
-        previous_brush = current_brush;
-        current_brush =  dynamic_cast <Brush*> (brushes_tab->value());
-        assert (current_brush);
-
-        newly_selected(blitz::Range(0,npoints-1)) = 0;
-        // extend the selection under the following circumstances, otherwise replace.
-        if (current_brush->add_to_selection->value() || // current_brush->paint->value() || ???
-            current_brush != previous_brush ||
-            current_plot != previous_plot) {
-          previously_selected( blitz::Range(0,npoints-1)) = selected( blitz::Range( 0, npoints-1));
-        }
-
-        xdown = (float)xprev;
-        xdown = + (2.0*(xdown/(float)w()) -1.0) ; // window -> [-1,1]
-        xdown = xdown / xscale;
-        xdown = xdown + xcenter;
-
-        ydown = (float)yprev;
-        ydown = - (2.0*(ydown/(float)h()) -1.0) ; // window -> [-1,1]
-        ydown = ydown/yscale;
-        ydown = ydown + ycenter;
-
-        xtracked = xdown;
-        ytracked = ydown;
-        selection_changed = 1;
-        handle_selection ();
-        redraw_all_plots (index);
-      }
-
+      // delete selected points from all future processing
+    case 'x':
+    case FL_Delete:
+      delete_selection(nullptr);
       return 1;
 
-    // Mouse drag
-    case FL_DRAG:
-      DEBUG (printf ("FL_DRAG, event_state: %x\n", Fl::event_state()));
-      xcur = Fl::event_x();
-      ycur = Fl::event_y();
-
-      xdragged = xcur - xprev;
-      ydragged = -(ycur - yprev);
-      xprev = xcur;
-      yprev = ycur;
-
-      // drag with right mouse (or alt-left-mouse) => translate the view
-      if( Fl::event_state(FL_BUTTON3) ||
-          (Fl::event_state(FL_BUTTON1) && Fl::event_state(FL_ALT))) {
-        float xmove = xdragged*(1/xscale)*(2.0/w());
-        float ymove = ydragged*(1/yscale)*(2.0/h());
-        xcenter -= xmove;
-        ycenter -= ymove;
-        DEBUG ( cout << "translating (xcenter, ycenter) = (" << xcenter << ", " << ycenter << ")" << endl);
-        // redraw ();
-        show_center_glyph = 1;
-        needs_redraw = 1;
-        update_linked_transforms ();
-      }
-
-      // drag with middle-mouse (or c-left-mouse) => scale the view
-      else if( Fl::event_state(FL_BUTTON2) ||
-               (Fl::event_state(FL_BUTTON1) && Fl::event_state(FL_CTRL))) {
-        if( scale_histogram) {
-          xhscale *= 1 + xdragged*(2.0/w());
-          yhscale *= 1 + ydragged*(2.0/h());
-        }
-        else {
-          xscale *= 1 + xdragged*(2.0/w());
-          yscale *= 1 + ydragged*(2.0/h());
-          zscale *= 1 + 0.5 * (xdragged*(2.0/w()) + ydragged*(2.0/h()));  // XXX hack.
-          DEBUG ( cout << "scaling (xscale, yscale) = (" << xscale << ", " << yscale << ")" << endl);
-        }
-        // redraw();
-        needs_redraw = 1;
-        update_linked_transforms ();
-      }
-
-      // drag with left mouse => continue selecting
-      else if( Fl::event_state(FL_BUTTON1)) {
-
-        // shift key down => move entire selection
-        if( Fl::event_key(FL_Shift_L) || Fl::event_key(FL_Shift_R)) {
-          xdown += xdragged*(1/xscale)*(2.0/w());
-          ydown += ydragged*(1/yscale)*(2.0/h());
-          xtracked += xdragged*(1/xscale)*(2.0/w());
-          ytracked += ydragged*(1/yscale)*(2.0/h());
-        }
-
-        // no shift key => move corner of selection
-        else {
-          xtracked = + (2.0*(xcur/(float)w()) -1.0) ; // window -> [-1,1]
-          xtracked = xtracked / xscale;
-          xtracked = xtracked + xcenter;
-
-          ytracked = - (2.0*(ycur/(float)h()) -1.0) ; // window -> [-1,1]
-          ytracked = ytracked/yscale;
-          ytracked = ytracked + ycenter;
-        }
-
-        // printf ("FL_DRAG & FL_BUTTON1, event_state: %x  isdrag = %d  xdragged=%f  ydragged=%f\n", Fl::event_state(), isdrag, xdragged, ydragged);
-        if( ( fabs(xdragged)+fabs(ydragged))>0) {
-          selection_changed = 1;
-          if( defer_redraws_button->value()) {
-            redraw_one_plot ();
-          }
-          else {
-            handle_selection ();
-            redraw_all_plots (index);
-          }
-        }
-      }
-      screen_to_world (-1, -1, wmin[0], wmin[1]);
-      screen_to_world (+1, +1, wmax[0], wmax[1]);
+    // Invert or restore (uninvert) selected and nonselected
+    case 'i':
+      invert_selection();
+      return 1;
+    // Clear selection
+    case 'c':
+      clear_selections(nullptr);
       return 1;
 
-    // Mouse button up
-    case FL_RELEASE:
-      DEBUG (cout << "FL_RELEASE at " << Fl::event_x() << ", " << Fl::event_y() << endl);
-      if( show_center_glyph) {
-        show_center_glyph = 0;
-      }
-      if (defer_redraws_button->value()) {
-        handle_selection();
-        redraw_all_plots(index);
-      }
-      else {
-        redraw_one_plot();
-      }
+    // Don't display / display deselected dots
+    case 'd':
+      toggle_display_deselected(nullptr);
       return 1;
 
-    // keypress, key is in Fl::event_key(), ascii in Fl::event_text().  Return
-    // 1 if you understand/use the keyboard event, 0 otherwise...
-    case FL_KEYDOWN:
-      DEBUG ( cout << "FL_KEYDOWN, event_key() = " << Fl::event_key() << endl);
+    // Reset view tranform for this plot
+    case 'r':
+      reset_view();
+      return 1;
 
-      // XXX should figure out how to share shortcuts between plot windows and
-      // control panels... later
-      switch( Fl::event_key()) {
+    // hold down 'h' and middle mouse drag to scale histogram bin height.
+    // there should really be a better way....
+    case 'h':
+      scale_histogram=1;
+      return 1;
 
-        // exit
-        case 'q':
-          if( expert_mode || make_confirmation_window( "Quit?  Are you sure?") > 0)
-            exit( 0);
-          else
-            return 1;
+    // run a timing test, for performance tuning & profiling
+    case '9':
+      run_timing_test();
+      return 1;
 
-        // delete selected points from all future processing
-        case 'x':
-        case FL_Delete:
-          delete_selection(nullptr);
-          return 1;
+    // Center on click
+    case 'w':
+      center_on_click( Fl::event_x(), Fl::event_y());
+      return 1;
 
-        // Invert or restore (uninvert) selected and nonselected
-        case 'i':
-          invert_selection();
-          return 1;
-
-        // Clear selection
-        case 'c':
-          clear_selections(nullptr);
-          return 1;
-
-        // Don't display / display deselected dots
-        case 'd':
-          toggle_display_deselected(nullptr);
-          return 1;
-
-        // Reset view tranform for this plot
-        case 'r':
-          reset_view();
-          return 1;
-
-        // hold down 'h' and middle mouse drag to scale histogram bin height.
-        // there should really be a better way....
-        case 'h':
-          scale_histogram=1;
-          return 1;
-
-        // run a timing test, for performance tuning & profiling
-        case '9':
-          run_timing_test();
-          return 1;
-
-        // Center on click
-        case 'w':
-          center_on_click( Fl::event_x(), Fl::event_y());
-          return 1;
-
-        // Search for strings in x- or y-axis variable
-        case 'f':
-        {
-          char buf[1024];
-          char label[1024];
-          int col = Fl::event_shift()?cp->varindex1->value():cp->varindex2->value();
-          char cAxis[10];
-          strcpy( cAxis, "");
-          Fl::event_shift()?strcpy( cAxis, "x"):strcpy( cAxis, "y");
-          strcpy( buf, "");
-          sprintf(
-            label,
-            "Search for a string in the %s-axis variable, '%s'",
-            cAxis, Data_File_Manager::column_info[col].label.c_str());
-          make_find_window( label, buf);
-          if( buf[0]) {
-            select_on_string( buf, col);
-          }
-          return 1;
-        }
-
-        // toggle grid
-        case 'g':
-          cp->show_grid->value(1-cp->show_grid->value());
-          needs_redraw = 1;
-          return 1;
-
-      // Unrecognized key pressed: do nothing
-      default:
-        return 0;
+    // Search for strings in x- or y-axis variable
+    case 'f':
+    {
+      char buf[1024];
+      char local_label[1024];
+      int col = Fl::event_shift() ? cp->varindex1->value() : cp->varindex2->value();
+      char cAxis[10];
+      strcpy( cAxis, "");
+      Fl::event_shift()?strcpy( cAxis, "x"):strcpy( cAxis, "y");
+      strcpy( buf, "");
+      sprintf(local_label, 
+              "Search for a string in the %s-axis variable, '%s'",
+              cAxis,
+              Data_File_Manager::column_info[col].label.c_str());
+      make_find_window( local_label, buf);
+      if( buf[0])
+      {
+        select_on_string( buf, col);
+      }
+      return 1;
+    }
+    // toggle grid
+    case 'g':
+      cp->show_grid->value(1-cp->show_grid->value());
+      needs_redraw = 1;
+      return 1;
+    // Unrecognized key pressed: do nothing
+    default:
+      return 0;
     }
 
-    // Keyboard key up
-    case FL_KEYUP:
-      DEBUG ( cout << "FL_KEYUP" << endl);
-      switch( Fl::event_key()) {
-        case 'h':
-          scale_histogram=0;
-          return 1;
-
-        default:
-          return 0;
-      }
-
-    // Shortcut, key is in Fl::event_key(), ascii in Fl::event_text().  Return
-    // 1 if you understand/use the shortcut event, 0 otherwise...
-    case FL_SHORTCUT:
-      return 0;
-
-    // Mouse wheel, zoom in both the x and y axes
-    case FL_MOUSEWHEEL:
-      if(1) {
-        float wheel_zoom_rate = 100.0;
-        float wheel_size_rate = 5.0;
-        float dy = Fl::event_dy();
-        float dx = Fl::event_dx();
-        if(dx) {
-          float newsz = cp->size->value();
-          newsz += dx / wheel_size_rate;
-          newsz = (cp->size->maximum()>(double)newsz)?newsz:cp->size->maximum();
-          newsz = (cp->size->minimum()>(double)newsz)?cp->size->minimum():newsz;
-          cp->size->value(newsz);
-        }
-        else {
-          xscale *= 1 - dy / wheel_zoom_rate;
-          yscale *= 1 - dy / wheel_zoom_rate;
-        }
-        needs_redraw = 1;
-        update_linked_transforms();
-        // make sure grids & axis ticks get updated since we've changed the view.
-        screen_to_world (-1, -1, wmin[0], wmin[1]);
-        screen_to_world (+1, +1, wmax[0], wmax[1]);
-        return 1;
-      }
-
-    // Default: Pass other events to the base class...
+  // Keyboard key up
+  case FL_KEYUP:
+    DEBUG ( cout << "FL_KEYUP" << endl);
+    switch( Fl::event_key()) 
+    {
+    case 'h':
+      scale_histogram=0;
+      return 1;
     default:
-      return Fl_Gl_Window::handle( event);
+      return 0;
+    }
+
+  // Shortcut, key is in Fl::event_key(), ascii in Fl::event_text().  Return
+  // 1 if you understand/use the shortcut event, 0 otherwise...
+  case FL_SHORTCUT:
+    return 0;
+
+  // Mouse wheel, zoom in both the x and y axes
+  case FL_MOUSEWHEEL:
+  {
+    float wheel_zoom_rate = 100.0;
+    float wheel_size_rate = 5.0;
+    float dy = Fl::event_dy();
+    float dx = Fl::event_dx();
+    if(dx)
+    {
+      float newsz = cp->size->value();
+      newsz += dx / wheel_size_rate;
+      newsz = (cp->size->maximum()>(double)newsz)?newsz:cp->size->maximum();
+      newsz = (cp->size->minimum()>(double)newsz)?cp->size->minimum():newsz;
+      cp->size->value(newsz);
+    }
+    else
+    {
+      xscale *= 1 - dy / wheel_zoom_rate;
+      yscale *= 1 - dy / wheel_zoom_rate;
+    }
+    needs_redraw = 1;
+    update_linked_transforms();
+    // make sure grids & axis ticks get updated since we've changed the view.
+    screen_to_world (-1, -1, wmin[0], wmin[1]);
+    screen_to_world (+1, +1, wmax[0], wmax[1]);
+    return 1;
+  }
+  // Default: Pass other events to the base class...
+  default:
+    return Fl_Gl_Window::handle( event);
   }
 }
 
@@ -657,10 +681,11 @@ void Plot_Window::reset_view()
   // XXX this, and so much else, needs to be cleaned up, generalized to any
   // and all axes.  In particular, every possible c-style array should be
   // replaced in viewpoints with a std::vector or a boost::array.
-   for (int i=0; i<3; i++) {
-     wmin[i] = amin[i];
-     wmax[i] = amax[i];
-   }
+  for (int iter_i=0; iter_i<3; iter_i++)
+  {
+    wmin[iter_i] = amin[iter_i];
+    wmax[iter_i] = amax[iter_i];
+  }
 
   // Get third axis, if any
   int axis2 = (long)(cp->varindex3->mvalue()->user_data());
@@ -780,27 +805,30 @@ void Plot_Window::draw()
 
 //***************************************************************************
 // Plot_Window::center_on_click( x, y) -- Center on x, y on a mouse click.
-void Plot_Window::center_on_click( int x, int y)
+void Plot_Window::center_on_click( int in_x, int in_y)
 {
   float xt;
   float yt;
 
-  xt = + (2.0*(x/(float)w()) -1.0) ; // window -> [-1,1]
+  xt = + (2.0*(in_x/float(w())) -1.0) ; // window -> [-1,1]
   xt = xt / xscale;
   xt = xt + xcenter;
 
-  yt = - (2.0*(y/(float)h()) -1.0) ; // window -> [-1,1]
+  yt = - (2.0*(in_y/float(h())) -1.0) ; // window -> [-1,1]
   yt = yt/yscale;
   yt = yt + ycenter;
 
   xcenter = xt;
   ycenter = yt;
 
-  if(Fl::event_shift()) {
+  if(Fl::event_shift())
+  {
     // zoom in, centered on click
     xscale *= 1.5;
     yscale *= 1.5;
-  } else if(Fl::event_key(FL_Alt_L)||Fl::event_key(FL_Alt_R)) {
+  }
+  else if(Fl::event_key(FL_Alt_L)||Fl::event_key(FL_Alt_R))
+  {
     // zoom out, centered on click
     yscale /= 1.5;
     xscale /= 1.5;
@@ -902,37 +930,41 @@ void Plot_Window::draw_grid()
       glLineWidth(width);
       // lines of constant x, where x is nice
 
-      for (double x=nicemin_x+d_x; x<=nicemax_x-0.9999*d_x; x+=d_x) // was: for (x=nicemin; x<nicemax+.5*d; x+=d)
+      for (double loop_x = nicemin_x+d_x; loop_x <= nicemax_x-0.9999*d_x; loop_x += d_x) // was: for (x=nicemin; x<nicemax+.5*d; x+=d)
       {
-        if (fabsf(x)<0.0001*d_x)
-          x=0;
+        if (fabsf(loop_x)<0.0001*d_x)
+        {
+          loop_x=0;
+        }
         glBegin( GL_LINES);
-        glVertex3f (x, nicemin_y+d_y, 0);
-        glVertex3f (x, nicemax_y-d_y, 0);
+          glVertex3f (loop_x, nicemin_y+d_y, 0);
+          glVertex3f (loop_x, nicemax_y-d_y, 0);
         glEnd();
 
         // perhaps we should carry around an up-to-date array of nice tick values for
         // each axis object, and draw the ticks and labels in separate routines.
-        sprintf(temp, format_str_x, x);
+        sprintf(temp, format_str_x, loop_x);
         DEBUG (printf("(%s)\n", temp));
         float wx, wy;
         screen_to_world (0, -1.15, wx, wy); // tweaked offsets
-        gl_draw( temp, x-gl_width(temp)/(w()*xscale), wy);
+        gl_draw( temp, loop_x-gl_width(temp)/(w()*xscale), wy);
       }
       // lines of constant y, where y is nice
-      for (double y=nicemin_y+d_y; y<=nicemax_y-0.9999*d_y; y+=d_y) // was: for (y=nicemin; y<nicemax+.5*d; y+=d)
+      for (double loop_y=nicemin_y+d_y; loop_y<=nicemax_y-0.9999*d_y; loop_y+=d_y) // was: for (y=nicemin; y<nicemax+.5*d; y+=d)
       {
-        if (fabsf(y)<0.0001*d_y)
-          y=0;
+        if (fabsf(loop_y) < 0.0001*d_y)
+        {
+          loop_y=0;
+        }
         glBegin( GL_LINES);
-        glVertex3f (nicemin_x+d_x, y, 0);
-        glVertex3f (nicemax_x-d_x, y, 0);
+          glVertex3f (nicemin_x+d_x, loop_y, 0);
+          glVertex3f (nicemax_x-d_x, loop_y, 0);
         glEnd();
 
-        sprintf(temp2, format_str_y, y);
+        sprintf(temp2, format_str_y, loop_y);
         float wx, wy;
         screen_to_world (+1.1, 0, wx, wy); // tweaked offsets
-        gl_draw( temp2, wx, y-0.5*gl_height()/((h()*yscale)));
+        gl_draw( temp2, wx, loop_y-0.5*gl_height()/((h()*yscale)));
       }
     }
   }
@@ -1281,18 +1313,20 @@ void Plot_Window::update_selection_from_footprint()
 void Plot_Window::color_array_from_selection()
 {
   // Loop: initialize brush counts to zero
-  for( int i=0; i<NBRUSHES; i++) {
-    brushes[i]->count = 0;
+  for( int iter_i = 0; iter_i < NBRUSHES;  iter_i++)
+  {
+    brushes[iter_i]->count = 0;
   }
 
   // Loop: Examine successive points to fill the index arrays and their
   // associated counts
   int set;
 	int local_count=0;
-  for( int i=0; i<npoints; i++) {
-    set = selected(i);
+  for( int iter_i=0; iter_i < npoints; iter_i++)
+  {
+    set = selected(iter_i);
     local_count = brushes[set]->count++;
-    indices_selected( set, local_count) = i;
+    indices_selected( set, local_count) = iter_i;
   }
   nselected = npoints - brushes[0]->count;
   // assert(sum(number_selected(blitz::Range(0,nplots))) == (unsigned int)npoints);
@@ -1305,17 +1339,16 @@ void Plot_Window::color_array_from_selection()
 void Plot_Window::draw_selection_information()
 {
   int draw_selection_box = 1;
-  if( draw_selection_box) {
+  if( draw_selection_box)
+  {
     glBlendFunc( GL_ONE, GL_ZERO);
     glLineWidth( 1.0);
     glColor4f( 0.25,0.25,0.75,0.0);
     glBegin( GL_LINE_LOOP);
-
-    glVertex2f( xdown, ydown);
-    glVertex2f( xtracked, ydown);
-    glVertex2f( xtracked, ytracked);
-    glVertex2f( xdown, ytracked);
-
+      glVertex2f( xdown, ydown);
+      glVertex2f( xtracked, ydown);
+      glVertex2f( xtracked, ytracked);
+      glVertex2f( xdown, ytracked);
     glEnd();
   }
 
@@ -1332,7 +1365,10 @@ void Plot_Window::draw_selection_information()
 void Plot_Window::draw_data_points()
 {
   // cout << "pw[" << index << "]: draw_data_points() " << endl;
-  if ( !cp->show_points->value())return;
+  if ( !cp->show_points->value())
+  {
+    return;
+  }
 
 #ifdef ALPHA_TEXTURE
   glEnable(GL_ALPHA_TEST);
@@ -1342,8 +1378,10 @@ void Plot_Window::draw_data_points()
   int current_sprite = 0;
 
   // Are we plotting in two dimensions or three?
-  if( cp->varindex3->value() != nvars) {
-    if (cp->z_bufferring_button->value()) {
+  if( cp->varindex3->value() != nvars)
+  {
+    if (cp->z_bufferring_button->value())
+    {
       glEnable( GL_DEPTH_TEST);
       glDepthFunc( GL_GREATER);
       z_bufferring_enabled = 1;
@@ -1410,15 +1448,17 @@ void Plot_Window::draw_data_points()
   int first_brush=0, brush_step=+1;
 
   // we draw brushes in reverse order iff we are using stencil buffers to blend separately
-  if (blending_mode == Control_Panel_Window::BLEND_BRUSHES_SEPARATELY) {
+  if (blending_mode == Control_Panel_Window::BLEND_BRUSHES_SEPARATELY)
+  {
     first_brush=NBRUSHES-1; brush_step=-1;
   }
 
   // Loop: Draw successive brished in reverse order
-  for( int brush_num=0, brush_index=first_brush; brush_num<NBRUSHES; brush_num++, brush_index+=brush_step) {
-
+  for( int brush_num=0, brush_index=first_brush; brush_num<NBRUSHES; brush_num++, brush_index+=brush_step)
+  {
     // don't draw nonselected points (brush[0]) if we are hiding nonselected points in this plot
-    if (brush_index == 0 && (!show_deselected_button->value() || !cp->show_deselected_points->value())) {
+    if (brush_index == 0 && (!show_deselected_button->value() || !cp->show_deselected_points->value()))
+    {
       continue;
     }
 
@@ -1426,21 +1466,24 @@ void Plot_Window::draw_data_points()
     unsigned int local_count = brush->count;
 
     // If some points were selected in this set, render them
-    if(local_count > 0) {
+    if(local_count > 0)
+    {
 
       // if we are using stencils (and hence drawing brushes in reverse order)...
-      if (blending_mode == Control_Panel_Window::BLEND_BRUSHES_SEPARATELY) {
+      if (blending_mode == Control_Panel_Window::BLEND_BRUSHES_SEPARATELY)
+      {
         glStencilFunc (GL_GEQUAL, brush_index+1, 0xFFFF);
         glStencilOp (GL_KEEP, GL_KEEP, GL_REPLACE);
       }
 
       // Set the pointsize for this brush (hard limit from 1 to 100)
       // note this is a combination of the brush's size and per-plot scaling
-      float size = brush->pointsize->value() * powf(2.0, cp->size->value());
-      if (cp->scale_points->value()) {
-        size = magnification*size;
+      float local_size = brush->pointsize->value() * powf(2.0, cp->size->value());
+      if (cp->scale_points->value())
+      {
+        local_size *= magnification;
       }
-      size = min(max(size,1.0F),100.0F);
+      local_size = min(max(local_size,1.0F),100.0F);
 
       // alpa cutoff, useful for soft brushes on light backgrounds.  This should perhaps
       // be per plot instead of per brush, or better yet it should go away.
@@ -1450,21 +1493,22 @@ void Plot_Window::draw_data_points()
       current_sprite = brush->symbol_menu->value();
       assert ((current_sprite >= 0) && (current_sprite < NSYMBOLS));
       GLenum element_mode;
-      switch (current_sprite) {
-        case 0:
-          element_mode = GL_POINTS;
-          enable_regular_points();
-          glPointSize(size);
-          break;
-        case 1:
-          element_mode = GL_LINE_STRIP;
-          glLineWidth(size);
-          break;
-        default:
-          element_mode = GL_POINTS;
-          enable_sprites(current_sprite);
-          glPointSize(size+2); // sprites cover fewer pixels, in general
-          break;
+      switch (current_sprite)
+      {
+      case 0:
+        element_mode = GL_POINTS;
+        enable_regular_points();
+        glPointSize(local_size);
+        break;
+      case 1:
+        element_mode = GL_LINE_STRIP;
+        glLineWidth(local_size);
+        break;
+      default:
+        element_mode = GL_POINTS;
+        enable_sprites(current_sprite);
+        glPointSize(local_size+2); // sprites cover fewer pixels, in general
+        break;
       }
 
       // set the color for this set of points
@@ -1472,22 +1516,24 @@ void Plot_Window::draw_data_points()
       float lum1 = pow2(brush->lum1->value()), lum2 = pow2(brush->lum2->value());
       float alpha = brush->alpha->value();
       // float alpha0 = brush->alpha0->value();
-      double r = lum0*lum2*(brush->color_chooser->r()+lum1);
-      double g = lum0*lum2*(brush->color_chooser->g()+lum1);
-      double b = lum0*lum2*(brush->color_chooser->b()+lum1);
-      double a = alpha;
+      double local_r = lum0*lum2*(brush->color_chooser->r()+lum1);
+      double local_g = lum0*lum2*(brush->color_chooser->g()+lum1);
+      double local_b = lum0*lum2*(brush->color_chooser->b()+lum1);
+      double local_a = alpha;
       // cout << "plot " << index << ", brush " << brush->index << ", (r,g,b,a) = (" << r << ", " << g << ", " << b << ", " << a << ")" << endl;
-      glColor4d(r,g,b,a);
+      glColor4d(local_r,local_g,local_b,local_a);
 
       // then render the points
-      if (use_VBOs) {
+      if (use_VBOs)
+      {
         assert (VBOinitialized && VBOfilled && indexVBOsinitialized && indexVBOsfilled) ;
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+1+brush_index);
         glDrawElements( element_mode, GLsizei(local_count), GL_UNSIGNED_INT, BUFFER_OFFSET(0)); // would it bee faster to use glDrawRangeElements() ?
         // make sure we succeeded
         CHECK_GL_ERROR("drawing points from VBO");
       }
-      else {
+      else
+      {
         // Create an alias to slice
         blitz::Array<unsigned int, 1> tmpArray = indices_selected(brush_index, blitz::Range(0,npoints-1));
         unsigned int *indices = static_cast<unsigned int*>(tmpArray.data());
@@ -1497,13 +1543,16 @@ void Plot_Window::draw_data_points()
   }
 
   // potentially turn off various gl state variables that are specific to this routine.
-  if (z_bufferring_enabled) {
+  if (z_bufferring_enabled)
+  {
     glDisable( GL_DEPTH_TEST);
   }
-  if (blending_mode == Control_Panel_Window::BLEND_BRUSHES_SEPARATELY) {
+  if (blending_mode == Control_Panel_Window::BLEND_BRUSHES_SEPARATELY)
+  {
     glDisable( GL_STENCIL_TEST);
   }
-  if (current_sprite > 0) {
+  if (current_sprite > 0)
+  {
     disable_sprites();
   }
   glLineWidth(1);
@@ -1556,22 +1605,24 @@ void Plot_Window::compute_histogram( int axis)
   int brush_index = bp->index;
 
   // Loop: sum over successive points to load histogram arrays
-  for( int i=0; i<npoints; i++) {
-    float x = vertices( i, axis);
+  for( int iter_i=0; iter_i<npoints; iter_i++)
+  {
+    float local_x = vertices( iter_i, axis);
     // MCL XXX presently, weighting is based on the z-axis variable.  Weighting variable should really be a pulldown of is own.
-    float weight = weighted?vertices(i,2):1.0;
-    int bin = int(floorf( local_nbins * ( ( x - amin[axis]) / range)));
+    float weight = weighted ? vertices(iter_i,2) : 1.0;
+    int bin = int(floorf( local_nbins * ( ( local_x - amin[axis]) / range)));
     if( bin < 0) bin = 0;
     if( bin > local_nbins-1) bin = local_nbins-1;
     counts( bin, axis) += weight;
-    if( selected( i) == brush_index) counts_selected( bin, axis)+=weight;
+    if( selected(iter_i) == brush_index) counts_selected( bin, axis)+=weight;
   }
   float maxcount = max(max(counts(BINS,axis)), 1.0f);
 
   // Normalize results.
-  if( npoints > 0) {
-    counts(BINS,axis) = counts(BINS,axis) / (float)maxcount;
-    counts_selected(BINS,axis) = counts_selected(BINS,axis) / (float)maxcount;
+  if( npoints > 0)
+  {
+    counts(BINS,axis) = counts(BINS,axis) / float(maxcount);
+    counts_selected(BINS,axis) = counts_selected(BINS,axis) / float(maxcount);
   }
 }
 
@@ -1589,14 +1640,15 @@ void Plot_Window::compute_histograms()
 void Plot_Window::draw_x_histogram(
   const blitz::Array<float,1> bin_counts, const int in_nbins)
 {
-  float x = amin[0];
+  float local_x = amin[0];
   float xwidth = (amax[0]-amin[0]) / float(in_nbins);
   glBegin( GL_LINE_STRIP);
-  for( int bin=0; bin<in_nbins; ++bin, x+=xwidth) {
-    glVertex2f( x, 0.0); // lower left corner
-    glVertex2f( x, bin_counts( bin, 0));   // left edge
-    glVertex2f( x+xwidth, bin_counts( bin, 0));   // top edge
-    glVertex2f( x+xwidth,0.0);   // right edge
+  for( int bin=0; bin<in_nbins; ++bin, local_x+=xwidth)
+  {
+    glVertex2f( local_x, 0.0); // lower left corner
+    glVertex2f( local_x, bin_counts( bin, 0));   // left edge
+    glVertex2f( local_x+xwidth, bin_counts( bin, 0));   // top edge
+    glVertex2f( local_x+xwidth,0.0);   // right edge
   }
   glEnd();
 }
@@ -1606,15 +1658,16 @@ void Plot_Window::draw_x_histogram(
 void Plot_Window::draw_y_histogram(
   const blitz::Array<float,1> bin_counts, const int in_nbins)
 {
-  float y = amin[1];
+  float local_y = amin[1];
   float ywidth = (amax[1]-amin[1]) / float(in_nbins);
   glBegin( GL_LINE_STRIP);
-  for( int bin=0; bin<in_nbins; ++bin) {
-    glVertex2f( 0.0, y);
-    glVertex2f(bin_counts(bin),y);   // bottom
-    glVertex2f(bin_counts(bin), y+ywidth);   // right edge
-    glVertex2f(0.0, y+ywidth);   // top edge
-    y+=ywidth;
+  for( int bin=0; bin<in_nbins; ++bin)
+  {
+    glVertex2f( 0.0, local_y);
+    glVertex2f(bin_counts(bin), local_y);   // bottom
+    glVertex2f(bin_counts(bin), local_y + ywidth);   // right edge
+    glVertex2f(0.0, local_y + ywidth);   // top edge
+    local_y +=ywidth;
   }
   glEnd();
 }
@@ -1638,8 +1691,8 @@ void Plot_Window::draw_histograms()
   }
 
   // note use of slider to control log_2 bincount
-  int xbins = (int)exp2(cp->nbins_slider[0]->value());
-  int ybins = (int)exp2(cp->nbins_slider[1]->value());
+  int xbins = int(exp2(cp->nbins_slider[0]->value()));
+  int ybins = int(exp2(cp->nbins_slider[1]->value()));
 
   // if no axes has bin count > zero, return immediately
   if (xbins <= 0 && ybins <= 0)
@@ -1653,7 +1706,8 @@ void Plot_Window::draw_histograms()
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // x-axis histograms
-  if ((x_marginal || x_selection || x_conditional) && xbins > 0) {
+  if ((x_marginal || x_selection || x_conditional) && xbins > 0)
+  {
     blitz::Range BINS( 0, xbins-1);
     glLoadIdentity();
     glTranslatef( xzoomcenter*xscale, hoffset, 0);
@@ -1663,17 +1717,20 @@ void Plot_Window::draw_histograms()
     glTranslatef (0.0, 0.0, hoffset);
 
     // Draw x-axis histogram of all points.
-    if (x_marginal) {
+    if (x_marginal)
+    {
       glColor4f( 0.0, 0.5, 0.5, 1.0);
       draw_x_histogram (counts(BINS,0), xbins);
     }
     // Draw x-axis histogram of selected points
-    if( nselected > 0 && x_selection) {
+    if( nselected > 0 && x_selection)
+    {
       glColor4f( 0.25, 1.0, 1.0, 1.0);
       draw_x_histogram (counts_selected(BINS,0), xbins);
     }
     // Draw scaled x-axis histogram of selected points ("conditional");
-    if( nselected > 0 && x_conditional) {
+    if( nselected > 0 && x_conditional)
+    {
       float local_yscale = max(counts(BINS,0))/max(counts_selected(BINS,0));
       blitz::Array<float,1> scaled_bin_counts(xbins);
       scaled_bin_counts = local_yscale*counts_selected(BINS,0);
@@ -1683,7 +1740,8 @@ void Plot_Window::draw_histograms()
   }
 
   // y-axis histograms
-  if ((y_marginal || y_selection || y_conditional) && ybins > 0) {
+  if ((y_marginal || y_selection || y_conditional) && ybins > 0)
+  {
     blitz::Range BINS( 0, ybins-1);
     glLoadIdentity();
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1693,17 +1751,20 @@ void Plot_Window::draw_histograms()
     glTranslatef( 0.0, -yzoomcenter, 0);
 
     // Draw y-axis histogram of all points.
-    if (y_marginal) {
+    if (y_marginal)
+    {
       glColor4f( 0.0, 0.5, 0.5, 1.0);
       draw_y_histogram (counts(BINS,1), ybins);
     }
     // Draw y-axis histogram of selected points
-    if( nselected > 0 && y_selection) {
+    if( nselected > 0 && y_selection)
+    {
       glColor4f( 0.25, 1.0, 1.0, 1.0);
       draw_y_histogram (counts_selected(BINS,1), ybins);
     }
     // Draw scaled y-axis histogram of selected points ("conditional");
-    if( nselected > 0 && y_conditional) {
+    if( nselected > 0 && y_conditional)
+    {
       float local_yscale = max(counts(BINS,1))/max(counts_selected(BINS,1));
       blitz::Array<float,1> scaled_bin_counts(ybins);
       scaled_bin_counts = local_yscale*counts_selected(BINS,1);
@@ -1722,7 +1783,11 @@ void Plot_Window::density_1D( blitz::Array<float,1> a, const int axis)
 {
   // need to compute (but not necessarily display) the x-axis histogram if
   // its not already there.
-  if (!cp->show_histogram[axis]->value()) compute_histogram(axis);
+  if (!cp->show_histogram[axis]->value())
+  {
+    compute_histogram(axis);
+  }
+
   int local_nbins = int(exp2(cp->nbins_slider[axis]->value()));
 
   // Loop: For each point, find which bin its in (since that isn't saved in
@@ -1730,11 +1795,11 @@ void Plot_Window::density_1D( blitz::Array<float,1> a, const int axis)
   // equal to the bin count
   // range is tweaked by (n+1)/n to get the "last" point into the correct bin.
   float range = (amax[axis] - amin[axis]) * ((float)(npoints+1)/(float)npoints);
-  for( int i=0; i<npoints; i++) {
-    int bin = int(floorf( local_nbins * ( ( vertices(i,axis) - amin[axis]) / range)));
+  for(int iter_i=0; iter_i<npoints; iter_i++) {
+    int bin = int(floorf( local_nbins * ( ( vertices(iter_i,axis) - amin[axis]) / range)));
     if( bin < 0) bin = 0;
     if( bin > local_nbins-1) bin = local_nbins-1;
-    a(i) = counts( bin, axis)/(float)npoints;
+    a(iter_i) = counts( bin, axis)/float(npoints);
   }
 }
 
@@ -1745,32 +1810,38 @@ int Plot_Window::transform_2d()
 {
   blitz::Range NPTS(0,npoints-1);
 
-  if( cp->no_transform->value()) return 1;
-
-  else if( cp->sum_vs_difference->value()) {
+  if( cp->no_transform->value())
+  {
+    return 1;
+  }
+  else if( cp->sum_vs_difference->value())
+  {
     blitz::Array <float,1> tmp1(npoints), tmp2(npoints);
     tmp1 = vertices(NPTS,0);
     tmp2 = vertices(NPTS,1);
     vertices(NPTS,0) = (sqrt(2.0)/2.0) * (tmp1 + tmp2);
     vertices(NPTS,1) = (sqrt(2.0)/2.0) * (tmp2 - tmp1);
   }
-  else if( cp->cond_prop->value()) {
+  else if( cp->cond_prop->value())
+  {
     blitz::Array <float,1> tmp1(npoints);
     tmp1 = vertices(NPTS,1);
     int local_nbins = int(exp2(cp->nbins_slider[0]->value()));
     cummulative_conditional (tmp1, x_rank, (npoints-1)/(local_nbins*2));
     vertices(NPTS,1) = tmp1;
   }
-  else if( cp->fluctuation->value()) {
+  else if( cp->fluctuation->value())
+  {
     blitz::Array <float,1> tmp1(npoints);
     tmp1 = vertices(NPTS,1);
     int local_nbins = int(exp2(cp->nbins_slider[0]->value()));
     fluctuation (tmp1, x_rank, (npoints-1)/(local_nbins*2));
     vertices(NPTS,1) = tmp1;
   }
-  for (int i=0; i<2; i++) {
-    wmin[i] = amin[i] = min(vertices(NPTS,i));
-    wmax[i] = amax[i] = max(vertices(NPTS,i));
+  for (int iter_i=0; iter_i<2; iter_i++)
+  {
+    wmin[iter_i] = amin[iter_i] = min(vertices(NPTS,iter_i));
+    wmax[iter_i] = amax[iter_i] = max(vertices(NPTS,iter_i));
   }
   return 1;
 }
@@ -1885,11 +1956,12 @@ int Plot_Window::normalize(
   // Replace each value with its rank, equal values get sequential rank
   // according to original input order
   case Control_Panel_Window::NORMALIZATION_RANK:
-    for( int i=0; i<npoints; i++) {
-      a(a_rank(i)) = (float)(i+1);
+    for( int iter_i=0; iter_i<npoints; iter_i++)
+    {
+      a(a_rank(iter_i)) = float(iter_i+1);
     }
     amin[axis_index] = 1.0;
-    amax[axis_index] = (float)(npoints);
+    amax[axis_index] = float(npoints);
     return 1;
 
   // Replace each value with its rank, equal values get equal rank
@@ -1900,12 +1972,14 @@ int Plot_Window::normalize(
 
     // Loop: Subsequent values, if equal, get equal rank.  Otherwise, they
     // get previous + 1.
-    for( int i=0; i<npoints; i++) {
-      if ( a(a_rank(i)) > previous ) {
-        previous = a(a_rank(i));
+    for( int iter_i=0; iter_i<npoints; iter_i++)
+    {
+      if ( a(a_rank(iter_i)) > previous )
+      {
+        previous = a(a_rank(iter_i));
         partial_rank += 1.0;
       }
-      a(a_rank(i)) = partial_rank;
+      a(a_rank(iter_i)) = partial_rank;
     }
     amin[axis_index] = 1.0;
     amax[axis_index] = partial_rank;
@@ -1914,8 +1988,8 @@ int Plot_Window::normalize(
 
   // Gaussianize the data, mapping the old median to 0 in the new Gaussian N(0,1).
   case Control_Panel_Window::NORMALIZATION_GAUSSIANIZE:
-    for( int i=0; i<npoints; i++) {
-      a(a_rank(i)) = (1.0/5.0) * (float)gsl_cdf_ugaussian_Pinv((double)(float(i+1) / (float)(npoints+2)));
+    for( int iter_i=0; iter_i<npoints; iter_i++) {
+      a(a_rank(iter_i)) = (1.0/5.0) * float(gsl_cdf_ugaussian_Pinv(double((float(iter_i+1) / (float)(npoints+2)))));
     }
     amin[axis_index] = -1.0;
     amax[axis_index] = +1.0;
@@ -1934,8 +2008,9 @@ int Plot_Window::normalize(
 
     // make a random permutation of a();
     gsl_ran_shuffle( vp_gsl_rng, tmp_indices.data(), npoints, sizeof(int));
-    for( int i=0; i<npoints; i++) {
-      a(i) = acopy(tmp_indices(i));
+    for( int iter_i = 0; iter_i < npoints;  iter_i++)
+    {
+      a(iter_i) = acopy(tmp_indices(iter_i));
     }
   }
   return 1;
@@ -2177,21 +2252,25 @@ void Plot_Window::upper_triangle_incr( int &i, int &j, const int n)
 {
   i++;
   j++;
-  if (i==n && j==n) {
+  if (i==n && j==n)
+	{
     i = 0;
     j = 1;
   }
-  else if (j==n) {
+  else if (j==n)
+	{
     int d = j-i;
     d++;
     i = 0;
     j = d;
-    if (j>=n) {
+    if (j>=n)
+		{
       i = n-1;
       j = 0;
     }
   }
-  else if (i==n) {
+  else if (i==n)
+	{
     int d = i-j;
     d--;
     i = d;
@@ -2218,8 +2297,8 @@ void Plot_Window::redraw_all_plots( int p)
   // selected set and set arrays *before* all the other plots get redrawn.
   // Ugh.  Also, they are queued in reverse order, since is the order in which
   // fltk will actually draw() them (most recently defined gets drawn first).
-  for( int i=0; i<nplots; i++) {
-    int j = (p+i)%nplots;
+  for( int iter_i=0; iter_i<nplots; iter_i++) {
+    int j = (p+iter_i)%nplots;
     assert (j>=0);
     assert (j<nplots);
     pws[j]->compute_histograms();
@@ -2244,7 +2323,8 @@ void Plot_Window::run_timing_test()
   (void) gettimeofday(&tp, (struct timezone *)0);
   double start_time = (double)tp.tv_sec + 1.0E-6*(double)tp.tv_usec;
 
-  for (int i=0; i<nframes; i++) {
+  for (int iter_i = 0; iter_i<nframes; iter_i++)
+  {
     invert_selection();
     Fl::check();  // this flushes all the pending redraws.
   }
@@ -2377,16 +2457,18 @@ void Plot_Window::toggle_display_deselected( Fl_Widget *o)
 void Plot_Window::initialize_selection()
 {
   // Loop: Reset selection box for successive plots.
-  for( int i=0; i<nplots; i++) {
-    pws[i]->reset_selection_box();
+  for( int iter_i=0; iter_i<nplots; iter_i++)
+  {
+    pws[iter_i]->reset_selection_box();
   }
 
   // all points start out unselected (i.e. rendered using brush[0]);
   brushes[0]->count = npoints;
 
   // no other brushes render anything to start out.
-  for (int i=1; i<NBRUSHES; i++) {
-    brushes[i]->count = 0;
+  for (int iter_i=1; iter_i<NBRUSHES; iter_i++)
+  {
+    brushes[iter_i]->count = 0;
   }
   reset_selection_arrays();
 }
@@ -2411,14 +2493,15 @@ void Plot_Window::clear_selections( Fl_Widget *o)
 void Plot_Window::select_on_string( const char *str, int a_col)
 {
   if( Data_File_Manager::column_info[a_col].hasASCII && a_col>=0) {
-    for(int i=0;i<npoints;i++) {
-      const char *label_a =
-        Data_File_Manager::column_info[a_col].ascii_value(
-          (int) Data_File_Manager::column_info[a_col].points(i)).c_str();
-      inside_footprint(i) = (label_a && strstr(label_a,str))?1:0;
+    for(int iter_i=0; iter_i<npoints; iter_i++)
+    {
+      const char * label_a =
+        Data_File_Manager::column_info[a_col].ascii_value( (int) Data_File_Manager::column_info[a_col].points(iter_i)).c_str();
+      inside_footprint(iter_i) = (label_a && strstr(label_a,str)) ? 1 : 0;
     }
   }
-  else {
+  else 
+  {
     // what should select_on_string() do here, for pure numerical data?
   }
   update_selection_from_footprint();
