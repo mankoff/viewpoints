@@ -4,6 +4,7 @@ project(viewpoints)
 set (CPACK_INSTALL_PREFIX "/usr")
 set (${PROJECT_NAME}_VERSION_MAJOR 0)
 set (${PROJECT_NAME}_VERSION_MINOR 1)
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 find_package(FLTK REQUIRED)
@@ -12,6 +13,7 @@ find_package(OpenGL REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Blitzpp REQUIRED)
 find_package(CFITSIO REQUIRED)
+find_package(ROOT REQUIRED)
 
 #IF(APPLE)
 #	SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
@@ -89,7 +91,8 @@ include_directories(${Blitz_INCLUDE_DIR}
                     ${Boost_INCLUDE_DIRS}
                     ${OPENGL_INCLUDE_DIRS}
                     ${GLUT_INCLUDE_DIRS}
-                    ${CFITSIO_INCLUDE_DIR})
+                    ${CFITSIO_INCLUDE_DIR}
+                    ${ROOT_INCLUDE_DIR})
 
 
 include_directories(${PROJECT_SOURCE_DIR}/inc)
