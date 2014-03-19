@@ -53,6 +53,35 @@
 // a member variable rather than just a pointer
 #include "column_info.h"
 
+#include <TROOT.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TLeaf.h>
+
+#include <TLeafF.h>
+#include <TLeafI.h>
+#include <TLeafD.h>
+#include <TLeafB.h>
+
+#include <TKey.h>
+#include <TH1.h>
+
+#include <memory>
+#include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
+
+namespace viewpoints
+{
+  enum file_extension
+  {
+    ascii,
+    binary,
+    fits,
+    root,
+    all
+  };
+}
+
 //***************************************************************************
 // Class: Data_File_Manager
 //
@@ -207,6 +236,8 @@ class Data_File_Manager
 
     // I/O parameters and state variables
     int nSkipHeaderLines;
+    viewpoints::file_extension input_file_type, output_file_type;
+    bool is_ascii;
     int inputFileType_, outputFileType_, isAsciiData;
     int doAppend, doMerge, writeAllData_;
     int readSelectionInfo_, writeSelectionInfo_;
@@ -237,6 +268,7 @@ class Data_File_Manager
     int read_ascii_file_with_headers();
     int read_binary_file_with_headers();
     int read_table_from_fits_file();
+    int read_tree_from_root_file();
     void create_default_data( int nvars_in);
 
     int findOutputFile();
@@ -245,6 +277,7 @@ class Data_File_Manager
     int write_ascii_file_with_headers();
     int write_binary_file_with_headers();
     int write_table_to_fits_file();
+    int write_table_to_root_file();
 
     // Column label edit window methods
     static void edit_column_info( Fl_Widget *o, void *);
@@ -305,6 +338,9 @@ class Data_File_Manager
     // command line argument.  NOTE: 0 means read to EOF and/or end of line.
     int npoints_cmd_line;
     int nvars_cmd_line;
+
+    std::shared_ptr<TFile> m_root_file_handle;
+		//
 
     // Define statics to hold header format
     static const int MAX_HEADER_LENGTH;
