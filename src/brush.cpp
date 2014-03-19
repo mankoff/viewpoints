@@ -121,16 +121,25 @@ Fl_Pixmap Brush::image_osaka_63( Symbol_Menu::idata_osaka_63);
 // Brush::Brush() --  Default constructor with no arguments.  Used only for
 // serialization.  Do nothing except call the constructor for the parent
 // class, Fl_Group, with dummy arguments.
-Brush::Brush() : Fl_Group( 10, 10, 10, 10),
-  brush_symbol_save(0), brush_size_save( 0),
-  alpha_save( 1.0), cutoff_save( 0.0), lum1_save( 0.2), lum2_save( 1.0),
-  red_value_save( 1.0), green_value_save( 0), blue_value_save( 0), index(0)
+Brush::Brush() : 
+  Fl_Group(10, 10, 10, 10),
+  brush_symbol_save(0),
+  brush_size_save(0),
+  alpha_save(1.0),
+  cutoff_save(0.0),
+  lum1_save(0.2),
+  lum2_save(1.0),
+  red_value_save(1.0),
+  green_value_save(0),
+  blue_value_save(0),
+  index(0)
 {}
 
 //***************************************************************************
 // Brush::Brush( x, y, w, h) --  Constructor.  Set parameters and tab shape,
 // invoke the make_widgets() method to generate the control panel
-Brush::Brush(int x, int y, int w, int h) : Fl_Group( x, y, w, h)
+Brush::Brush(int in_x, int in_y, int in_w, int in_h) :
+  Fl_Group( in_x, in_y, in_w, in_h)
 {
   // Set parametera
   index = nbrushes++;
@@ -421,12 +430,13 @@ void Brush::build_symbol_menu()
     if( i < NSYMBOLS) {
       m->labeltype_ = FL_NORMAL_LABEL;
       m->labelsize_ = 14;
-      m->user_data_ = static_cast<void*>(&i);
+      m->user_data_ = (void *)size_t(i);
     }
-    else {
+    else
+		{
       m->labeltype_ = 0;
       m->labelsize_ = 0;
-      m->user_data_ = nullptr;
+      m->user_data_ = (void *)0;
     }
   }
 
