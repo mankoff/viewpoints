@@ -1,8 +1,48 @@
-viewpoints -- Fast interactive linked plotting of large multivariate data sets.
+VIEWPOINTS
+==========
 
-This Github repository is a fork of https://www.assembla.com/wiki/show/viewpoints
+viewpoints is a fast interactive linked plotting of large multivariante data sets.
+
+Dependency
+----------
+ * blitz++
+ * OpenGL and GLUT
+ * root-system (root.cern.ch)
+ * boost (specifically boost serialize)
+ * C++11 (nullptr, std::shared_ptr)
+ * FLTK  (www.fltk.org)
+ * CFITSIO (Flexible Image Transport System)
+ * GSL   (CNU Scientific Library)
+
+
+This is a fork of https://www.assembla.com/wiki/show/viewpoints (originall github repository jblomo/viewpoints). The build proceedure has been updated. Original used a makefile to build. This revision now use cmake to correctly find dependencies and link against them. Further Fl_flews (a custom FLTK widget librarty is included as a submodule). From the project root directory (pick a release type):
+
+
+```
+mkdir -p build/gcc/
+cd build/gcc/
+cmake ../.. -DCMAKE_BUILD_TYPE=(DEBUG|RELEASE)
+make all
+```
+
+This will end up building all the necessary libraries and exectubles.
+
+```
+CC=clang" CXX=clang++ cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
+CC=gcc   CXX=g++     cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
+```
+
+If it builds,
+
+```
+./vp ../../sample_data/sampledata.txt 
+```
+
+
+
 
 Original README follows:
+------------------------
 
 Creon Levit <Creon.Levit@nasa.gov>   and    Paul Gazis <Paul.R.Gazis@nasa.gov>
 
