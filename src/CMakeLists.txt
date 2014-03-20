@@ -22,3 +22,10 @@ add_executable (vp ${viewpoint_sources})
 add_dependencies(vp flews-static)
 target_link_libraries(vp flews-static ${FLTK_LIBRARY} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${CFITSIO_LIBRARIES} ${Boost_SERIALIZATION_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${ROOT_LIBRARIES})
 
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
+
+set_target_properties( vp PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+)

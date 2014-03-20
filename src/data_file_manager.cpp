@@ -407,7 +407,9 @@ int Data_File_Manager::load_data_file()
   {
     cout << "Data_File_Manager::load_data_file: " << "Problems reading file <" << inFileSpec.c_str() << ">" << endl;
     if (!uHaveOldData)
+    {
       create_default_data(4);
+    }
     else
     {
       nvars = old_nvars;
@@ -1037,13 +1039,15 @@ int Data_File_Manager::read_ascii_file_with_headers()
 	{
     if (inStream->eof() != 0)
 		{
+      cout << "found end of file" << endl;
 			break;
 		}
-    getline( *inStream, line, '\n');
+    getline( *inStream, line);//this is problematic (1) windows use \r
+    //(2) this defaults to \n; [assuming linux]
     nRead++;
 
     // Skip empty lines without updating the LASTHEADERLINE buffer
-    if (line.length() == 0)
+    if (line.length() == 0)//
     {
       nHeaderLines++;
       continue;
@@ -1051,8 +1055,8 @@ int Data_File_Manager::read_ascii_file_with_headers()
 
     // If this line is supposed to be skipped or if it begins with a comment
     // character, skip it and update the LASTHEADERLINE buffer
-    if( iLine < nSkipHeaderLines ||
-        line.length() == 0 || line.find_first_of( "!#%") == 0)
+    if( (iLine < nSkipHeaderLines) ||
+        (line.find_first_of( "!#%") == 0))
 		{
       lastHeaderLine = line;
       nHeaderLines++;
