@@ -1047,7 +1047,7 @@ int Data_File_Manager::read_ascii_file_with_headers()
     nRead++;
 
     // Skip empty lines without updating the LASTHEADERLINE buffer
-    if (line.length() == 0)//
+    if (line.length() == 0 || (line == "\r"))//(1) linux/OS X; (2) windows;
     {
       nHeaderLines++;
       continue;
