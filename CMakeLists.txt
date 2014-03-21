@@ -15,17 +15,10 @@ find_package(Blitzpp REQUIRED)
 find_package(CFITSIO REQUIRED)
 find_package(ROOT REQUIRED)
 
-#IF(APPLE)
-#	SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
-#	ADD_EXECUTABLE(mesh_view mesh_view.cpp)
-#ENDIF(APPLE)
-
-#TARGET_LINK_LIBRARIES(mesh_view ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
-
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.54 COMPONENTS system filesystem unit_test_framework serialization REQUIRED)
+find_package(Boost 1.46 COMPONENTS system serialization REQUIRED)
 
 SET (CMAKE_C_FLAGS                "-std=c99 -pedantic -O0 -g3 -Wall -W -fPIC")
 SET (CMAKE_C_FLAGS_DEBUG          "-std=c99 -pedantic -O0 -g3 -fPIC")
@@ -40,7 +33,7 @@ SET (CMAKE_CXX_FLAGS_RELEASE        "-std=c++11 -pedantic -O3 -DNDEBUG -fPIC")
 SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-std=c++11 -pedantic -O2 -g2 -fPIC")
 
 IF(APPLE)
-	SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL")
+	SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
 ENDIF(APPLE)
 
 
