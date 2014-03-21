@@ -8,11 +8,11 @@ Dependency
  * blitz++
  * OpenGL and GLUT
  * root-system (root.cern.ch)
- * boost (specifically boost serialize)
- * C++11 (nullptr, std::shared_ptr)
- * FLTK  (www.fltk.org)
- * CFITSIO (Flexible Image Transport System)
- * GSL   (CNU Scientific Library)
+ * boost     (specifically boost serialize)
+ * C++11     (nullptr, std::shared_ptr)
+ * FLTK 1.3  (www.fltk.org)
+ * CFITSIO   (Flexible Image Transport System)
+ * GSL       (GNU Scientific Library)
 
 
 This is a fork of https://www.assembla.com/wiki/show/viewpoints (originall github repository jblomo/viewpoints). The build proceedure has been updated. Original used a makefile to build. This revision now use cmake to correctly find dependencies and link against them. Further Fl_flews (a custom FLTK widget librarty is included as a submodule). From the project root directory (pick a release type):
