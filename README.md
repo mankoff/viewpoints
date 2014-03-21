@@ -26,7 +26,10 @@ Dependency
  * GSL       (GNU Scientific Library)
 
 ```
-sudo apt-get --install-suggests install libblitz0-dev libboost1.54-all-dev libfltk-gl1.3 libfltk1.3-dev libfltk-cairo1.3 root-system-bin libroot-tree-dev libroot-io-dev libcfitsio3-dev libgsl0-dev g++-4.8 libx11-dev libxinerama1 libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev cmake
+sudo apt-get --install-suggests install libblitz0-dev libboost1.54-all-dev libfltk-gl1.3 \
+libfltk1.3-dev libfltk-cairo1.3 root-system-bin libroot-tree-dev libroot-io-dev \
+libcfitsio3-dev libgsl0-dev g++-4.8 libx11-dev libxinerama1 libgl1-mesa-dev \
+libglu1-mesa-dev freeglut3-dev cmake
 ```
 
 
