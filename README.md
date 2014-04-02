@@ -24,6 +24,7 @@ Dependency
  * FLTK 1.3    (www.fltk.org)
  * CFITSIO     (Flexible Image Transport System)
  * GSL         (GNU Scientific Library)
+ * cmake       (current build system)
 
 ```
 sudo apt-get --install-suggests install libblitz0-dev libboost1.54-all-dev \
