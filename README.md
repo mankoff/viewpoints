@@ -26,11 +26,37 @@ Dependency
  * GSL         (GNU Scientific Library)
 
 ```
-sudo apt-get --install-suggests install libblitz0-dev libboost1.54-all-dev libfltk-gl1.3 \
-libfltk1.3-dev libfltk-cairo1.3 root-system-bin libroot-tree-dev libroot-io-dev \
-libcfitsio3-dev libgsl0-dev g++-4.8 libx11-dev libxinerama1 libgl1-mesa-dev \
-libglu1-mesa-dev freeglut3-dev cmake
+sudo apt-get --install-suggests install libblitz0-dev libboost1.54-all-dev \
+libfltk1.3-dev root-system-bin libroot-tree-dev libcfitsio3-dev \
+libgsl0-dev g++-4.8 gfortran libxcb-xinerama0-dev libxinerama-dev \
+libgl-dev libgl1-mesa-dev libgl1-mesa-glx-dev libglu-dev libglu1-mesa-dev \
+libxft2-dev libgl1-mesa-dri-experimental freeglut3-dev cmake
 ```
+
+This is a fork of https://www.assembla.com/wiki/show/viewpoints (originall github repository jblomo/viewpoints). The build proceedure has been updated. Original used a makefile to build. This revision now use cmake to correctly find dependencies and link against them. Further Fl_flews (a custom FLTK widget librarty is included as a submodule). From the project root directory (pick a release type):
+
+```
+mkdir -p build/gcc/
+cd build/gcc/
+cmake ../.. -DCMAKE_BUILD_TYPE=(DEBUG|RELEASE)
+make all
+```
+
+This will end up building all the necessary libraries and exectubles.
+
+```
+CC=clang" CXX=clang++ cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
+CC=gcc   CXX=g++     cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
+```
+
+If it builds,
+
+```
+./vp ../../sample_data/sampledata.txt 
+```
+
+Some Notes (DEPENDENCY INFO, ....)
+==========
 
 fl_flews
 --------
@@ -54,6 +80,134 @@ libxrender1
 zlib1g
 ```
 
+So, using `apt-rdepends` or `apt-cache depends` on the following :
+
+```
+for x in libc6 libexpat1 libfontconfig1 libfreetype6 libgcc1 libstdc++6 \
+libx11-6 libxau6 libxcb1 libxdmcp6 libxext6 libxft2 libxinerama1 \
+libxrender1 zlib1g; 
+do 
+  echo "${x}"; echo "`apt-cache depends ${x} | grep Depend | cut -f 2 -d: | grep -v multiarch-support `"; 
+done
+libc6
+ libgcc1
+libexpat1
+ libc6
+libfontconfig1
+ libc6
+ libexpat1
+ libfreetype6
+ fontconfig-config
+libfreetype6
+ libc6
+ zlib1g
+libgcc1
+ gcc-4.8-base
+ libc6
+libstdc++6
+ gcc-4.8-base
+ libc6
+ libgcc1
+libx11-6
+ libc6
+ libxcb1
+ libx11-data
+libxau6
+ libc6
+libxcb1
+ libc6
+ libxau6
+ libxdmcp6
+libxdmcp6
+ libc6
+libxext6
+ libc6
+ libx11-6
+libxft2
+ libc6
+ libfontconfig1
+ libfreetype6
+ libx11-6
+ libxrender1
+libxinerama1
+ libc6
+ libx11-6
+ libxext6
+libxrender1
+ libc6
+ libx11-6
+zlib1g
+ libc6
+```
+
+ **1** So (notice `libc6` is a dependency on all, it can be removed - along with `libgcc1`);
+```
+libexpat1
+libfontconfig1
+ libexpat1
+ libfreetype6
+ fontconfig-config
+libfreetype6
+ zlib1g
+libstdc++6
+ gcc-4.8-base
+libx11-6
+ libxcb1
+ libx11-data
+libxau6
+libxcb1
+ libxau6
+ libxdmcp6
+libxdmcp6
+libxext6
+ libx11-6
+libxft2
+ libfontconfig1
+ libfreetype6
+ libx11-6
+ libxrender1
+libxinerama1
+ libx11-6
+ libxext6
+libxrender1
+ libx11-6
+zlib1g
+```
+ **2** Substitute each dependency list inplace;
+```
+libstdc++6
+libxft2
+ libfontconfig1
+ libexpat1
+ libfreetype6
+ zlib1g
+ fontconfig-config
+ libfreetype6
+ libx11-6
+ libxrender1
+ libx11-6
+ libxcb1
+ libxau6
+ libxdmcp6
+ libx11-data
+libxinerama1
+ libx11-6
+ libxcb1
+ libx11-data
+ libxext6
+ libx11-6
+ libxcb1
+ libxau6
+ libxdmcp6
+ libx11-data
+```
+ **3** Grab top level packages.
+```
+libstdc++6
+libxft2
+libxinerama1
+``` 
+
 To get the static link Dependency (from the cmake fl\_flews build directory BUILD\_DIR/fl_flews/src and ignoring fltk1.1):
 ```
 make clean && make all VERBOSE=1 | tr ' ' '\n' | grep -v home | grep -v ^-D | grep -v ^-W | grep -v ^-I | grep -v ^-L | grep lib
@@ -67,8 +221,14 @@ make clean && make all VERBOSE=1 | tr ' ' '\n' | grep -v home | grep -v ^-D | gr
 libfltk1.3-dev
 ```
 
-Build Dependency
-----------------
+So the full list for fl_flews dependencies becomes,
+```
+libstdc++6 libxft2 libxinerama1 libfltk1.3-dev
+```
+**NOTE** `libfltk1.3-dev` suggests/depends on `libstdc++6`, `libxft2`, `libxinerama1`
+
+Library Dependency
+------------------
 To get the static link Dependency (from cmake viewpoints build director BULD\_DIR/src and ignoring fltk1.1):
 ```
 make clean && make -j2 all VERBOSE=1 2>&1 | tr ' ' '\n'  | grep -v home | grep -v ^-D | grep -v ^-W | grep -v ^-I | grep -v ^-L | grep lib
@@ -133,7 +293,6 @@ ldd vp | cut -f1 -d= | grep -v ld-linux
 ```
 
 To get the list of packages that vp depends on:
-
 ```
 ldd vp | cut -f2 -d'>' | cut -f1 -d'(' | sort | sed 's/[ \t]//g' | xargs -n1 apt-file search 
 libc6: /lib64/ld-linux-x86-64.so.2
@@ -300,11 +459,9 @@ libexpat1
 libfontconfig1
 libfreetype6
 libgcc1
-libgcc1-dbg
 libgl1-mesa-glx
 libglapi-mesa
 libglu1-mesa
-libgsl0-dbg
 libgsl0ldbl
 liblzma5
 libpcre3
@@ -316,7 +473,6 @@ libroot-tree5.34
 libssl1.0.0
 libstdc++6
 libx11-6
-libx11-6-dbg
 libx11-xcb1
 libxau6
 libxcb1
@@ -333,27 +489,142 @@ libxxf86vm1
 zlib1g
 ```
 
-This is a fork of https://www.assembla.com/wiki/show/viewpoints (originall github repository jblomo/viewpoints). The build proceedure has been updated. Original used a makefile to build. This revision now use cmake to correctly find dependencies and link against them. Further Fl_flews (a custom FLTK widget librarty is included as a submodule). From the project root directory (pick a release type):
+So the list is,
+
+```
+libboost-serialization1.54.0 libc6 libcfitsio3 libdrm2 libexpat1 libfontconfig1 libfreetype6 libgcc1 libgl1-mesa-glx libglapi-mesa libglu1-mesa libgsl0ldbl liblzma5 libpcre3 libroot-core5.34 libroot-io5.34 libroot-math-mathcore5.34 libroot-net5.34 libroot-tree5.34 libssl1.0.0 libstdc++6 libx11-6 libx11-xcb1 libxau6 libxcb1 libxcb-dri2-0 libxcb-glx0 libxdamage1 libxdmcp6 libxext6 libxfixes3 libxft2 libxinerama1 libxrender1 libxxf86vm1 zlib1g
+```
 
 
 ```
-mkdir -p build/gcc/
-cd build/gcc/
-cmake ../.. -DCMAKE_BUILD_TYPE=(DEBUG|RELEASE)
-make all
+for x in libboost-serialization1.54.0 libc6 libcfitsio3 \
+libdrm2 libexpat1 libfontconfig1 libfreetype6 libgcc1 \
+libgl1-mesa-glx libglapi-mesa libglu1-mesa libgsl0-dbg \
+libgsl0ldbl liblzma5 libpcre3 libroot-core5.34 libroot-io5.34 \
+libroot-math-mathcore5.34 libroot-net5.34 libroot-tree5.34 \
+libssl1.0.0 libstdc++6 libx11-6 libx11-6-dbg libx11-xcb1 \
+libxau6 libxcb1 libxcb-dri2-0 libxcb-glx0 libxdamage1 libxdmcp6 \
+libxext6 libxfixes3 libxft2 libxinerama1 libxrender1 \
+libxxf86vm1 zlib1g; 
+do 
+	echo ${x}; 
+	apt-cache depends ${x} | grep Depends: | grep -v Pre | grep -v multiarch-support
+done
 ```
 
-This will end up building all the necessary libraries and exectubles.
+Returns:
+```
+libboost-serialization1.54.0
+  Depends: libstdc++6
+libcfitsio3
+  Depends: libc6
+libexpat1
+libfontconfig1
+  Depends: libexpat1
+  Depends: libfreetype6
+  Depends: fontconfig-config
+libfreetype6
+libgl1-mesa-glx
+  Depends: libdrm2
+  Depends: libglapi-mesa
+  Depends: libx11-6
+  Depends: libx11-xcb1
+  Depends: libxcb-dri2-0
+  Depends: libxcb-glx0
+  Depends: libxcb1
+  Depends: libxdamage1
+  Depends: libxext6
+  Depends: libxfixes3
+  Depends: libxxf86vm1
+libglapi-mesa
+libglu1-mesa
+  Depends: libgl1-mesa-glx
+  Depends: <libgl1>
+  Depends: libstdc++6
+libgsl0ldbl
+liblzma5
+libpcre3
+libroot-core5.34
+  Depends: root-system-common
+  Depends: libgcc1
+  Depends: liblzma5
+  Depends: libpcre3
+  Depends: libstdc++6
+libroot-io5.34
+  Depends: libroot-core5.34
+  Depends: libstdc++6
+libroot-math-mathcore5.34
+  Depends: libroot-core5.34
+  Depends: libstdc++6
+libroot-net5.34
+  Depends: libroot-core5.34
+  Depends: libroot-io5.34
+  Depends: libroot-math-mathcore5.34
+  Depends: libssl1.0.0
+  Depends: libstdc++6
+libroot-tree5.34
+  Depends: libroot-core5.34
+  Depends: libroot-io5.34
+  Depends: libroot-net5.34
+  Depends: libstdc++6
+libssl1.0.0
+ |Depends: debconf
+  Depends: <debconf-2.0>
+libstdc++6
+  Depends: libgcc1
+libx11-6
+  Depends: libxcb1
+  Depends: libx11-data
+libx11-6-dbg
+  Depends: libx11-6
+libx11-xcb1
+libxau6
+libxcb1
+  Depends: libxau6
+  Depends: libxdmcp6
+libxcb-dri2-0
+  Depends: libxcb1
+libxcb-glx0
+  Depends: libxcb1
+libxdamage1
+  Depends: libx11-6
+libxdmcp6
+libxext6
+  Depends: libx11-6
+libxfixes3
+  Depends: libx11-6
+libxft2
+  Depends: libfontconfig1
+  Depends: libfreetype6
+  Depends: libx11-6
+  Depends: libxrender1
+libxinerama1
+  Depends: libx11-6
+  Depends: libxext6
+libxrender1
+  Depends: libx11-6
+libxxf86vm1
+  Depends: libx11-6
+  Depends: libxext6
+```
+
+Reduces to:
 
 ```
-CC=clang" CXX=clang++ cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
-CC=gcc   CXX=g++     cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
+libboost-serialization1.54.0
+libcfitsio3
+libgl1-mesa-glx
+libglu1-mesa
+libgsl0ldbl
+libroot-tree5.34
+libxft2
+libxinerama1
 ```
 
-If it builds,
+Noteing that `libfltk1.3-dev` depends on `libgl1-mesa-glx`,`libxft2`, and `libxinerama1`. We get the minimal library dependency as,
 
 ```
-./vp ../../sample_data/sampledata.txt 
+libboost-serialization1.54.0 libcfitsio3 libglu1-mesa libgsl0ldbl libroot-tree5.34 libfltk1.3-dev
 ```
 
 
