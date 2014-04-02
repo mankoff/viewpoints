@@ -32,13 +32,56 @@ libcfitsio3-dev libgsl0-dev g++-4.8 libx11-dev libxinerama1 libgl1-mesa-dev \
 libglu1-mesa-dev freeglut3-dev cmake
 ```
 
-Additional possible depenencies (some of these may have to be reorder):
+fl_flews
+--------
+Dynamic Link Dependency (removing debugging libraries):
 ```
-libboost-serialization1.54.0  libdrm2 libexpat1 libfontconfig1 libfreetype6 libgcc1 libgcc1-dbg libgl1-mesa-glx libglapi-mesa libglu1-mesa libgsl0-dbg libgsl0ldbl liblzma5 libpcre3 libroot-core5.34 libroot-io5.34 libroot-math-mathcore5.34 libroot-net5.34 libroot-tree5.34 libssl1.0.0 libstdc++6 libx11-6 libx11-xcb1 libxau6 libxcb1 libxcb-dri2-0 libxcb-glx0 libxdamage1 libxdmcp6 libxext6 libxfixes3 libxft2 libxinerama1 libxrender1 libxxf86vm1 zlib1g
+ldd testflews  | cut -f2 -d'>'  | cut -f1 -d'(' | sort | xargs -n1 apt-file search | cut -f1 -d: | sort | uniq 
+libc6
+libexpat1
+libfontconfig1
+libfreetype6
+libgcc1
+libstdc++6
+libx11-6
+libxau6
+libxcb1
+libxdmcp6
+libxext6
+libxft2
+libxinerama1
+libxrender1
+zlib1g
+```
+
+To get the static link Dependency (from the cmake fl\_flews build directory BUILD\_DIR/fl_flews/src and ignoring fltk1.1):
+```
+make clean && make all VERBOSE=1 | tr ' ' '\n' | grep -v home | grep -v ^-D | grep -v ^-W | grep -v ^-I | grep -v ^-L | grep lib
+/usr/lib/x86_64-linux-gnu/libfltk.a
+/usr/lib/x86_64-linux-gnu/libfltk_gl.a
+/usr/lib/x86_64-linux-gnu/libfltk_forms.a
+/usr/lib/x86_64-linux-gnu/libfltk_images.a
+```
+**OR**
+```
+libfltk1.3-dev
 ```
 
 Build Dependency
 ----------------
+To get the static link Dependency (from cmake viewpoints build director BULD\_DIR/src and ignoring fltk1.1):
+```
+make clean && make -j2 all VERBOSE=1 2>&1 | tr ' ' '\n'  | grep -v home | grep -v ^-D | grep -v ^-W | grep -v ^-I | grep -v ^-L | grep lib
+../fl_flews/src/libflews.a
+/usr/lib/x86_64-linux-gnu/libfltk_images.a
+/usr/lib/x86_64-linux-gnu/libfltk_forms.a
+/usr/lib/x86_64-linux-gnu/libfltk_gl.a
+/usr/lib/x86_64-linux-gnu/libfltk.a
+```
+**OR**
+```
+libfltk1.3-dev
+```
 
 To get the list of libraries that are dynamically loaded when calling viewpoints:
 ```
