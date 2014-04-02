@@ -19,11 +19,11 @@ Dependency
  * blitz++
  * OpenGL and GLUT
  * root-system (root.cern.ch)
- * boost     (specifically boost serialize)
- * C++11     (nullptr, std::shared_ptr)
- * FLTK 1.3  (www.fltk.org)
- * CFITSIO   (Flexible Image Transport System)
- * GSL       (GNU Scientific Library)
+ * boost       (specifically boost serialize)
+ * C++11       (nullptr, std::shared_ptr)
+ * FLTK 1.3    (www.fltk.org)
+ * CFITSIO     (Flexible Image Transport System)
+ * GSL         (GNU Scientific Library)
 
 ```
 sudo apt-get --install-suggests install libblitz0-dev libboost1.54-all-dev libfltk-gl1.3 \
@@ -32,6 +32,263 @@ libcfitsio3-dev libgsl0-dev g++-4.8 libx11-dev libxinerama1 libgl1-mesa-dev \
 libglu1-mesa-dev freeglut3-dev cmake
 ```
 
+Additional possible depenencies (some of these may have to be reorder):
+```
+libboost-serialization1.54.0  libdrm2 libexpat1 libfontconfig1 libfreetype6 libgcc1 libgcc1-dbg libgl1-mesa-glx libglapi-mesa libglu1-mesa libgsl0-dbg libgsl0ldbl liblzma5 libpcre3 libroot-core5.34 libroot-io5.34 libroot-math-mathcore5.34 libroot-net5.34 libroot-tree5.34 libssl1.0.0 libstdc++6 libx11-6 libx11-xcb1 libxau6 libxcb1 libxcb-dri2-0 libxcb-glx0 libxdamage1 libxdmcp6 libxext6 libxfixes3 libxft2 libxinerama1 libxrender1 libxxf86vm1 zlib1g
+```
+
+Build Dependency
+----------------
+
+To get the list of libraries that are dynamically loaded when calling viewpoints:
+```
+ldd vp | cut -f1 -d= | grep -v ld-linux
+	linux-vdso.so.1 
+	libGL.so.1 
+	libX11.so.6 
+	libXext.so.6 
+	libGLU.so.1 
+	libgsl.so.0 
+	libgslcblas.so.0 
+	libm.so.6 
+	libcfitsio.so.3 
+	libboost_serialization.so.1.54.0 
+	libCore.so.5.34 
+	libRIO.so.5.34 
+	libTree.so.5.34 
+	libdl.so.2 
+	libXft.so.2 
+	libfontconfig.so.1 
+	libXinerama.so.1 
+	libstdc++.so.6 
+	libgcc_s.so.1 
+	libpthread.so.0 
+	libc.so.6 
+	libglapi.so.0 
+	libXdamage.so.1 
+	libXfixes.so.3 
+	libX11-xcb.so.1 
+	libxcb-glx.so.0 
+	libxcb-dri2.so.0 
+	libxcb.so.1 
+	libXxf86vm.so.1 
+	libdrm.so.2 
+	libz.so.1 
+	liblzma.so.5 
+	libpcre.so.3 
+	libCint.so.5.34 
+	libThread.so.5.34 
+	libNet.so.5.34 
+	libfreetype.so.6 
+	libXrender.so.1 
+	libexpat.so.1 
+	libXau.so.6 
+	libXdmcp.so.6 
+	libMathCore.so.5.34 
+	libcrypto.so.1.0.0 
+	libssl.so.1.0.0
+```
+
+To get the list of packages that vp depends on:
+
+```
+ldd vp | cut -f2 -d'>' | cut -f1 -d'(' | sort | sed 's/[ \t]//g' | xargs -n1 apt-file search 
+libc6: /lib64/ld-linux-x86-64.so.2
+libssl1.0.0: /lib/x86_64-linux-gnu/libcrypto.so.1.0.0
+libssl1.0.0-dbg: /usr/lib/debug/lib/x86_64-linux-gnu/libcrypto.so.1.0.0
+libc6: /lib/x86_64-linux-gnu/libc.so.6
+libc6: /lib/x86_64-linux-gnu/libdl.so.2
+libexpat1: /lib/x86_64-linux-gnu/libexpat.so.1
+libexpat1: /lib/x86_64-linux-gnu/libexpat.so.1.6.0
+libgcc1: /lib/x86_64-linux-gnu/libgcc_s.so.1
+libgcc1-dbg: /usr/lib/debug/lib/x86_64-linux-gnu/libgcc_s.so.1
+liblzma5: /lib/x86_64-linux-gnu/liblzma.so.5
+liblzma5: /lib/x86_64-linux-gnu/liblzma.so.5.0.0
+libc6: /lib/x86_64-linux-gnu/libm.so.6
+libpcre3: /lib/x86_64-linux-gnu/libpcre.so.3
+libpcre3: /lib/x86_64-linux-gnu/libpcre.so.3.13.1
+libpcre3-dbg: /usr/lib/debug/lib/x86_64-linux-gnu/libpcre.so.3.13.1
+libc6: /lib/x86_64-linux-gnu/libpthread.so.0
+libssl1.0.0: /lib/x86_64-linux-gnu/libssl.so.1.0.0
+libssl1.0.0-dbg: /usr/lib/debug/lib/x86_64-linux-gnu/libssl.so.1.0.0
+zlib1g: /lib/x86_64-linux-gnu/libz.so.1
+zlib1g: /lib/x86_64-linux-gnu/libz.so.1.2.8
+libboost-serialization1.54.0: /usr/lib/libboost_serialization.so.1.54.0
+libgsl0-dbg: /usr/lib/debug/usr/lib/libgslcblas.so.0.0.0
+libgsl0ldbl: /usr/lib/libgslcblas.so.0
+libgsl0ldbl: /usr/lib/libgslcblas.so.0.0.0
+libgsl0-dbg: /usr/lib/debug/usr/lib/libgsl.so.0.17.0
+libgsl0ldbl: /usr/lib/libgsl.so.0
+libgsl0ldbl: /usr/lib/libgsl.so.0.17.0
+libcfitsio3: /usr/lib/x86_64-linux-gnu/libcfitsio.so.3
+libcfitsio3: /usr/lib/x86_64-linux-gnu/libcfitsio.so.3.310
+libcfitsio3-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libcfitsio.so.3.310
+libroot-core5.34: /usr/lib/x86_64-linux-gnu/libCint.so.5.34
+libroot-core5.34: /usr/lib/x86_64-linux-gnu/libCore.so.5.34
+libdrm2: /usr/lib/x86_64-linux-gnu/libdrm.so.2
+libdrm2: /usr/lib/x86_64-linux-gnu/libdrm.so.2.4.0
+libfontconfig1: /usr/lib/x86_64-linux-gnu/libfontconfig.so.1
+libfontconfig1: /usr/lib/x86_64-linux-gnu/libfontconfig.so.1.7.0
+libfreetype6: /usr/lib/x86_64-linux-gnu/libfreetype.so.6
+libfreetype6: /usr/lib/x86_64-linux-gnu/libfreetype.so.6.10.1
+libglapi-mesa: /usr/lib/x86_64-linux-gnu/libglapi.so.0
+libglapi-mesa: /usr/lib/x86_64-linux-gnu/libglapi.so.0.0.0
+libglapi-mesa-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libglapi.so.0.0.0
+libglu1-mesa: /usr/lib/x86_64-linux-gnu/libGLU.so.1
+libglu1-mesa: /usr/lib/x86_64-linux-gnu/libGLU.so.1.3.1
+libroot-math-mathcore5.34: /usr/lib/x86_64-linux-gnu/libMathCore.so.5.34
+libroot-net5.34: /usr/lib/x86_64-linux-gnu/libNet.so.5.34
+libroot-io5.34: /usr/lib/x86_64-linux-gnu/libRIO.so.5.34
+libstdc++6: /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+libstdc++6: /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.18
+libstdc++6-4.8-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.18
+libstdc++6-4.8-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.18-gdb.py
+libroot-core5.34: /usr/lib/x86_64-linux-gnu/libThread.so.5.34
+libroot-tree5.34: /usr/lib/x86_64-linux-gnu/libTree.so.5.34
+libx11-6: /usr/lib/x86_64-linux-gnu/libX11.so.6
+libx11-6: /usr/lib/x86_64-linux-gnu/libX11.so.6.3.0
+libx11-6-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libX11.so.6.3.0
+libx11-xcb1: /usr/lib/x86_64-linux-gnu/libX11-xcb.so.1
+libx11-xcb1: /usr/lib/x86_64-linux-gnu/libX11-xcb.so.1.0.0
+libx11-xcb1-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libX11-xcb.so.1.0.0
+libxau6: /usr/lib/x86_64-linux-gnu/libXau.so.6
+libxau6: /usr/lib/x86_64-linux-gnu/libXau.so.6.0.0
+libxau6-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libXau.so.6.0.0
+libxcb-dri2-0: /usr/lib/x86_64-linux-gnu/libxcb-dri2.so.0
+libxcb-dri2-0: /usr/lib/x86_64-linux-gnu/libxcb-dri2.so.0.0.0
+libxcb-glx0: /usr/lib/x86_64-linux-gnu/libxcb-glx.so.0
+libxcb-glx0: /usr/lib/x86_64-linux-gnu/libxcb-glx.so.0.0.0
+libxcb1: /usr/lib/x86_64-linux-gnu/libxcb.so.1
+libxcb1: /usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0
+libxdamage1: /usr/lib/x86_64-linux-gnu/libXdamage.so.1
+libxdamage1: /usr/lib/x86_64-linux-gnu/libXdamage.so.1.1.0
+libxdamage1-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libXdamage.so.1.1.0
+libxdmcp6: /usr/lib/x86_64-linux-gnu/libXdmcp.so.6
+libxdmcp6: /usr/lib/x86_64-linux-gnu/libXdmcp.so.6.0.0
+libxdmcp6-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libXdmcp.so.6.0.0
+libxext6: /usr/lib/x86_64-linux-gnu/libXext.so.6
+libxext6: /usr/lib/x86_64-linux-gnu/libXext.so.6.4.0
+libxext6-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libXext.so.6.4.0
+libxfixes3: /usr/lib/x86_64-linux-gnu/libXfixes.so.3
+libxfixes3: /usr/lib/x86_64-linux-gnu/libXfixes.so.3.1.0
+libxft2: /usr/lib/x86_64-linux-gnu/libXft.so.2
+libxft2: /usr/lib/x86_64-linux-gnu/libXft.so.2.3.1
+libxft2-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libXft.so.2.3.1
+libxinerama1: /usr/lib/x86_64-linux-gnu/libXinerama.so.1
+libxinerama1: /usr/lib/x86_64-linux-gnu/libXinerama.so.1.0.0
+libxinerama1-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libXinerama.so.1.0.0
+libxrender1: /usr/lib/x86_64-linux-gnu/libXrender.so.1
+libxrender1: /usr/lib/x86_64-linux-gnu/libXrender.so.1.3.0
+libxrender1-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/libXrender.so.1.3.0
+libxxf86vm1: /usr/lib/x86_64-linux-gnu/libXxf86vm.so.1
+libxxf86vm1: /usr/lib/x86_64-linux-gnu/libXxf86vm.so.1.0.0
+libgl1-mesa-glx: /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1
+libgl1-mesa-glx: /usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0
+libgl1-mesa-glx-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0
+
+```
+
+List of all possible packages sorted (and uniq):
+```
+ldd vp | cut -f2 -d'>' | cut -f1 -d'(' | sort | sed 's/[ \t]//g' | xargs -n1 apt-file search | cut -f1 -d: | sort | uniq
+libboost-serialization1.54.0
+libc6
+libcfitsio3
+libcfitsio3-dbg
+libdrm2
+libexpat1
+libfontconfig1
+libfreetype6
+libgcc1
+libgcc1-dbg
+libgl1-mesa-glx
+libgl1-mesa-glx-dbg
+libglapi-mesa
+libglapi-mesa-dbg
+libglu1-mesa
+libgsl0-dbg
+libgsl0ldbl
+liblzma5
+libpcre3
+libpcre3-dbg
+libroot-core5.34
+libroot-io5.34
+libroot-math-mathcore5.34
+libroot-net5.34
+libroot-tree5.34
+libssl1.0.0
+libssl1.0.0-dbg
+libstdc++6
+libstdc++6-4.8-dbg
+libx11-6
+libx11-6-dbg
+libx11-xcb1
+libx11-xcb1-dbg
+libxau6
+libxau6-dbg
+libxcb1
+libxcb-dri2-0
+libxcb-glx0
+libxdamage1
+libxdamage1-dbg
+libxdmcp6
+libxdmcp6-dbg
+libxext6
+libxext6-dbg
+libxfixes3
+libxft2
+libxft2-dbg
+libxinerama1
+libxinerama1-dbg
+libxrender1
+libxrender1-dbg
+libxxf86vm1
+zlib1g
+
+```
+
+So, now taking the above list (and remove debugging versions - at least for now),
+```
+libboost-serialization1.54.0
+libc6
+libcfitsio3
+libdrm2
+libexpat1
+libfontconfig1
+libfreetype6
+libgcc1
+libgcc1-dbg
+libgl1-mesa-glx
+libglapi-mesa
+libglu1-mesa
+libgsl0-dbg
+libgsl0ldbl
+liblzma5
+libpcre3
+libroot-core5.34
+libroot-io5.34
+libroot-math-mathcore5.34
+libroot-net5.34
+libroot-tree5.34
+libssl1.0.0
+libstdc++6
+libx11-6
+libx11-6-dbg
+libx11-xcb1
+libxau6
+libxcb1
+libxcb-dri2-0
+libxcb-glx0
+libxdamage1
+libxdmcp6
+libxext6
+libxfixes3
+libxft2
+libxinerama1
+libxrender1
+libxxf86vm1
+zlib1g
+```
 
 This is a fork of https://www.assembla.com/wiki/show/viewpoints (originall github repository jblomo/viewpoints). The build proceedure has been updated. Original used a makefile to build. This revision now use cmake to correctly find dependencies and link against them. Further Fl_flews (a custom FLTK widget librarty is included as a submodule). From the project root directory (pick a release type):
 
