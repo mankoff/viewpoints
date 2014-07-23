@@ -110,7 +110,7 @@ Vp_File_Chooser::Vp_File_Chooser(
 
     // Upper Row Group scope: Create a group to hold buttons and fields
     {
-      Fl_Group* upperRowGroup = new Fl_Group( 10, 5, 470, 35);
+      auto  upperRowGroup = new Fl_Group( 10, 5, 470, 35);
       // upperRowGroup->box( FL_UP_FRAME);
 
       // 'Favorites:' Button/menu at upper left
@@ -149,7 +149,7 @@ Vp_File_Chooser::Vp_File_Chooser(
     // preview windows below the 'Favorites' field, 'New Folder' button,
     // and 'Preview'checkbox
     {
-      Fl_Tile* browserTile = new Fl_Tile( 10, 45, 470, 225);
+      auto  browserTile = new Fl_Tile( 10, 45, 470, 225);
       browserTile->callback( (Fl_Callback*) cb_preview);
 
       // Draw File Browser on the left below the 'Show:' field
@@ -178,13 +178,13 @@ Vp_File_Chooser::Vp_File_Chooser(
     // filename input field, the file type chooser, the extension chooser,
     // and a box with the 'OK' and 'Cancel' buttons.
     {
-      Fl_Group* lowerControlsGroup = new Fl_Group( 10, 275, 470, 175);
+      auto  lowerControlsGroup = new Fl_Group( 10, 275, 470, 175);
       // lowerControlsGroup->box( FL_DOWN_FRAME);  // GROUP_FRAMING
 
       // Box with a 'Filename:' label followed by an Fl_File_Input widget to
       // manage the Filename input field
       {
-        Fl_Box* fl_box_filename = new Fl_Box( 10, 290, 105, 25, "Filename:");
+        auto  fl_box_filename = new Fl_Box( 10, 290, 105, 25, "Filename:");
         fl_box_filename->labelfont( 1);
         fl_box_filename->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
         fl_box_filename->label( filename_label);
@@ -202,7 +202,7 @@ Vp_File_Chooser::Vp_File_Chooser(
       // Box with a 'File Type:' label followed by an Fl_Choice widget to
       // manage the File Type menu
       {
-        Fl_Box* fl_box_filetype = new Fl_Box( 10, 320, 55, 25, "File Type:");
+        auto  fl_box_filetype = new Fl_Box( 10, 320, 55, 25, "File Type:");
         fl_box_filetype->labelfont( 1);
         fl_box_filetype->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
         fl_box_filetype->label( filetype_label);
@@ -222,7 +222,7 @@ Vp_File_Chooser::Vp_File_Chooser(
       // Box with a 'Show ext:' label followed by an Fl_Choice widget to
       // manage the 'File Extension' chooser
       {
-        Fl_Box* fl_box_showext = new Fl_Box( 10, 350, 105, 25, "Show ext:");
+        auto  fl_box_showext = new Fl_Box( 10, 350, 105, 25, "Show ext:");
         fl_box_showext->labelfont( 1);
         fl_box_showext->align( FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
         fl_box_showext->label( show_label);
@@ -333,7 +333,7 @@ Vp_File_Chooser::Vp_File_Chooser(
 
       // Group with 'OK' and 'Cancel' buttons at bottom right
       {
-        Fl_Group* ok_and_cancel_group = new Fl_Group( 310, 420, 175, 35);
+        auto  ok_and_cancel_group = new Fl_Group( 310, 420, 175, 35);
         // o->box( FL_ROUNDED_BOX);  // GROUP_FRAMING
         {
           okButton =
@@ -348,7 +348,7 @@ Vp_File_Chooser::Vp_File_Chooser(
           cancelButton->label( fl_cancel);
         }
         {
-          Fl_Box* fl_box_ok_and_cancel = new Fl_Box( 10, 405, 30, 25);
+          auto  fl_box_ok_and_cancel = new Fl_Box( 10, 405, 30, 25);
           Fl_Group::current()->resizable(fl_box_ok_and_cancel);
         }
         ok_and_cancel_group->end();
@@ -380,7 +380,7 @@ Vp_File_Chooser::Vp_File_Chooser(
     // FavWindow scope: Create a group to hold the favorites up, down, and
     // delete buttons
     {
-      Fl_Group* up_down_delete_group = new Fl_Group( 320, 10, 25, 95);
+      auto  up_down_delete_group = new Fl_Group( 320, 10, 25, 95);
       {
         favUpButton =
           new Fl_Button( 320, 10, 25, 25, "@8>");
@@ -404,7 +404,7 @@ Vp_File_Chooser::Vp_File_Chooser(
     // Manage Favorites Group scope: Create a group to hold a the
     // 'Manage Favorites' window
     {
-      Fl_Group* manage_favourite_group = new Fl_Group( 10, 113, 335, 29);
+      auto  manage_favourite_group = new Fl_Group( 10, 113, 335, 29);
       {
         favCancelButton =
           new Fl_Button( 273, 115, 72, 25, "Cancel");
@@ -418,7 +418,7 @@ Vp_File_Chooser::Vp_File_Chooser(
         favOkButton->label( save_label);
       }
       {
-        Fl_Box* fl_box_manage_favourite_group = new Fl_Box( 10, 115, 161, 25);
+        auto  fl_box_manage_favourite_group = new Fl_Box( 10, 115, 161, 25);
         Fl_Group::current()->resizable(fl_box_manage_favourite_group);
       }
       manage_favourite_group->end();
@@ -435,8 +435,8 @@ Vp_File_Chooser::Vp_File_Chooser(
   window->size_range( window->w(), window->h(), Fl::w(), Fl::h());
 
   // Initialize pointers to callback function, data, and directory
-  callback_ = 0;
-  data_ = 0;
+  callback_ = nullptr;
+  data_ = nullptr;
   directory_[ 0] = 0;
 
   // Invoke member functions to intialize various state variables
@@ -1466,17 +1466,17 @@ void Vp_File_Chooser::update_favorites()
   favoritesButton->clear();
   favoritesButton->add( "bla");
   favoritesButton->clear();
-  favoritesButton->add( add_favorites_label, FL_ALT + 'a', 0);
+  favoritesButton->add( add_favorites_label, FL_ALT + 'a', nullptr);
   favoritesButton->add(
-    manage_favorites_label, FL_ALT + 'm', 0, 0, FL_MENU_DIVIDER);
-  favoritesButton->add( filesystems_label, FL_ALT + 'f', 0);
+    manage_favorites_label, FL_ALT + 'm', nullptr, nullptr, FL_MENU_DIVIDER);
+  favoritesButton->add( filesystems_label, FL_ALT + 'f', nullptr);
 
   // Get and display the home directory as a name in the favorites menu
   char menuname[ 2048];
   const char *home;
   if( ( home = getenv( "HOME")) != nullptr) {
     quote_pathname( menuname, home, sizeof(menuname));
-    favoritesButton->add( menuname, FL_ALT + 'h', 0);
+    favoritesButton->add( menuname, FL_ALT + 'h', nullptr);
   }
 
   // Loop: Examine successive elements of the favorites menu.  NOTE: The index,
@@ -1490,7 +1490,7 @@ void Vp_File_Chooser::update_favorites()
 
     quote_pathname( menuname, pathname, sizeof( menuname));
 
-    if( i < 10) favoritesButton->add( menuname, FL_ALT + '0' + i, 0);
+    if( i < 10) favoritesButton->add( menuname, FL_ALT + '0' + i, nullptr);
     else favoritesButton->add( menuname);
   }
   if( i == 100) ( (Fl_Menu_Item*) favoritesButton->menu())[0].deactivate();
@@ -1524,7 +1524,7 @@ void Vp_File_Chooser::update_preview()
   if( oldimage) oldimage->release();
 
   // Initialize the preview box?
-  previewBox->image( 0);
+  previewBox->image( nullptr);
 
   // If no image exists then try to get one...
   if( !image) {
@@ -1561,7 +1561,7 @@ void Vp_File_Chooser::update_preview()
 
     // If this is a non-printable file, just show a big ?...
     if( *ptr || ptr == preview_text_) {
-      previewBox->label(filename ? "?" : 0);
+      previewBox->label(filename ? "?" : nullptr);
       previewBox->align(FL_ALIGN_CLIP);
       previewBox->labelsize(100);
       previewBox->labelfont(FL_HELVETICA);
@@ -1605,7 +1605,7 @@ void Vp_File_Chooser::update_preview()
     }
 
     previewBox->align(FL_ALIGN_CLIP);
-    previewBox->label(0);
+    previewBox->label(nullptr);
   }
 
   // Make sure the preview box gets redrawn
@@ -2429,7 +2429,7 @@ void Vp_File_Chooser::favoritesButtonCB()
   // ...or invoke the favorites dialog with a null value which should
   // reinitialize the list...
   else if( selectionValue == 1) {
-    favoritesCB( 0);
+    favoritesCB( nullptr);
   }
 
   //... or set current directory to Filesystems/My Computer

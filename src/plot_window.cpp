@@ -477,7 +477,7 @@ int Plot_Window::handle( int event)
       }
 
       // printf ("FL_DRAG & FL_BUTTON1, event_state: %x  isdrag = %d  xdragged=%f  ydragged=%f\n", Fl::event_state(), isdrag, xdragged, ydragged);
-      if( ( fabs(xdragged)+fabs(ydragged))>0)
+      if( ( std::abs(xdragged)+std::abs(ydragged))>0)
       {
         selection_changed = 1;
         if( defer_redraws_button->value())
@@ -932,7 +932,7 @@ void Plot_Window::draw_grid()
 
       for (double loop_x = nicemin_x+d_x; loop_x <= nicemax_x-0.9999*d_x; loop_x += d_x) // was: for (x=nicemin; x<nicemax+.5*d; x+=d)
       {
-        if (fabsf(loop_x)<0.0001*d_x)
+        if (std::abs(loop_x)<0.0001*d_x)
         {
           loop_x=0;
         }
@@ -952,7 +952,7 @@ void Plot_Window::draw_grid()
       // lines of constant y, where y is nice
       for (double loop_y=nicemin_y+d_y; loop_y<=nicemax_y-0.9999*d_y; loop_y+=d_y) // was: for (y=nicemin; y<nicemax+.5*d; y+=d)
       {
-        if (fabsf(loop_y) < 0.0001*d_y)
+        if (std::abs(loop_y) < 0.0001*d_y)
         {
           loop_y=0;
         }
@@ -1313,9 +1313,9 @@ void Plot_Window::update_selection_from_footprint()
 void Plot_Window::color_array_from_selection()
 {
   // Loop: initialize brush counts to zero
-  for( int iter_i = 0; iter_i < NBRUSHES;  iter_i++)
+  for(auto & brushe : brushes)
   {
-    brushes[iter_i]->count = 0;
+    brushe->count = 0;
   }
 
   // Loop: Examine successive points to fill the index arrays and their
@@ -1895,7 +1895,7 @@ int Plot_Window::normalize(
   // All data fits in window w/zero at center of axis
   case Control_Panel_Window::NORMALIZATION_MAXABS:
   {
-    float tmaxabs = fmaxf(fabsf(tmin[axis_index]),fabsf(tmax[axis_index]));
+    float tmaxabs = std::max(std::abs(tmin[axis_index]),std::abs(tmax[axis_index]));
     if( tmaxabs != 0.0) {
       amin[axis_index] = -tmaxabs;
       amax[axis_index] = tmaxabs;
@@ -2320,7 +2320,7 @@ void Plot_Window::run_timing_test()
   const int nframes = 10;
   struct timeval tp;
 
-  (void) gettimeofday(&tp, (struct timezone *)0);
+  (void) gettimeofday(&tp, (struct timezone *)nullptr);
   double start_time = (double)tp.tv_sec + 1.0E-6*(double)tp.tv_usec;
 
   for (int iter_i = 0; iter_i<nframes; iter_i++)
@@ -2329,7 +2329,7 @@ void Plot_Window::run_timing_test()
     Fl::check();  // this flushes all the pending redraws.
   }
 
-  (void) gettimeofday(&tp, (struct timezone *)0);
+  (void) gettimeofday(&tp, (struct timezone *)nullptr);
   double end_time = (double)tp.tv_sec + 1.0E-6*(double)tp.tv_usec;
 
   double elapsed_time = end_time - start_time;
@@ -2924,7 +2924,7 @@ double nicenum( const double xx, const double round)
   double f;    // fractional part of x
   double nf;   // nice, rounded fraction
   double signum = 0;
-  double x = fabs(xx);
+  double x = std::abs(xx);
 
   if( x == 0.0)
     return 0.0;

@@ -78,8 +78,8 @@ void Vp_Value_Input_Spin::input_cb(Fl_Widget*, void* v)
 {
   Vp_Value_Input_Spin& t = *(Vp_Value_Input_Spin*)v;
   double nv;
-  if (t.step()>=1.0) nv = strtol(t.input.value(), 0, 0);
-  else nv = strtod(t.input.value(), 0);
+  if (t.step()>=1.0) nv = strtol(t.input.value(), nullptr, 0);
+  else nv = strtod(t.input.value(), nullptr);
   hack_o_rama = 1;
   t.handle_push();
   t.handle_drag(t.soft()?nv:t.clamp(nv));

@@ -58,7 +58,7 @@ int make_confirmation_window( const char* text, int nButtons, int nLines)
   sMessage.append( text);
 
   // Write text to box label and align it inside box
-  Fl_Box* output_box = new Fl_Box( 5, 5, 390, nHeight, sMessage.c_str());
+  auto  output_box = new Fl_Box( 5, 5, 390, nHeight, sMessage.c_str());
   // output_box->box( FL_SHADOW_BOX);
   output_box->box( FL_NO_BOX);
   output_box->color( 7);
@@ -68,9 +68,9 @@ int make_confirmation_window( const char* text, int nButtons, int nLines)
   output_box->align( FL_ALIGN_TOP|FL_ALIGN_CENTER|FL_ALIGN_INSIDE);
 
   // Define buttons and invoke callback functions to handle them
-  Fl_Button* yes_button = new Fl_Button( 90, nHeight-20, 60, 25, "&Yes");
-  Fl_Button* no_button = new Fl_Button( 170, nHeight-20, 60, 25, "&No");
-  Fl_Button* cancel_button = new Fl_Button( 250, nHeight-20, 60, 25, "&Cancel");
+  auto  yes_button = new Fl_Button( 90, nHeight-20, 60, 25, "&Yes");
+  auto  no_button = new Fl_Button( 170, nHeight-20, 60, 25, "&No");
+  auto  cancel_button = new Fl_Button( 250, nHeight-20, 60, 25, "&Cancel");
 
   // Revise format if this is not the three-button mode
   if( nButtons == 2) {
@@ -154,7 +154,7 @@ int make_find_window( const char* text, char *res)
   sMessage.append( text);
 
   // Write text to box label and align it inside box
-  Fl_Box* output_box = new Fl_Box( 5, 5, 390, nHeight, sMessage.c_str());
+  auto  output_box = new Fl_Box( 5, 5, 390, nHeight, sMessage.c_str());
   // output_box->box( FL_SHADOW_BOX);
   output_box->box( FL_NO_BOX);
   output_box->color( 7);
@@ -164,9 +164,9 @@ int make_find_window( const char* text, char *res)
   output_box->align( FL_ALIGN_TOP|FL_ALIGN_CENTER|FL_ALIGN_INSIDE);
 
   // Define buttons and invoke callback functions to handle them
-  Fl_Button* yes_button = new Fl_Button( 90, nHeight-20, 60, 25, "&OK");
-  Fl_Button* cancel_button = new Fl_Button( 150, nHeight-20, 60, 25, "&Cancel");
-  Fl_Input* inp = new Fl_Input(60, 30, 140, 30, "Text:");
+  auto  yes_button = new Fl_Button( 90, nHeight-20, 60, 25, "&OK");
+  auto  cancel_button = new Fl_Button( 150, nHeight-20, 60, 25, "&Cancel");
+  auto  inp = new Fl_Input(60, 30, 140, 30, "Text:");
 
   Fl::focus(inp);
 

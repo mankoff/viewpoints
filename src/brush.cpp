@@ -422,7 +422,7 @@ void Brush::build_symbol_menu()
 
     // MCL XXX shouldn't we do this by calling the member functions instead?
     m->shortcut_ = 0;
-    m->callback_ = 0;
+    m->callback_ = nullptr;
     m->flags = 0;
     m->labelfont_ = 0;
     m->labelcolor_ = 0;
@@ -436,7 +436,7 @@ void Brush::build_symbol_menu()
 		{
       m->labeltype_ = 0;
       m->labelsize_ = 0;
-      m->user_data_ = (void *)0;
+      m->user_data_ = (void *)nullptr;
     }
   }
 

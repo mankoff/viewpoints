@@ -178,7 +178,7 @@ class Plot_Window : public Fl_Gl_Window
     void fill_indexVBOs();
     
     // Draw routines
-    void draw();
+    void draw() override;
     void draw_background();
     void draw_grid();
     void draw_axes();
@@ -195,7 +195,7 @@ class Plot_Window : public Fl_Gl_Window
     void clear_stencil_buffer();
 
     // Event handlers
-    int handle( int event);
+    int handle( int event) override;
     void handle_selection();
     void run_timing_test();
     

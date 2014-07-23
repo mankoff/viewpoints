@@ -134,7 +134,7 @@ int Column_Info::add_value( string sToken)
   // MCL XXX Can't we do this whole thing with operator[] ? 
 
  // Determine if this value has occurred before
-  map<string,int>::iterator iter = ascii_values_.find( sToken);
+  auto iter = ascii_values_.find( sToken);
 
   // Insert it if it's new.  Does insert know how to order strings?
   if( iter != ascii_values_.end()) {
@@ -162,13 +162,11 @@ int Column_Info::update_ascii_values_and_data()
   // Loop: Create and load a map to do the conversion
   map<int,int> conversion;
   int iAlpha = 0;
-  for(
-    map<string,int>::iterator iter = ascii_values_.begin();
-    iter != ascii_values_.end(); iter++)
+  for(auto & elem : ascii_values_)
   {
-    int iOrder = iter->second;
+    int iOrder = elem.second;
     conversion.insert( map<int,int>::value_type( iOrder, iAlpha));
-    iter->second = iAlpha;
+    elem.second = iAlpha;
     iAlpha++;
   }
 
@@ -201,21 +199,19 @@ Column_Info& Column_Info::add_info_and_update_data( Column_Info &old_info)
   // associated value to the old value.  If it doesn't occur, increment the 
   // number of keys and use this as its value.
   int nAllKeys = (old_info.ascii_values_).size();
-  for(
-    map<string,int>::iterator iter = ascii_values_.begin();
-    iter != ascii_values_.end(); iter++)
+  for(auto & elem : ascii_values_)
   {
-    string sThisKey = iter->first;
-    int iThisValue = iter->second;
+    string sThisKey = elem.first;
+    int iThisValue = elem.second;
     if( (old_info.ascii_values_).find(sThisKey) != 
         (old_info.ascii_values_).end()) {
-      int iOldValue = old_info.ascii_values_[iter->first];
-      iter->second = iOldValue;
+      int iOldValue = old_info.ascii_values_[elem.first];
+      elem.second = iOldValue;
       ascii_values_[sThisKey] = iOldValue;
       conversion_table.insert( map<int,int>::value_type( iThisValue, iOldValue));
     }
     else {
-      iter->second = nAllKeys;
+      elem.second = nAllKeys;
       ascii_values_[sThisKey] = nAllKeys;
       conversion_table.insert( map<int,int>::value_type( iThisValue, nAllKeys));
       nAllKeys++;
@@ -224,12 +220,10 @@ Column_Info& Column_Info::add_info_and_update_data( Column_Info &old_info)
 
   // Loop: Go through the old Column_Info object one more time to make sure 
   // we got everything
-  for(
-    map<string,int>::iterator old_iter = (old_info.ascii_values_).begin();
-    old_iter != (old_info.ascii_values_).end(); old_iter++)
+  for(auto & elem : (old_info.ascii_values_))
   {
-    string sOldKey = old_iter->first;
-    int iOldValue = old_iter->second;
+    string sOldKey = elem.first;
+    int iOldValue = elem.second;
     ascii_values_[sOldKey] = iOldValue;
   }
 
@@ -254,7 +248,7 @@ string Column_Info::ascii_value(int iValue)
 	{
 		return string( "BAD_INDEX_VP");
 	}
-  map<string,int>::iterator iter = ascii_values_.begin();
+  auto iter = ascii_values_.begin();
   for( int i=0; i<iValue; i++) {
     iter++;
     if( iter == ascii_values_.end()) break;

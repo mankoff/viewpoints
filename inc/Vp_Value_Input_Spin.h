@@ -89,7 +89,7 @@ private:
   int butsize;
 
   static FL_EXPORT void input_cb( Fl_Widget*,void*);
-  virtual FL_EXPORT void value_damage(); // cause damage() due to value() changing
+  virtual FL_EXPORT void value_damage() override; // cause damage() due to value() changing
   static FL_EXPORT void repeat_callback( void *);
   FL_EXPORT void increment_cb(); 
   
@@ -100,9 +100,9 @@ public:
   // Define Fl_Input object to hold the actual display
   Fl_Input input;
 
-  FL_EXPORT void draw();
-  FL_EXPORT int handle( int);
-  FL_EXPORT void resize( int, int, int, int);
+  FL_EXPORT void draw() override;
+  FL_EXPORT int handle( int) override;
+  FL_EXPORT void resize( int, int, int, int) override;
 
   void soft( char in_x) { soft_ = in_x;}
   char soft() const { return soft_;}

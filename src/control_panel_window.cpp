@@ -46,29 +46,29 @@ Fl_Menu_Item Control_Panel_Window::varindex_menu_items[ MAXVARS+2] = { Fl_Menu_I
 
 // Define an array of menu items for the normalization style menus.
 Fl_Menu_Item Control_Panel_Window::normalization_style_menu_items[] = {
-  { "none",         0, 0, (void *) NORMALIZATION_NONE,         0, 0, 0, 0, 0},
-  { "minmax",       0, 0, (void *) NORMALIZATION_MINMAX,       0, 0, 0, 0, 0},
-  { "zeromax",      0, 0, (void *) NORMALIZATION_ZEROMAX,      0, 0, 0, 0, 0},
-  { "maxabs",       0, 0, (void *) NORMALIZATION_MAXABS,       0, 0, 0, 0, 0},
-  { "trim 1e-2",    0, 0, (void *) NORMALIZATION_TRIM_1E2,     0, 0, 0, 0, 0},
-  { "trim 1e-3",    0, 0, (void *) NORMALIZATION_TRIM_1E3,     0, 0, 0, 0, 0},
-  { "three sigma",  0, 0, (void *) NORMALIZATION_THREESIGMA,   0, 0, 0, 0, 0},
-  { "log_10",       0, 0, (void *) NORMALIZATION_LOG10,        0, 0, 0, 0, 0},
-  { "atanh",        0, 0, (void *) NORMALIZATION_SQUASH,       0, 0, 0, 0, 0},
-  { "(x)->(-x)",    0, 0, (void *) NORMALIZATION_REVERSE,      0, 0, 0, 0, 0},
-  { "(x)->(1/x)",   0, 0, (void *) NORMALIZATION_INVERT,       0, 0, 0, 0, 0},
-  { "rank",         0, 0, (void *) NORMALIZATION_RANK,         0, 0, 0, 0, 0},
-  { "partial rank", 0, 0, (void *) NORMALIZATION_PARTIAL_RANK, 0, 0, 0, 0, 0},
-  { "gaussianize",  0, 0, (void *) NORMALIZATION_GAUSSIANIZE,  0, 0, 0, 0, 0},
-  { "randomize",    0, 0, (void *) NORMALIZATION_RANDOMIZE,    0, 0, 0, 0, 0},
+  { "none",         0, nullptr, (void *) NORMALIZATION_NONE,         0, 0, 0, 0, 0},
+  { "minmax",       0, nullptr, (void *) NORMALIZATION_MINMAX,       0, 0, 0, 0, 0},
+  { "zeromax",      0, nullptr, (void *) NORMALIZATION_ZEROMAX,      0, 0, 0, 0, 0},
+  { "maxabs",       0, nullptr, (void *) NORMALIZATION_MAXABS,       0, 0, 0, 0, 0},
+  { "trim 1e-2",    0, nullptr, (void *) NORMALIZATION_TRIM_1E2,     0, 0, 0, 0, 0},
+  { "trim 1e-3",    0, nullptr, (void *) NORMALIZATION_TRIM_1E3,     0, 0, 0, 0, 0},
+  { "three sigma",  0, nullptr, (void *) NORMALIZATION_THREESIGMA,   0, 0, 0, 0, 0},
+  { "log_10",       0, nullptr, (void *) NORMALIZATION_LOG10,        0, 0, 0, 0, 0},
+  { "atanh",        0, nullptr, (void *) NORMALIZATION_SQUASH,       0, 0, 0, 0, 0},
+  { "(x)->(-x)",    0, nullptr, (void *) NORMALIZATION_REVERSE,      0, 0, 0, 0, 0},
+  { "(x)->(1/x)",   0, nullptr, (void *) NORMALIZATION_INVERT,       0, 0, 0, 0, 0},
+  { "rank",         0, nullptr, (void *) NORMALIZATION_RANK,         0, 0, 0, 0, 0},
+  { "partial rank", 0, nullptr, (void *) NORMALIZATION_PARTIAL_RANK, 0, 0, 0, 0, 0},
+  { "gaussianize",  0, nullptr, (void *) NORMALIZATION_GAUSSIANIZE,  0, 0, 0, 0, 0},
+  { "randomize",    0, nullptr, (void *) NORMALIZATION_RANDOMIZE,    0, 0, 0, 0, 0},
   { nullptr,        0, nullptr,    nullptr,                    0, 0, 0, 0, 0}
 };
 
 // Define an array of menu items for the text ordering style menus.
 Fl_Menu_Item Control_Panel_Window::text_ordering_style_menu_items[] = {
-  { "lexicographic", 0, 0, (void *) NORMALIZATION_NONE,         0, 0, 0, 0, 0},
-  { "frequency",     0, 0, (void *) NORMALIZATION_MINMAX,       0, FL_MENU_INACTIVE, 0, 0, 0},
-  { "order in file", 0, 0, (void *) NORMALIZATION_ZEROMAX,      0, FL_MENU_INACTIVE, 0, 0, 0},
+  { "lexicographic", 0, nullptr, (void *) NORMALIZATION_NONE,         0, 0, 0, 0, 0},
+  { "frequency",     0, nullptr, (void *) NORMALIZATION_MINMAX,       0, FL_MENU_INACTIVE, 0, 0, 0},
+  { "order in file", 0, nullptr, (void *) NORMALIZATION_ZEROMAX,      0, FL_MENU_INACTIVE, 0, 0, 0},
   { nullptr,         0, nullptr,    nullptr,                    0, 0, 0, 0, 0}
 };
 
@@ -408,7 +408,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
     varindex_menu_items[i].label(pdfm->column_label(i).c_str());
     varindex_menu_items[i].user_data((void *)i);
   }
-  varindex_menu_items[nvars+1].label(0);
+  varindex_menu_items[nvars+1].label(nullptr);
 
   // X-axis variable selection menu
   varindex1 = new Fl_Choice (xpos, ypos, subwidth-15, 25);

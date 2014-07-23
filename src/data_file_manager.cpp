@@ -223,7 +223,7 @@ int Data_File_Manager::findInputFile()
 
   // Instantiate and show an Vp_File_Chooser widget.  NOTE: The pathname must
   // be passed as a variable or the window will begin in some root directory.
-  Vp_File_Chooser* file_chooser =
+  auto  file_chooser =
     new Vp_File_Chooser(
       cInFileSpec, pattern.c_str(), Vp_File_Chooser::SINGLE, title.c_str());
   file_chooser->fileType( inputFileType_);
@@ -570,9 +570,9 @@ int Data_File_Manager::load_data_file()
 
       // Add new columns of data to the old data buffer
       old_column_info.pop_back();
-      for (unsigned int i = 0; i < column_info.size(); i++)
+      for (auto & elem : column_info)
       {
-        old_column_info.push_back( column_info[ i]);
+        old_column_info.push_back( elem);
       }
 
       // Copy old data buffer to the current data buffer
@@ -830,15 +830,15 @@ int Data_File_Manager::extract_column_labels( string sLine, int doDefault)
   // This will misbehave if some label is more than 80 characters long.
   cout << "  ";
   int nLineLength = 4;
-  for (unsigned int i_iter=0; i_iter < column_info.size(); i_iter++ )
+  for (auto & elem : column_info)
 	{
-    nLineLength += 2 + (column_info[i_iter].label).length();
+    nLineLength += 2 + (elem.label).length();
     if (nLineLength > 80)
 		{
       cout << endl << "  ";
-      nLineLength = 4 + (column_info[i_iter].label).length();
+      nLineLength = 4 + (elem.label).length();
     }
-    cout << "  (" << column_info[i_iter].label << ")";
+    cout << "  (" << elem.label << ")";
   }
   cout << endl;
 
@@ -974,7 +974,7 @@ int Data_File_Manager::remove_column_of_selection_info()
   if( readSelectionInfo_)
 	{
     int iTarget = nColumns-1;
-    vector<Column_Info>::iterator pTarget = column_info.end();
+    auto pTarget = column_info.end();
     iTarget--;
     iTarget--;
     pTarget--;
@@ -2121,15 +2121,15 @@ int Data_File_Manager::read_table_from_fits_file()
   // This will misbehave if some label is more than 80 characters long.
   cout << "  ";
   int nLineLength = 4;
-  for (unsigned int i_iter = 0; i_iter < column_info.size(); i_iter++)
+  for (auto & elem : column_info)
   {
-    nLineLength += 2 + (column_info[i_iter].label).length();
+    nLineLength += 2 + (elem.label).length();
     if (nLineLength > 80)
     {
       cout << endl << "  ";
-      nLineLength = 4 + (column_info[i_iter].label).length();
+      nLineLength = 4 + (elem.label).length();
     }
-    cout << "  " << column_info[i_iter].label;
+    cout << "  " << elem.label;
   }
   cout << endl;
 
@@ -2405,7 +2405,7 @@ int Data_File_Manager::findOutputFile()
   // Instantiate and show an Vp_File_Chooser widget.  NOTE: The pathname
   // must be passed as a variable or the window will begin in some root
   // directory.
-  Vp_File_Chooser* file_chooser =
+  auto  file_chooser =
     new Vp_File_Chooser(
       cOutFileSpec, pattern.c_str(), Vp_File_Chooser::CREATE, title.c_str());
   file_chooser->directory( sDirectory_.c_str());
@@ -3156,12 +3156,12 @@ void Data_File_Manager::edit_column_info_i( Fl_Widget *o)
   edit_labels_window->labelsize( 10);
 
   // Write warning in box at top of window
-  Fl_Box* warningBox = new Fl_Box( 5, 5, 240, 20);
+  auto  warningBox = new Fl_Box( 5, 5, 240, 20);
   warningBox->label( "Warning: this will reset axes \nselections, and scaling");
   warningBox->align( FL_ALIGN_INSIDE|FL_ALIGN_LEFT);
 
   // Set an invisible box to control resize behavior
-  Fl_Box *box = new Fl_Box( 5, 35, 240, 220);
+  auto box = new Fl_Box( 5, 35, 240, 220);
   box->box( FL_NO_BOX);
   // box->box( FL_ROUNDED_BOX);
   edit_labels_window->resizable( box);
@@ -3175,11 +3175,11 @@ void Data_File_Manager::edit_column_info_i( Fl_Widget *o)
   refresh_edit_column_info();
 
   // Invoke callback function to delete labels
-  Fl_Button* delete_button = new Fl_Button( 10, 270, 100, 25, "&Delete labels");
+  auto  delete_button = new Fl_Button( 10, 270, 100, 25, "&Delete labels");
   delete_button->callback( (Fl_Callback*) delete_labels, edit_labels_widget);
 
   // Invoke callback function to quit and close window
-  Fl_Button* quit = new Fl_Button( 160, 270, 70, 25, "&Quit");
+  auto  quit = new Fl_Button( 160, 270, 70, 25, "&Quit");
   quit->callback( (Fl_Callback*) close_edit_labels_window, edit_labels_window);
 
   // Done creating the 'Tools|Edit Column_Labels' window.
@@ -3467,15 +3467,15 @@ void Data_File_Manager::create_default_data( int nvars_in)
   // Report column labels
   cout << " -column_labels:";
   int nLineLength = 17;
-  for (unsigned int i_iter = 0; i_iter < column_info.size(); i_iter++)
+  for (auto & elem : column_info)
   {
-    nLineLength += 1 + (column_info[i_iter].label).length();
+    nLineLength += 1 + (elem.label).length();
     if (nLineLength > 80)
     {
       cout << endl << "   ";
-      nLineLength = 4 + (column_info[i_iter].label).length();
+      nLineLength = 4 + (elem.label).length();
     }
-    cout << " " << column_info[i_iter].label;
+    cout << " " << elem.label;
   }
   cout << endl;
   cout << " -Generated default header with " << nvars
@@ -3535,7 +3535,7 @@ int Data_File_Manager::ascii_value_index( int jcol, string &sToken)
 	{
     return -1;
 	}
-  map<string,int>::iterator iter = (column_info[jcol].ascii_values_).find(sToken);
+  auto iter = (column_info[jcol].ascii_values_).find(sToken);
   if (iter != (column_info[jcol].ascii_values_).end())
 	{
     return iter->second;
@@ -3651,7 +3651,7 @@ void Data_File_Manager::maxvars(int in_i)
   if( nvars > maxvars_)
   {
     nvars = maxvars_;
-    vector<Column_Info>::iterator pTarget = column_info.begin();
+    auto pTarget = column_info.begin();
     for( int vars_iter=0; vars_iter<=nvars; ++vars_iter)
 		{
 			++pTarget;
@@ -3666,9 +3666,9 @@ void Data_File_Manager::maxvars(int in_i)
 int Data_File_Manager::n_ascii_columns()
 {
   int result = 0;
-  for (unsigned int i_iter = 0; i_iter < column_info.size(); i_iter++)
+  for (auto & elem : column_info)
   {
-    if (column_info[i_iter].hasASCII > 0)
+    if (elem.hasASCII > 0)
 		{
 			++result;
 		}
@@ -3830,7 +3830,7 @@ int Data_File_Manager::read_tree_from_root_file()
 
     leaf_name = leaf->GetName();
 
-    TLeaf * size_leaf = 0;
+    TLeaf * size_leaf = nullptr;
     Int_t count_value = 0;
 
     leaf_length[i_iter] = leaf->GetMaximum();
@@ -3870,7 +3870,7 @@ int Data_File_Manager::read_tree_from_root_file()
     // if (leaf_name.find("Neu") != std::string::npos) continue;
 
     vector_of_leaf_names.push_back(leaf_name);
-    map_leaf_name_to_tbranch[leaf_name] = 0;
+    map_leaf_name_to_tbranch[leaf_name] = nullptr;
 
     // determine the storage space required for each leaf being considered
     if (count_value == 1 && !size_leaf)
@@ -3943,15 +3943,15 @@ int Data_File_Manager::read_tree_from_root_file()
   cout << " -column_labels:";
   int nLineLength = 17;
 
-  for (unsigned int i = 0; i < column_info.size(); i++)
+  for (auto & elem : column_info)
   {
-    nLineLength += 1 + (column_info[i].label).length();
+    nLineLength += 1 + (elem.label).length();
     if (nLineLength > 80)
     {
       cout << endl << "   ";
-      nLineLength = 4 + (column_info[i].label).length();
+      nLineLength = 4 + (elem.label).length();
     }
-    cout << " " << column_info[i].label << endl;
+    cout << " " << elem.label << endl;
   }
 
   cout << "Number of Variables = " << number_of_columns << endl;
@@ -3982,11 +3982,9 @@ int Data_File_Manager::read_tree_from_root_file()
     int current_column = 0;
     a_tree->GetEntry(i);// Load the entries
 
-    for (std::vector<std::string>::iterator pos = vector_of_leaf_names.begin(); 
-         pos != vector_of_leaf_names.end(); 
-         ++pos)
+    for (auto & current_leaf_name : vector_of_leaf_names)
     {
-      string & current_leaf_name = (*pos);
+      
       TLeaf * leaf = a_tree->GetLeaf(current_leaf_name.c_str());
       current_array_size = maximum_array_size = map_leaf_name_to_maximum_size[current_leaf_name];
 
@@ -4087,7 +4085,7 @@ int Data_File_Manager::write_table_to_root_file()
   bool is_selected = false;
   UNUSED(is_selected);
 
-  TFile * root_file = new TFile(outFileSpec.c_str(), "RECREATE");
+  auto  root_file = new TFile(outFileSpec.c_str(), "RECREATE");
 
   if (!root_file->IsOpen() || root_file->IsZombie())
   {

@@ -503,7 +503,7 @@ Vp_Color_Chooser::Vp_Color_Chooser(int X, int Y, int W, int H, const char* L)
 // Modified: P. R. Gazis  15-Aug-2007
 //*****************************************************************************
 class ColorChip : public Fl_Widget {
-  void draw();
+  void draw() override;
 public:
   uchar r,g,b;
   ColorChip(int X, int Y, int W, int H) : Fl_Widget(X,Y,W,H) {

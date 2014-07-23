@@ -324,7 +324,7 @@ void make_help_about_window( Fl_Widget *o)
   about_window->labelsize( 10);
 
   // Write text to box label and align it inside box
-  Fl_Box* output_box = new Fl_Box( 5, 5, 350, 180);
+  auto  output_box = new Fl_Box( 5, 5, 350, 180);
   output_box->box( FL_SHADOW_BOX);
   output_box->color( 7);
   output_box->selection_color( 52);
@@ -334,7 +334,7 @@ void make_help_about_window( Fl_Widget *o)
   output_box->copy_label( about_string.c_str());
 
   // Invoke a multi-purpose callback function to close window
-  Fl_Button* close = new Fl_Button( 240, 190, 60, 25, "&Close");
+  auto  close = new Fl_Button( 240, 190, 60, 25, "&Close");
   close->callback( (Fl_Callback*) close_help_window, about_window);
 
   // Done creating the 'Help|About' window
@@ -351,7 +351,7 @@ void create_main_control_panel(
   int in_main_x, int in_main_y, int in_main_w, int in_main_h, const char* cWindowLabel)
 {
   // Create main control panel window
-  Fl_Group::current(0);
+  Fl_Group::current(nullptr);
   Fl::scheme( "plastic");  // optional
   Fl_Tooltip::delay(1.0);
   Fl_Tooltip::hoverdelay(1.0);
@@ -403,7 +403,7 @@ void create_main_control_panel(
   main_scroll_group->end();
   main_scroll->end();
   main_control_panel->end();
-  Fl_Group::current(0);
+  Fl_Group::current(nullptr);
 }
 
 //***************************************************************************
@@ -442,9 +442,9 @@ void create_brushes( int w_x, int w_y, int w_w, int w_h)
   main_scroll_group->add(brushes_tab);
 
   Fl_Group::current(brushes_tab);
-  for (int i=0; i<NBRUSHES; i++) {
+  for (auto & brushe : brushes) {
     // create a brush (Fl_Group) corresponding to the tab
-    brushes[i] = new Brush(w_x, w_y+20, w_w-6, w_h-(20+6));
+    brushe = new Brush(w_x, w_y+20, w_w-6, w_h-(20+6));
   }
   brushes_tab->end();
 
@@ -628,9 +628,9 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
       do_restore_settings = 1;
       do_restore_positions = 1;
       // Reset brushes because load resets brush sizes
-      for( int j_iter = 0; j_iter < NBRUSHES; j_iter++)
+      for(auto & brushe : brushes)
 			{
-				brushes[j_iter]->reset();
+				brushe->reset();
 			}
     }
     else if( strncmp( widgetTitle, "Restore", 7) == 0) {
@@ -805,7 +805,7 @@ void manage_plot_window_array( Fl_Widget *o, void* user_data)
     // End the group here so that we can create new plot windows at the top
     // level, then set the pointer to the current group to the top level.
     cps[i_iter]->end();
-    Fl_Group::current( 0);
+    Fl_Group::current( nullptr);
 
     // If this was an INITIALIZE, REFRESH_WINDOWS, or NEW_DATA operation,
     // then create or restore the relevant windows.  NOTE: If this code was
@@ -1068,7 +1068,7 @@ void make_main_menu_bar()
     (Fl_Callback *) load_state);
   main_menu_bar->add(
     "File/Save configuration   ", 0,
-    (Fl_Callback *) save_state, 0, FL_MENU_DIVIDER);
+    (Fl_Callback *) save_state, nullptr, FL_MENU_DIVIDER);
   main_menu_bar->add(
     "File/Current File Name    ", 0,
     (Fl_Callback *) make_file_name_window);
@@ -1090,7 +1090,7 @@ void make_main_menu_bar()
     (Fl_Callback *) manage_plot_window_array);
   main_menu_bar->add(
     "View/Remove Column   ", 0,
-    (Fl_Callback *) manage_plot_window_array, 0, FL_MENU_DIVIDER);
+    (Fl_Callback *) manage_plot_window_array, nullptr, FL_MENU_DIVIDER);
   main_menu_bar->add(
     "View/Reload File     ", 0,
     (Fl_Callback *) read_data, (void*) "reload file");
@@ -1107,7 +1107,7 @@ void make_main_menu_bar()
     (Fl_Callback *) dfm.edit_column_info);
   main_menu_bar->add(
     "Tools/Statistics         ", 0,
-    (Fl_Callback *) make_statistics_window, 0, FL_MENU_DIVIDER);
+    (Fl_Callback *) make_statistics_window, nullptr, FL_MENU_DIVIDER);
   main_menu_bar->add(
     "Tools/Options...         ", 0,
     // (Fl_Callback *) make_options_window, 0, FL_MENU_INACTIVE);
@@ -1217,7 +1217,7 @@ void make_statistics_window( Fl_Widget *o, void * user_data = nullptr)
 
   // Generate statistics
   int n_selected_[ NBRUSHES];
-  for( int i=0; i<NBRUSHES; i++) n_selected_[ i] = 0;
+  for(auto & elem : n_selected_) elem = 0;
   for( int i=0; i<npoints; i++) n_selected_[ selected( i)]++;
   int n_total_selected_ = npoints - n_selected_[0];
 
@@ -1236,7 +1236,7 @@ void make_statistics_window( Fl_Widget *o, void * user_data = nullptr)
   }
 
   // Write text to box label and align it inside box
-  Fl_Box* output_box = new Fl_Box( 5, 15, 290, nHeight, sText.c_str());
+  auto  output_box = new Fl_Box( 5, 15, 290, nHeight, sText.c_str());
   // output_box->box( FL_SHADOW_BOX);
   output_box->box( FL_NO_BOX);
   output_box->color( 7);
@@ -1246,7 +1246,7 @@ void make_statistics_window( Fl_Widget *o, void * user_data = nullptr)
   output_box->align( FL_ALIGN_TOP|FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
 
   // Define buttons and invoke callback functions to handle them
-  Fl_Button* ok_button = new Fl_Button( 170, nHeight-20, 60, 25, "&OK");
+  auto  ok_button = new Fl_Button( 170, nHeight-20, 60, 25, "&OK");
 
   // Finish creating and show the statistics window.  Make sure it is
   // 'modal' to prevent events from being delivered to the other windows.
@@ -1389,9 +1389,9 @@ void make_options_window( Fl_Widget *o)
   }
 
   // Invoke a multi-purpose callback function to process window
-  Fl_Button* ok_button = new Fl_Button( 150, 220, 40, 25, "&OK");
+  auto  ok_button = new Fl_Button( 150, 220, 40, 25, "&OK");
   ok_button->callback( static_cast<Fl_Callback*>(&cb_options_window), ok_button);
-  Fl_Button* cancel = new Fl_Button( 200, 220, 60, 25, "&Cancel");
+  auto  cancel = new Fl_Button( 200, 220, 60, 25, "&Cancel");
   cancel->callback( static_cast<Fl_Callback*>(&cb_options_window), cancel);
 
   // Done creating the 'Help|Options' window
@@ -1470,26 +1470,26 @@ void make_help_view_window( Fl_Widget *o)
   help_topline = help_view_widget->topline();
 
   // Invoke callback functions to change text size
-  Fl_Box* fontsize_box = new Fl_Box( 15, 465, 60, 25, "Font Size:");
+  auto  fontsize_box = new Fl_Box( 15, 465, 60, 25, "Font Size:");
   fontsize_box->align( FL_ALIGN_CENTER);
-  Fl_Button* shrink_font = new Fl_Button( 80, 465, 25, 25, "-");
+  auto  shrink_font = new Fl_Button( 80, 465, 25, 25, "-");
   shrink_font->callback( static_cast<Fl_Callback*> (textsize_help_view_widget), (void*) -2);
 	//TODO: this is dangerous (void *)-2 is equivalent to memory address like 0xFFFFFFFD;
-  Fl_Button* grow_font = new Fl_Button( 110, 465, 25, 25, "+");
+  auto  grow_font = new Fl_Button( 110, 465, 25, 25, "+");
   grow_font->callback( static_cast<Fl_Callback*>(textsize_help_view_widget), (void*) 2);
 
   // Invoke callback function to move through help_view widget
   long help_height = help_view_widget->h();
   help_height = 3*help_height/4;
-  Fl_Button* back = new Fl_Button( 325, 465, 70, 25, "&Back");
+  auto  back = new Fl_Button( 325, 465, 70, 25, "&Back");
   back->callback( static_cast<Fl_Callback*>(step_help_view_widget), (void*)(-help_height));
-  Fl_Button* fwd = new Fl_Button( 400, 465, 70, 25, "&Fwd");
+  auto  fwd = new Fl_Button( 400, 465, 70, 25, "&Fwd");
   fwd->callback( static_cast<Fl_Callback*>(step_help_view_widget), (void*)(help_height));
 	//this is also dangerous;
 	//need to guarantee that user_data doesn't get dereferenced;
 
   // Invoke callback function to close window
-  Fl_Button* close = new Fl_Button( 500, 465, 70, 25, "&Close");
+  auto  close = new Fl_Button( 500, 465, 70, 25, "&Close");
   close->callback( static_cast<Fl_Callback*>(close_help_window), help_view_window);
 
   // Done creating the 'Help|Help' window
@@ -1927,7 +1927,7 @@ int load_state( Fl_Widget* o)
   // variable or the window will begin in some root directory.
   const char* title = "Load saved configuration from file";
   const char* pattern = "*.xml\tAll Files (*)";
-  Vp_File_Chooser* file_chooser =
+  auto  file_chooser =
     new Vp_File_Chooser( cInFileSpec, pattern, Vp_File_Chooser::SINGLE, title);
   file_chooser->directory( cInFileSpec);
   file_chooser->isConfigFileMode( 1);
@@ -2148,7 +2148,7 @@ int save_state( Fl_Widget* o)
   // directory.
   const char* title = "Save current configuration to file";
   const char* pattern = "*.xml\tAll Files (*)";
-  Vp_File_Chooser* file_chooser =
+  auto  file_chooser =
     new Vp_File_Chooser(
       cOutFileSpec, pattern, Vp_File_Chooser::CREATE, title);
   file_chooser->directory( cOutFileSpec);
@@ -2336,32 +2336,32 @@ int main( int argc, char **argv)
 
   // Define structure of command-line options
   static struct option long_options[] = {
-    { "format", required_argument, 0, 'f'},
-    { "npoints", required_argument, 0, 'n'},
-    { "nvars", required_argument, 0, 'v'},
-    { "skip_lines", required_argument, 0, 's'},
-    { "trivial_columns", required_argument, 0, 't'},
-    { "ordering", required_argument, 0, 'o'},
-    { "preserve_data", required_argument, 0, 'P'},
-    { "rows", required_argument, 0, 'r'},
-    { "cols", required_argument, 0, 'c'},
-    { "monitors", required_argument, 0, 'm'},
-    { "input_file", required_argument, 0, 'i'},
-    { "config_file", required_argument, 0, 'C'},
-    { "missing_values", required_argument, 0, 'M'},
-    { "delimiter", required_argument, 0, 'd'},
-    { "borderless", no_argument, 0, 'b'},
-    { "no_vbo", no_argument, 0, 'B'},
-    { "help", no_argument, 0, 'h'},
-    { "laptop_mode", no_argument, 0, 'l'},
-    { "commented_labels", no_argument, 0, 'L'},
-    { "expert", no_argument, 0, 'x'},
-    { "verbose", no_argument, 0, 'O'},
-    { "version", no_argument, 0, 'V'},
-    { "stdin", no_argument, 0, 'I'},
+    { "format", required_argument, nullptr, 'f'},
+    { "npoints", required_argument, nullptr, 'n'},
+    { "nvars", required_argument, nullptr, 'v'},
+    { "skip_lines", required_argument, nullptr, 's'},
+    { "trivial_columns", required_argument, nullptr, 't'},
+    { "ordering", required_argument, nullptr, 'o'},
+    { "preserve_data", required_argument, nullptr, 'P'},
+    { "rows", required_argument, nullptr, 'r'},
+    { "cols", required_argument, nullptr, 'c'},
+    { "monitors", required_argument, nullptr, 'm'},
+    { "input_file", required_argument, nullptr, 'i'},
+    { "config_file", required_argument, nullptr, 'C'},
+    { "missing_values", required_argument, nullptr, 'M'},
+    { "delimiter", required_argument, nullptr, 'd'},
+    { "borderless", no_argument, nullptr, 'b'},
+    { "no_vbo", no_argument, nullptr, 'B'},
+    { "help", no_argument, nullptr, 'h'},
+    { "laptop_mode", no_argument, nullptr, 'l'},
+    { "commented_labels", no_argument, nullptr, 'L'},
+    { "expert", no_argument, nullptr, 'x'},
+    { "verbose", no_argument, nullptr, 'O'},
+    { "version", no_argument, nullptr, 'V'},
+    { "stdin", no_argument, nullptr, 'I'},
 		// Apple OS X "provides" this next argument when any program invoked by clicking on its icon
-    { "psn_", required_argument, 0, 'p'},
-    { 0, 0, 0, 0}
+    { "psn_", required_argument, nullptr, 'p'},
+    { nullptr, 0, nullptr, 0}
   };
 
   // Extract persistent variables
@@ -2633,7 +2633,7 @@ int main( int argc, char **argv)
   argv += optind;
 
   // Set random seed (deprecated unix rand(3))
-  srand( (unsigned int) time(0));
+  srand( (unsigned int) time(nullptr));
 
   // Initialize gsl random number generator (Mersenne Twister)
   // gsl_rng_env_setup();   // Not needed

@@ -339,7 +339,7 @@ class FL_EXPORT Vp_File_Chooser
 
     // Access functions
     void callback(
-      void (*pCallback)( Vp_File_Chooser*, void*), void *pData = 0);
+      void (*pCallback)( Vp_File_Chooser*, void*), void *pData = nullptr);
     Fl_Color color();
     void color( Fl_Color file_browser_color_in);
     int count();

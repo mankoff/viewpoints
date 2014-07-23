@@ -64,10 +64,10 @@
 class Flcc_HueBox : public Fl_Widget {
   int px, py;
 protected:
-  void draw();
+  void draw() override;
   int handle_key(int);
 public:
-  int handle(int);
+  int handle(int) override;
   Flcc_HueBox(int X, int Y, int W, int H) : Fl_Widget(X,Y,W,H) {
   px = py = 0;}
 };
@@ -95,10 +95,10 @@ public:
 class Flcc_ValueBox : public Fl_Widget {
   int py;
 protected:
-  void draw();
+  void draw() override;
   int handle_key(int);
 public:
-  int handle(int);
+  int handle(int) override;
   Flcc_ValueBox(int X, int Y, int W, int H) : Fl_Widget(X,Y,W,H) {
   py = 0;}
 };
@@ -123,7 +123,7 @@ public:
 //*****************************************************************
 class Flcc_Value_Input : public Fl_Value_Input {
 public:
-  int format(char*);
+  int format(char*) override;
   Flcc_Value_Input(int X, int Y, int W, int H) : Fl_Value_Input(X,Y,W,H) {}
 };
 
@@ -183,7 +183,7 @@ public:
   int rgb(double,double,double);
   static void hsv2rgb(double, double, double,double&,double&,double&);
   static void rgb2hsv(double, double, double,double&,double&,double&);
-  Vp_Color_Chooser(int,int,int,int,const char* = 0);
+  Vp_Color_Chooser(int,int,int,int,const char* = nullptr);
 };
 
 // Definitions for two vp_color_chooser methods
