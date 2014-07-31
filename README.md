@@ -27,7 +27,7 @@ Dependency
  * cmake       (current build system)
 
 ```
-sudo apt-get --install-suggests install libblitz0-dev libboost1.54-all-dev \
+sudo apt-get --install-suggests install libblitz0-dev libboost1.55-all-dev \
 libfltk1.3-dev root-system-bin libroot-tree-dev libcfitsio3-dev \
 libgsl0-dev g++-4.8 gfortran libxcb-xinerama0-dev libxinerama-dev \
 libgl-dev libgl1-mesa-dev libgl1-mesa-glx-dev libglu-dev libglu1-mesa-dev \
@@ -256,7 +256,7 @@ ldd vp | cut -f1 -d= | grep -v ld-linux
 	libgslcblas.so.0 
 	libm.so.6 
 	libcfitsio.so.3 
-	libboost_serialization.so.1.54.0 
+	libboost_serialization.so.1.55.0 
 	libCore.so.5.34 
 	libRIO.so.5.34 
 	libTree.so.5.34 
@@ -316,7 +316,7 @@ libssl1.0.0: /lib/x86_64-linux-gnu/libssl.so.1.0.0
 libssl1.0.0-dbg: /usr/lib/debug/lib/x86_64-linux-gnu/libssl.so.1.0.0
 zlib1g: /lib/x86_64-linux-gnu/libz.so.1
 zlib1g: /lib/x86_64-linux-gnu/libz.so.1.2.8
-libboost-serialization1.54.0: /usr/lib/libboost_serialization.so.1.54.0
+libboost-serialization1.55.0: /usr/lib/libboost_serialization.so.1.55.0
 libgsl0-dbg: /usr/lib/debug/usr/lib/libgslcblas.so.0.0.0
 libgsl0ldbl: /usr/lib/libgslcblas.so.0
 libgsl0ldbl: /usr/lib/libgslcblas.so.0.0.0
@@ -394,7 +394,7 @@ libgl1-mesa-glx-dbg: /usr/lib/debug/usr/lib/x86_64-linux-gnu/mesa/libGL.so.1.2.0
 List of all possible packages sorted (and uniq):
 ```
 ldd vp | cut -f2 -d'>' | cut -f1 -d'(' | sort | sed 's/[ \t]//g' | xargs -n1 apt-file search | cut -f1 -d: | sort | uniq
-libboost-serialization1.54.0
+libboost-serialization1.55.0
 libc6
 libcfitsio3
 libcfitsio3-dbg
@@ -452,7 +452,7 @@ zlib1g
 
 So, now taking the above list (and remove debugging versions - at least for now),
 ```
-libboost-serialization1.54.0
+libboost-serialization1.55.0
 libc6
 libcfitsio3
 libdrm2
@@ -493,12 +493,12 @@ zlib1g
 So the list is,
 
 ```
-libboost-serialization1.54.0 libc6 libcfitsio3 libdrm2 libexpat1 libfontconfig1 libfreetype6 libgcc1 libgl1-mesa-glx libglapi-mesa libglu1-mesa libgsl0ldbl liblzma5 libpcre3 libroot-core5.34 libroot-io5.34 libroot-math-mathcore5.34 libroot-net5.34 libroot-tree5.34 libssl1.0.0 libstdc++6 libx11-6 libx11-xcb1 libxau6 libxcb1 libxcb-dri2-0 libxcb-glx0 libxdamage1 libxdmcp6 libxext6 libxfixes3 libxft2 libxinerama1 libxrender1 libxxf86vm1 zlib1g
+libboost-serialization1.55.0 libc6 libcfitsio3 libdrm2 libexpat1 libfontconfig1 libfreetype6 libgcc1 libgl1-mesa-glx libglapi-mesa libglu1-mesa libgsl0ldbl liblzma5 libpcre3 libroot-core5.34 libroot-io5.34 libroot-math-mathcore5.34 libroot-net5.34 libroot-tree5.34 libssl1.0.0 libstdc++6 libx11-6 libx11-xcb1 libxau6 libxcb1 libxcb-dri2-0 libxcb-glx0 libxdamage1 libxdmcp6 libxext6 libxfixes3 libxft2 libxinerama1 libxrender1 libxxf86vm1 zlib1g
 ```
 
 
 ```
-for x in libboost-serialization1.54.0 libc6 libcfitsio3 \
+for x in libboost-serialization1.55.0 libc6 libcfitsio3 \
 libdrm2 libexpat1 libfontconfig1 libfreetype6 libgcc1 \
 libgl1-mesa-glx libglapi-mesa libglu1-mesa libgsl0-dbg \
 libgsl0ldbl liblzma5 libpcre3 libroot-core5.34 libroot-io5.34 \
@@ -515,7 +515,7 @@ done
 
 Returns:
 ```
-libboost-serialization1.54.0
+libboost-serialization1.55.0
   Depends: libstdc++6
 libcfitsio3
   Depends: libc6
@@ -612,7 +612,7 @@ libxxf86vm1
 Reduces to:
 
 ```
-libboost-serialization1.54.0
+libboost-serialization1.55.0
 libcfitsio3
 libgl1-mesa-glx
 libglu1-mesa
@@ -622,10 +622,10 @@ libxft2
 libxinerama1
 ```
 
-Noteing that `libfltk1.3-dev` depends on `libgl1-mesa-glx`,`libxft2`, and `libxinerama1`. We get the minimal library dependency as,
+Noting that `libfltk1.3-dev` depends on `libgl1-mesa-glx`,`libxft2`, and `libxinerama1`. We get the minimal library dependency as,
 
 ```
-libboost-serialization1.54.0 libcfitsio3 libglu1-mesa libgsl0ldbl libroot-tree5.34 libfltk1.3-dev
+libboost-serialization1.55.0 libcfitsio3 libglu1-mesa libgsl0ldbl libroot-tree5.34-dev libfltk1.3-dev
 ```
 
 
