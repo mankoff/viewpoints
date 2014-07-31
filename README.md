@@ -3,6 +3,19 @@ VIEWPOINTS
 
 viewpoints is a fast interactive linked plotting of large multivariante data sets. Currently my build requires the use of `cmake` to build the code. The current build is working on Ubuntu 14.04. Untested on OS X or Windows.
 
+The main window acts a simple mediator (it handles queuing or draw updates to the display windows, handles changing scales for drawing windows, handles generating histograms and then drawing).
+
+![main window](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-main-window.png)
+
+The Data Display Windows:
+![viewpoints display window #2](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-display-2.png)
+![viewpoints display window #3](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-display-3.png)
+
+Data Distplay Window after selection is made:
+![viewpoints display window #2](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-display-2-selection.png)
+![viewpoints display window #3 selection](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-display-3-selection.png)
+
+
 Getting the code
 ----------------
 So, to get the code you have to do the following:
@@ -56,6 +69,16 @@ If it builds,
 ```
 ./vp ../../sample_data/sampledata.txt 
 ```
+
+Other Work
+==========
+
+
+FAQ
+===
+
+
+
 
 Some Notes (DEPENDENCY INFO, ....)
 ==========
