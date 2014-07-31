@@ -1,7 +1,7 @@
 VIEWPOINTS
 ==========
 
-viewpoints is a fast interactive linked plotting of large multivariante data sets.
+viewpoints is a fast interactive linked plotting of large multivariante data sets. Currently my build requires the use of `cmake` to build the code. The current build is working on Ubuntu 14.04. Untested on OS X or Windows.
 
 Getting the code
 ----------------
@@ -33,6 +33,7 @@ libgsl0-dev g++-4.8 gfortran libxcb-xinerama0-dev libxinerama-dev \
 libgl-dev libgl1-mesa-dev libgl1-mesa-glx-dev libglu-dev libglu1-mesa-dev \
 libxft2-dev libgl1-mesa-dri-experimental freeglut3-dev cmake
 ```
+
 
 This is a fork of https://www.assembla.com/wiki/show/viewpoints (originall github repository jblomo/viewpoints). The build proceedure has been updated. Original used a makefile to build. This revision now use cmake to correctly find dependencies and link against them. Further Fl_flews (a custom FLTK widget librarty is included as a submodule). From the project root directory (pick a release type):
 
