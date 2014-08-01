@@ -95,12 +95,24 @@ If it builds,
 Other Work
 ==========
 
-
 BaBar
 =====
 The following work (and sample files are due to M. Bellis)
 [M. Bellis Viewpoints Website](http://web.stanford.edu/group/burchat/cgi-bin/bellis_mediawiki/index.php/Viewpoints_NASA)
 
+Converted Photons
+-----------------
+
+```./vp --np=500000 ../../sample_data/converted_photons.txt```
+
+* Converted Photons ![original file](http://www.slac.stanford.edu/~bellis/viewpoints/converted_photons.txt)
+* Suggested by Steve Sekula
+* Added file to the repository in ![updated file](sample_data/converted_photons.txt)
+* Photons can convert to an electron-positron pair via interaction with the material.
+* Tracking these electron and positrons back to the creation center, we can then produce an image of the SVT (silicon vertex tracker) which surrounds the interaction region.
+1. Using the first plot. Try plotting x-position vs. y-position vs. z-position. Using the **rotate** slider you can see the structure of the material around the interaction point.
+2. In the upper part of the main control panel, attempt to adjust the **lumin**.
+3. Select the *red* tab on the lower part of the control panel. Adjust **lum1** and **lum2** to highlight different features of the SVT (look for the beam pipe, 5 different layers of the SVT).
 
 
 Some Notes (DEPENDENCY INFO, ....)
