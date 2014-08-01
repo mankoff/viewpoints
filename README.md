@@ -1,20 +1,42 @@
 VIEWPOINTS
 ==========
 
-viewpoints is a fast interactive linked plotting of large multivariante data sets. Currently my build requires the use of `cmake` to build the code. The current build is working on Ubuntu 14.04. Untested on OS X or Windows.
+viewpoints is a fast interactive linked plotting of large multivariante data sets. Currently my build requires the use of `cmake` to build the code. The current build is working on Ubuntu 14.04.  **UNTESTED** on OS X or Windows.
+
+
+>Viewpoints (vp) is a high-performance visualization and analysis tool for large, complex, multidimensional data sets. It allows interactive exploration of data in 100 or more dimensions with sample counts, or the number of points, exceeding 10^6 (up to 10^8 depending on available RAM). Viewpoints was originaly created for use with the extremely large data sets produced by current and future NASA space science missions, but it has been used for a wide variety of diverse applications ranging from aeronautical engineering, quantum chemistry, and computational fluid dynamics to virology, computational finance, and aviation safety.
+
+[Paper](http://pubs.giss.nasa.gov/docs/2010/2010_Gazis_etal_1.pdf)
+
+[Another Paper](http://www.academia.edu/2717234/Viewpoints_high_performance_visualization_for_large_high-dimensional_space_science_earth_science_and_engineering_data)
+
+[Website](https://www.assembla.com/spaces/viewpoints/wiki/Home/)
+
+[Original FAQ](https://www.assembla.com/spaces/viewpoints/wiki/FAQs)
+
+
+Screenshots
+-----------
 
 The main window acts a simple mediator (it handles queuing or draw updates to the display windows, handles changing scales for drawing windows, handles generating histograms and then drawing).
 
 ![main window](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-main-window.png)
 
-The Data Display Windows:
+Data Display Windows
+--------------------
+
 ![viewpoints display window #2](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-display-2.png)
 ![viewpoints display window #3](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-display-3.png)
 
-Data Distplay Window after selection is made:
+Data Distplay Window (with selection)
+-------------------------------------
+
 ![viewpoints display window #2](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-display-2-selection.png)
 ![viewpoints display window #3 selection](https://raw.githubusercontent.com/kingtaurus/viewpoints/master/images/viewpoints-display-3-selection.png)
 
+Movies
+------
+**NONE YET**
 
 Getting the code
 ----------------
@@ -74,9 +96,10 @@ Other Work
 ==========
 
 
-FAQ
-===
-
+BaBar
+=====
+The following work (and sample files are due to M. Bellis)
+[M. Bellis Viewpoints Website](http://web.stanford.edu/group/burchat/cgi-bin/bellis_mediawiki/index.php/Viewpoints_NASA)
 
 
 
