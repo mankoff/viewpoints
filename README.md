@@ -81,7 +81,7 @@ make all
 This will end up building all the necessary libraries and exectubles.
 
 ```
-CC=clang" CXX=clang++ cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
+CC=clang CXX=clang++ cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
 CC=gcc   CXX=g++     cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE
 ```
 
