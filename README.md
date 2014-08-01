@@ -14,7 +14,6 @@ viewpoints is a fast interactive linked plotting of large multivariante data set
 
 [Original FAQ](https://www.assembla.com/spaces/viewpoints/wiki/FAQs)
 
-
 Screenshots
 -----------
 
@@ -91,6 +90,13 @@ If it builds,
 ```
 ./vp ../../sample_data/sampledata.txt 
 ```
+
+This is some biometric data that was originally provided for testing viewpoint; The data is originally, according the header: *Mörchen, F., Ultsch, A., Hoos, O.*; Extracting interpretable muscle activation patterns with Time Series Knowledge Mining; **International Journal of Knowledge-Based & Intelligent Engineering Systems** (2005). All the data views are selection connected 2d scatter plots.
+* Click on any of the 4 plots to select it (or clink on the desired tab at the top of the control panel)
+* Using the plot buttons (and its associated drop down menu) select which variable to plot.
+* At the lower section of the control panel are multi-coloured tabs. Default colour for data points is red. However if you select a portion of the graph you can colour them in some other hue. Viewpoints defaults to blue for selection.
+* Once you've selected a region (hold the shift key and click-hold on the region and drag it to some other location); the other plot windows will show which points are now with in the selection region.
+
 
 Other Work
 ==========
