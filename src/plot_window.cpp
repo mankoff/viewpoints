@@ -41,8 +41,9 @@
 #include "column_info.h"
 
 // experimental
-#define ALPHA_TEXTURE
+//#define ALPHA_TEXTURE
 
+#ifndef NDEBUG
 #define CHECK_GL_ERROR(msg)                    \
     {                                          \
         GLenum TMerrCode = glGetError();       \
@@ -54,6 +55,9 @@
             abort();                           \
         }                                      \
     }
+#else
+#define CHECK_GL_ERROR(msg)
+#endif
 
 // initialize static data members for class Plot_Window::
 
@@ -1391,7 +1395,10 @@ void Plot_Window::draw_data_points()
   // Tell the GPU where to find the vertices for this plot.
   if (use_VBOs) {
     // bind VBO for vertex data
-    glBindBuffer(GL_ARRAY_BUFFER, index+1);
+    CHECK_GL_ERROR("before glBindBuffer");
+    std::cout << "glBindBuffer(GL_ARRAY_BUFFER) for " << index+2 << std::endl;
+    glBindBuffer(GL_ARRAY_BUFFER, index+2);
+    CHECK_GL_ERROR("after glBindBuffer");
 
     // If the variables we are plotting were changed, then the vertex VBO must
     // be updated to contain the correct vertex data, and it has to be done
@@ -1472,7 +1479,7 @@ void Plot_Window::draw_data_points()
       // if we are using stencils (and hence drawing brushes in reverse order)...
       if (blending_mode == Control_Panel_Window::BLEND_BRUSHES_SEPARATELY)
       {
-        glStencilFunc (GL_GEQUAL, brush_index+1, 0xFFFF);
+        glStencilFunc (GL_GEQUAL, brush_index+2, 0xFFFF);
         glStencilOp (GL_KEEP, GL_KEEP, GL_REPLACE);
       }
 
@@ -1526,7 +1533,8 @@ void Plot_Window::draw_data_points()
       // then render the points
       if (use_VBOs)
       {
-        assert (VBOinitialized && VBOfilled && indexVBOsinitialized && indexVBOsfilled) ;
+        assert (VBOinitialized && VBOfilled && indexVBOsinitialized && indexVBOsfilled);
+       std::cout << __PRETTY_FUNCTION__ << " Attempt glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << MAXPLOTS+1+brush_index << "@ " << __LINE__ << std::endl;
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+1+brush_index);
         glDrawElements( element_mode, GLsizei(local_count), GL_UNSIGNED_INT, BUFFER_OFFSET(0)); // would it bee faster to use glDrawRangeElements() ?
         // make sure we succeeded
@@ -2693,11 +2701,13 @@ void Plot_Window::initialize_VBO()
 {
   // Create a VBO. Index 0 is reserved.
   if (!VBOinitialized) {
-    glBindBuffer(GL_ARRAY_BUFFER, index+1);
+    std::cout << __PRETTY_FUNCTION__ << " Attempting to bind to a buffer " << index+2 << std::endl;
+    glBindBuffer(GL_ARRAY_BUFFER, index+2);
     CHECK_GL_ERROR ("creating VBO");
 
     // Reserve enough space in openGL server memory VBO to hold all the
     // vertices, but do not initilize it.
+    std::cout << __PRETTY_FUNCTION__ << " Attempting to fill " << index+2 << std::endl;
     glBufferData( GL_ARRAY_BUFFER, (GLsizeiptr) npoints*3*sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
 
     // Make sure we succeeded
@@ -2712,8 +2722,13 @@ void Plot_Window::initialize_VBO()
 void Plot_Window::fill_VBO()
 {
   if (!VBOfilled) {
-    glBindBuffer(GL_ARRAY_BUFFER, index+1);
-    void *vertexp = (void *)vertices.data();
+    std::cout << __PRETTY_FUNCTION__ << " Attempting to fill " << index+2 << "@ " << __LINE__ << std::endl;
+    CHECK_GL_ERROR("before glBindBuffer");
+    std::cout << (glIsBuffer(index+2) == GL_TRUE) << std::endl;
+    glBindBuffer(GL_ARRAY_BUFFER, index+2);
+    CHECK_GL_ERROR("after glBindBuffer");
+    void * vertexp = (void *) vertices.data();
+    std::cout << vertices.data() << std::endl;
     glBufferSubData( GL_ARRAY_BUFFER, (GLintptr) 0, (GLsizeiptr) (npoints*3*sizeof(GLfloat)), vertexp);
     CHECK_GL_ERROR("filling VBO");
     VBOfilled = true;
@@ -2729,8 +2744,11 @@ void Plot_Window::initialize_indexVBO(int set)
   // There is one shared set of index VBOs for all plots.
   //  indexVBO bound to MAXPLOTS+1 holds indices of nonselected (brushes[0]) points
   //  indexVBO bound to MAXPLOTS+2 holds indices of points selected by brushes[1], etc.
+    std::cout << __PRETTY_FUNCTION__ << " Attempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER " << MAXPLOTS+set+1 << std::endl;
   glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+set+1);  // a safe place....
+  CHECK_GL_ERROR("glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)");
   glBufferData( GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr) (npoints*sizeof(GLuint)), nullptr, GL_DYNAMIC_DRAW);
+  CHECK_GL_ERROR("glBufferData(GL_ELEMENT_ARRAY_BUFFER)");
 }
 
 //***************************************************************************
@@ -2750,8 +2768,11 @@ void Plot_Window::initialize_indexVBOs()
 void Plot_Window::fill_indexVBO(int set)
 {
   if (brushes[set]->count > 0) {
+    
+    std::cout << __PRETTY_FUNCTION__ << " Attempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER " << MAXPLOTS+set+1 << std::endl;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+set+1);
     // Create an alias to slice
+    CHECK_GL_ERROR("glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)");
     blitz::Array<unsigned int, 1> tmpArray = indices_selected( set, blitz::Range(0,npoints-1));
     unsigned int *indices = (unsigned int *) (tmpArray.data());
     glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, (GLintptr) 0, (GLsizeiptr) (brushes[set]->count*sizeof(GLuint)), indices);

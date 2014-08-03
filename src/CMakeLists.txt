@@ -1,4 +1,8 @@
 
+IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    message("debug mode")
+ENDIF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+
 set(viewpoint_sources
   brush.cpp
   plot_window.cpp
@@ -15,8 +19,8 @@ set(viewpoint_sources
   Vp_Color_Chooser.cpp
 )
 
-add_definitions("-DGL_GLEXT_PROTOTYPES")
-add_definitions("-DSERIALIZATION")
+add_definitions("-D GL_GLEXT_PROTOTYPES=1 -D ALPHA_TEXTURE=1")
+add_definitions("-D SERIALIZATION=1")
 
 add_executable (vp ${viewpoint_sources})
 add_dependencies(vp flews-static)
