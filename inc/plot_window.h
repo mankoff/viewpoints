@@ -233,6 +233,17 @@ class Plot_Window : public Fl_Gl_Window
     // Number of plot windows
     static int count; // MCL XXX isn't this the same as nplots?  is it consistent?
 
+    //void glGenBuffers(GLsizei n,
+    //GLuint * buffers);
+    //
+    GLuint m_buffer_one;
+
+    //Probably should change this into an array
+    //const GLsizei m_num_gl_buffer = 4;
+    //GLunit m_buffer[n_num_gl_buffer];
+
+
+
   public:
     Plot_Window();   // Default constructor
     Plot_Window( int w, int h, int new_index);   // Constructor
