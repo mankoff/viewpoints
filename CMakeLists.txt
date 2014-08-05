@@ -40,8 +40,9 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 
 IF(APPLE)
 #-v -stdlib=libc++
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
-	SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
+  message(STATUS "Building for APPLE")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v -stdlib=libc++ -lc++")
+  SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
 ENDIF(APPLE)
 
 
