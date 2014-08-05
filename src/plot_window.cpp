@@ -762,9 +762,6 @@ void Plot_Window::draw()
     glEnable(GL_BLEND);
     glEnableClientState(GL_VERTEX_ARRAY);
 
-    glGenBuffers(1, &m_buffer_one);
-    CHECK_GL_ERROR("glGenBuffers call");
-
     // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     // glEnableClientState(GL_COLOR_ARRAY);
 
@@ -797,7 +794,7 @@ void Plot_Window::draw()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
   }
 
-  if( use_VBOs) {
+  if( use_VBOs ) {
     if( !VBOinitialized) initialize_VBO();
     if( !VBOfilled) fill_VBO();
     if( !indexVBOsinitialized) initialize_indexVBOs();
@@ -1546,7 +1543,7 @@ void Plot_Window::draw_data_points()
       if (use_VBOs)
       {
         assert (VBOinitialized && VBOfilled && indexVBOsinitialized && indexVBOsfilled);
-        DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << " Attempt glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << MAXPLOTS+1+brush_index << "@ " << __LINE__ << std::endl;);
+        DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << MAXPLOTS+1+brush_index << "@ " << __LINE__ << std::endl;);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+1+brush_index);
         CHECK_GL_ERROR("after glBindBuffer");
         glDrawElements( element_mode, GLsizei(local_count), GL_UNSIGNED_INT, BUFFER_OFFSET(0)); // would it bee faster to use glDrawRangeElements() ?
@@ -2715,6 +2712,9 @@ void Plot_Window::initialize_VBO()
   // Create a VBO. Index 0 is reserved.
   if (!VBOinitialized)
   {
+    glGenBuffers(1, &m_buffer_one);
+    CHECK_GL_ERROR("glGenBuffers call");
+
     DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << " Attempting to bind to a buffer " << m_buffer_one << std::endl;);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer_one);
     CHECK_GL_ERROR ("creating VBO");
@@ -2736,7 +2736,7 @@ void Plot_Window::initialize_VBO()
 void Plot_Window::fill_VBO()
 {
   if (!VBOfilled) {
-    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << " Attempting to fill " << m_buffer_one << "@ " << __LINE__ << std::endl;);
+    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ARRAY_BUFFER) " << m_buffer_one << "@ " << __LINE__ << std::endl;);
     CHECK_GL_ERROR("before glBindBuffer");
     DEBUG_OUTPUT(std::cout << (glIsBuffer(m_buffer_one) == GL_TRUE) << std::endl;);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer_one);
@@ -2758,7 +2758,7 @@ void Plot_Window::initialize_indexVBO(int set)
   // There is one shared set of index VBOs for all plots.
   //  indexVBO bound to MAXPLOTS+1 holds indices of nonselected (brushes[0]) points
   //  indexVBO bound to MAXPLOTS+2 holds indices of points selected by brushes[1], etc.
-  DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << " Attempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)" << MAXPLOTS+set+1 << std::endl;);
+  DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << MAXPLOTS+set+1 << std::endl;);
 
   GLenum error_code;
   while ((error_code = glGetError())!= GL_NO_ERROR)
@@ -2789,7 +2789,7 @@ void Plot_Window::fill_indexVBO(int set)
 {
   if (brushes[set]->count > 0) {
     
-    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << " Attempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER " << MAXPLOTS+set+1 << std::endl;);
+    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER " << MAXPLOTS+set+1 << std::endl;);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+set+1);
     // Create an alias to slice
     CHECK_GL_ERROR("glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)");

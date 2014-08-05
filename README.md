@@ -49,7 +49,8 @@ git submodule update
 ```
 
 Dependency
-----------
+==========
+
  * blitz++
  * OpenGL and GLUT
  * root-system (root.cern.ch)
@@ -60,6 +61,9 @@ Dependency
  * GSL         (GNU Scientific Library)
  * cmake       (current build system)
 
+Ubuntu (and other Debian Derivatives)
+-------------------------------------
+
 ```
 sudo apt-get --install-suggests install libblitz0-dev libboost1.55-all-dev \
 libfltk1.3-dev root-system-bin libroot-tree-dev libcfitsio3-dev \
@@ -68,8 +72,23 @@ libgl-dev libgl1-mesa-dev libgl1-mesa-glx-dev libglu-dev libglu1-mesa-dev \
 libxft2-dev libgl1-mesa-dri-experimental freeglut3-dev cmake
 ```
 
+Mac OS X (10.9)
+---------------
+Ports:
+```
+sudo port install blitz freeglut cmake root5 fltk cfitsio boost gsl
+```
 
-This is a fork of https://www.assembla.com/wiki/show/viewpoints (originall github repository jblomo/viewpoints). The build proceedure has been updated. Original used a makefile to build. This revision now use cmake to correctly find dependencies and link against them. Further Fl_flews (a custom FLTK widget librarty is included as a submodule). From the project root directory (pick a release type):
+Brew:
+```
+sudo brew install blitz freeglut cmake homebrew/science/root fltk cfitsio boost gsl
+```
+
+
+Build
+=====
+
+This is a fork of https://www.assembla.com/wiki/show/viewpoints (original github repository jblomo/viewpoints). The build proceedure has been updated. Original used a makefile to build. This revision now use cmake to correctly find dependencies and link against them. Further Fl_flews (a custom FLTK widget librarty is included as a submodule). From the project root directory (pick a release type):
 
 ```
 mkdir -p build/gcc/
