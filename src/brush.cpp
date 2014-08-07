@@ -132,6 +132,7 @@ Brush::Brush() :
   red_value_save(1.0),
   green_value_save(0),
   blue_value_save(0),
+  current_footprint(BRUSH_BOX),
   index(0)
 {}
 
@@ -139,7 +140,8 @@ Brush::Brush() :
 // Brush::Brush( x, y, w, h) --  Constructor.  Set parameters and tab shape,
 // invoke the make_widgets() method to generate the control panel
 Brush::Brush(int in_x, int in_y, int in_w, int in_h) :
-  Fl_Group( in_x, in_y, in_w, in_h)
+  Fl_Group( in_x, in_y, in_w, in_h),
+  current_footprint(BRUSH_BOX)
 {
   // Set parametera
   index = nbrushes++;
@@ -273,6 +275,7 @@ void Brush::reset ()
   alpha->value(1.0);
   lum1->value(0.2);  // !!!
   lum2->value(1.0);
+  current_footprint = BRUSH_BOX;
 }
 
 //***************************************************************************
@@ -409,6 +412,38 @@ void Brush::make_widgets( Brush *bw)
   paint->selection_color( FL_BLUE);
   paint->type( FL_TOGGLE_BUTTON);
   paint->tooltip( "dribble paint (do not erase) when dragging or shift-dragging");
+
+  selection_menu = new Fl_Choice(xpos, ypos+=20, 80, 20, "Selection Type");
+  selection_menu->align( FL_ALIGN_RIGHT);
+  build_selection_type_menu();
+  selection_menu->value(0);
+}
+
+void handle_selection_choice(Fl_Widget * in_w, Brush* in_v)
+{
+  std::cout << "Handling Callback" << std::endl;
+  switch(((Fl_Choice*)in_w)->value())
+  {
+  case 0 :
+    in_v->current_footprint = BRUSH_BOX;
+    return;
+  case 1 :
+    in_v->current_footprint = BRUSH_CIRCLE;
+    return;
+  case 2 :
+    in_v->current_footprint = BRUSH_ELLIPSE;
+    return;
+  default :
+    in_v->current_footprint = BRUSH_BOX;
+  }
+  return;
+}
+
+void Brush::build_selection_type_menu()
+{
+  selection_menu->add("Rectangle", 0, (Fl_Callback*)&handle_selection_choice, (void *)this);
+  selection_menu->add("Circle   ", 0, (Fl_Callback*)&handle_selection_choice, (void *)this);
+  selection_menu->add("Ellipse  ", 0, (Fl_Callback*)&handle_selection_choice, (void *)this);
 }
 
 //***************************************************************************

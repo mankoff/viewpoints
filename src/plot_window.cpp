@@ -1252,10 +1252,9 @@ void Plot_Window::handle_selection ()
 
   // switch (current_brush->footprint->value()) {
 
-  enum footprint {BRUSH_BOX, BRUSH_CIRCLE};
-  footprint xxx = BRUSH_BOX;
+  footprint xxx =  current_brush->get_footprint();
   switch (xxx) {
-  case BRUSH_BOX:
+  case footprint::BRUSH_BOX:
     inside_footprint(NPTS) =
       where( ( vertices( NPTS, 0)>fmaxf( xdown, xtracked) ||
                vertices( NPTS, 0)<fminf( xdown, xtracked) ||
@@ -1263,12 +1262,33 @@ void Plot_Window::handle_selection ()
                vertices( NPTS, 1)<fminf( ydown, ytracked)),
              0, 1);
     break;
-  case BRUSH_CIRCLE:
+  case footprint::BRUSH_CIRCLE:
     {
       float xs = xscale*w(), ys=yscale*h();
-      float dist2 = pow2((xtracked-xdown)*xs) + pow2((ytracked-ydown)*ys);
+      float dist2 = (pow2((xtracked-xdown)*xs) + pow2((ytracked-ydown)*ys));
       inside_footprint(NPTS) =
         where( ( (pow2((vertices(NPTS,0)-xdown)*xs) + pow2((vertices(NPTS,1)-ydown)*ys)) > dist2),
+               0, 1);
+    }
+    break;
+  case footprint::BRUSH_ELLIPSE:
+    {
+      float xs = xscale*w(), ys=yscale*h();
+      float a  = std::abs(xtracked-xdown)*xs;//x-direction size of the ellipse
+      float b  = std::abs(ytracked-ydown)*ys;//y-direction size of the ellipse
+
+      if (a == 0.)
+      {
+        a = 1.* xs;
+      }
+
+      if (b == 0.)
+      {
+        b = 1. * ys;
+      }
+
+      inside_footprint(NPTS) =
+        where( ( (pow2((vertices(NPTS,0)-xdown)*xs/a) + pow2((vertices(NPTS,1)-ydown)*ys/b)) > 1.),
                0, 1);
     }
     break;

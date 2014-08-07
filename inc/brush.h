@@ -74,6 +74,13 @@
 // Author: Creon Levit    14-AUG-2007
 // Modified: P. R. Gazis  08-JUL-2008
 //***************************************************************************
+
+
+#define NSELECTION_TYPE = 3;
+enum footprint {BRUSH_BOX, BRUSH_CIRCLE, BRUSH_ELLIPSE};
+void handle_selection_choice(Fl_Widget * in_w, Brush* in_v);
+
+
 class Brush : public Fl_Group
 {
   protected:
@@ -82,7 +89,7 @@ class Brush : public Fl_Group
 #ifdef SERIALIZATION
     friend class boost::serialization::access;
 #endif // SERIALIZATION
-    
+    friend void handle_selection_choice(Fl_Widget * in_w, Brush* in_v);
     // Define buffers to save state
     int brush_symbol_save;
 
@@ -96,6 +103,8 @@ class Brush : public Fl_Group
     double red_value_save;
 		double green_value_save;
 		double blue_value_save;
+
+    footprint current_footprint;
 
     // When the class Archive corresponds to an output archive, the &
     // operator is defined similar to <<.  Likewise, when the class Archive 
@@ -131,6 +140,11 @@ class Brush : public Fl_Group
     void make_state();
     void copy_state( Brush* brush_save);
     void load_state();
+
+    footprint get_footprint() const
+    {
+      return current_footprint;
+    }
 
     // number of brushes created
     static int nbrushes;
@@ -183,6 +197,9 @@ class Brush : public Fl_Group
     static Fl_Pixmap* symbol_images[];
     void build_symbol_menu( void);
     int previous_symbol;
+
+    Fl_Choice * selection_menu;
+    void build_selection_type_menu();
     
     // Static member Fl_Pixmap objects to hold pixel maps of symbols
     static Fl_Pixmap image_0;
