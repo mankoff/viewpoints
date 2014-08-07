@@ -240,9 +240,7 @@ class Plot_Window : public Fl_Gl_Window
 
     //Probably should change this into an array
     //const GLsizei m_num_gl_buffer = 4;
-    //GLunit m_buffer[n_num_gl_buffer];
-
-
+    static GLuint m_buffer[NBRUSHES];
 
   public:
     Plot_Window();   // Default constructor

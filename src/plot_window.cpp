@@ -79,6 +79,9 @@ blitz::Array<unsigned int,2> Plot_Window::indices_selected(NBRUSHES,1);
 
 GLuint Plot_Window::spriteTextureID[NSYMBOLS];
 GLubyte* Plot_Window::spriteData[NSYMBOLS];
+
+GLuint Plot_Window::m_buffer[NBRUSHES];
+
 int Plot_Window::sprites_initialized = 0;
 
 void *Plot_Window::global_GLContext = nullptr;
@@ -762,8 +765,8 @@ void Plot_Window::draw()
     glEnable(GL_BLEND);
     glEnableClientState(GL_VERTEX_ARRAY);
 
-    // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-     glEnableClientState(GL_COLOR_ARRAY);
+    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    //glEnableClientState(GL_COLOR_ARRAY);
 
     // this next idiom is necessary, per window, to map texture coordinate
     // values to [0..1] for texturing.
@@ -1590,10 +1593,10 @@ void Plot_Window::draw_data_points()
       if (use_VBOs)
       {
         assert (VBOinitialized && VBOfilled && indexVBOsinitialized && indexVBOsfilled);
-        DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << MAXPLOTS+1+brush_index << "@ " << __LINE__ << std::endl;);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+1+brush_index);
+        DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nglBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << 2*MAXPLOTS+1+brush_index << std::endl;);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer[brush_index]);
         CHECK_GL_ERROR("after glBindBuffer");
-        glDrawElements( element_mode, GLsizei(local_count), GL_UNSIGNED_INT, BUFFER_OFFSET(0)); // would it bee faster to use glDrawRangeElements() ?
+        glDrawElements( element_mode, GLsizei(local_count), GL_UNSIGNED_INT, BUFFER_OFFSET(0)); // would it be faster to use glDrawRangeElements() ?
         // make sure we succeeded
         CHECK_GL_ERROR("drawing points from VBO");
       }
@@ -2531,7 +2534,7 @@ void Plot_Window::initialize_selection()
   brushes[0]->count = npoints;
 
   // no other brushes render anything to start out.
-  for (int iter_i=1; iter_i<NBRUSHES; iter_i++)
+  for (int iter_i=1; iter_i< NBRUSHES; iter_i++)
   {
     brushes[iter_i]->count = 0;
   }
@@ -2755,14 +2758,14 @@ void Plot_Window::initialize_VBO()
     glGenBuffers(1, &m_buffer_one);
     CHECK_GL_ERROR("glGenBuffers call");
 
-    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << " Attempting to bind to a buffer " << m_buffer_one << std::endl;);
+    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to bind to a buffer " << m_buffer_one << std::endl;);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer_one);
     CHECK_GL_ERROR ("creating VBO");
 
     // Reserve enough space in openGL server memory VBO to hold all the
     // vertices, but do not initilize it.
-    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << " Attempting to fill " << m_buffer_one << std::endl;);
-    glBufferData( GL_ARRAY_BUFFER, (GLsizeiptr) npoints*3*sizeof(GLfloat), nullptr, GL_DYNAMIC_DRAW);
+    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to fill " << m_buffer_one << std::endl;);
+    glBufferData( GL_ARRAY_BUFFER, (GLsizeiptr) (npoints*3*sizeof(GLfloat)), nullptr, GL_DYNAMIC_DRAW);
 
     // Make sure we succeeded
     CHECK_GL_ERROR ("initializing VBO");
@@ -2776,13 +2779,11 @@ void Plot_Window::initialize_VBO()
 void Plot_Window::fill_VBO()
 {
   if (!VBOfilled) {
-    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ARRAY_BUFFER) " << m_buffer_one << "@ " << __LINE__ << std::endl;);
-    CHECK_GL_ERROR("before glBindBuffer");
-    DEBUG_OUTPUT(std::cout << (glIsBuffer(m_buffer_one) == GL_TRUE) << std::endl;);
+    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ARRAY_BUFFER) " << m_buffer_one << std::endl;);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer_one);
+    DEBUG_OUTPUT(std::cout <<"glIsBuffer(" << m_buffer_one<< ")= " << std::boolalpha << (glIsBuffer(m_buffer_one) == GL_TRUE) << std::endl;);
     CHECK_GL_ERROR("after glBindBuffer");
     void * vertexp = (void *) vertices.data();
-    DEBUG_OUTPUT(std::cout << vertices.data() << std::endl;);
     glBufferSubData( GL_ARRAY_BUFFER, (GLintptr) 0, (GLsizeiptr) (npoints*3*sizeof(GLfloat)), vertexp);
     CHECK_GL_ERROR("filling VBO");
     VBOfilled = true;
@@ -2793,21 +2794,16 @@ void Plot_Window::fill_VBO()
 // Plot_Window::initialize_indexVBO() -- Initialize the 'index VBO' that
 // holds indices of selected (or non-selected) points.
 // MCL XXX index VBOs hould probably be handled by the Brush class.
-void Plot_Window::initialize_indexVBO(int set)
+void Plot_Window::initialize_indexVBO(const int set)
 {
   // There is one shared set of index VBOs for all plots.
   //  indexVBO bound to MAXPLOTS+1 holds indices of nonselected (brushes[0]) points
   //  indexVBO bound to MAXPLOTS+2 holds indices of points selected by brushes[1], etc.
-  DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << MAXPLOTS+set+1 << std::endl;);
-
-  GLenum error_code;
-  while ((error_code = glGetError())!= GL_NO_ERROR)
-  {
-    std::cerr << "OpenGL error : " << error_code << std::endl;
-  }
-  glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+set+1);  // a safe place....
+  DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << set << " " << m_buffer[set] << std::endl;);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer[set]);// a safe place ... this was not a safe place (MAXPLOTS + set + 1)
   CHECK_GL_ERROR("glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)");
-  glBufferData( GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr) (npoints*sizeof(GLuint)), nullptr, GL_DYNAMIC_DRAW);
+  std::cout << "sizeof(GLuint) = " << sizeof(GLuint) << " ; npoints*sizeof(GLuint) = " << npoints*sizeof(GLuint) << std::endl;
+  glBufferData( GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr) (npoints*sizeof(GLuint)), nullptr, GL_STREAM_DRAW);
   CHECK_GL_ERROR("glBufferData(GL_ELEMENT_ARRAY_BUFFER)");
 }
 
@@ -2815,9 +2811,13 @@ void Plot_Window::initialize_indexVBO(int set)
 // Plot_Window::initialize_indexVBOs() -- Initialize set of index VBOs
 void Plot_Window::initialize_indexVBOs()
 {
-  if (!indexVBOsinitialized) {
-    for (int set=0; set<NBRUSHES; set++) {
-      initialize_indexVBO(set);
+  if (!indexVBOsinitialized)
+  {
+    glGenBuffers(NBRUSHES, m_buffer);
+    CHECK_GL_ERROR("glGenBuffer(NBRUSHES,m_buffer)");
+    for (int current_set=0; current_set < NBRUSHES; ++current_set)
+    {
+      initialize_indexVBO(current_set);
     }
     indexVBOsinitialized = 1;
   }
@@ -2825,19 +2825,21 @@ void Plot_Window::initialize_indexVBOs()
 
 //***************************************************************************
 // Plot_Window::fill_indexVBO() -- Fill the index VBO
-void Plot_Window::fill_indexVBO(int set)
+void Plot_Window::fill_indexVBO(const int set)
 {
-  if (brushes[set]->count > 0) {
-    
-    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER " << MAXPLOTS+set+1 << std::endl;);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+set+1);
-    // Create an alias to slice
-    CHECK_GL_ERROR("glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)");
+  std::cout << "count = " << brushes[set]->count << std::endl;
+  if (brushes[set]->count > 0)
+  {
+    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << (m_buffer[set]) << std::endl;);
     blitz::Array<unsigned int, 1> tmpArray = indices_selected( set, blitz::Range(0,npoints-1));
     unsigned int *indices = (unsigned int *) (tmpArray.data());
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer[set]);
+    // Create an alias to slice
+    CHECK_GL_ERROR("glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)");
     glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, (GLintptr) 0, (GLsizeiptr) (brushes[set]->count*sizeof(GLuint)), indices);
     // make sure we succeeded
-    CHECK_GL_ERROR("filling index VBO");
+    CHECK_GL_ERROR("filling_index VBO");
   }
 }
 
@@ -2846,8 +2848,8 @@ void Plot_Window::fill_indexVBO(int set)
 void Plot_Window::fill_indexVBOs()
 {
   if (!indexVBOsfilled) {
-    for (int set=0; set<NBRUSHES; set++) {
-      fill_indexVBO(set);
+    for (int current_set=0; current_set <NBRUSHES; current_set++) {
+      fill_indexVBO(current_set);
     }
     indexVBOsfilled = 1;
   }
