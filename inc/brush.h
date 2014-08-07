@@ -77,7 +77,7 @@
 
 
 #define NSELECTION_TYPE = 3;
-enum footprint {BRUSH_BOX, BRUSH_CIRCLE, BRUSH_ELLIPSE};
+enum footprint {BRUSH_BOX, BRUSH_CIRCLE, BRUSH_ELLIPSE, BRUSH_ANNULUS};
 void handle_selection_choice(Fl_Widget * in_w, Brush* in_v);
 
 

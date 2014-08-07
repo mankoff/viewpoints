@@ -1256,10 +1256,10 @@ void Plot_Window::handle_selection ()
   switch (xxx) {
   case footprint::BRUSH_BOX:
     inside_footprint(NPTS) =
-      where( ( vertices( NPTS, 0)>fmaxf( xdown, xtracked) ||
-               vertices( NPTS, 0)<fminf( xdown, xtracked) ||
-               vertices( NPTS, 1)>fmaxf( ydown, ytracked) ||
-               vertices( NPTS, 1)<fminf( ydown, ytracked)),
+      where( ( vertices( NPTS, 0)>max( xdown, xtracked) ||
+               vertices( NPTS, 0)<min( xdown, xtracked) ||
+               vertices( NPTS, 1)>max( ydown, ytracked) ||
+               vertices( NPTS, 1)<min( ydown, ytracked)),
              0, 1);
     break;
   case footprint::BRUSH_CIRCLE:
@@ -1290,6 +1290,33 @@ void Plot_Window::handle_selection ()
       inside_footprint(NPTS) =
         where( ( (pow2((vertices(NPTS,0)-xdown)*xs/a) + pow2((vertices(NPTS,1)-ydown)*ys/b)) > 1.),
                0, 1);
+    }
+    break;
+  case footprint::BRUSH_ANNULUS:
+    {
+      float xs = xscale * w();
+      float ys = yscale * h();
+
+      float dist_x2 = pow2((xtracked-xdown)*xs);
+      float dist_y2 = pow2((ytracked-ydown)*ys);
+
+      if (dist_x2 == 0.)
+      {
+        dist_x2 = xs*xs;
+      }
+
+      if (dist_y2 == 0.)
+      {
+        dist_y2 = ys*ys;
+      }
+
+      float out_radius = std::max(dist_x2,dist_y2);
+      float in_radius  = std::min(dist_x2,dist_y2);
+      inside_footprint(NPTS) =
+        where( ( (pow2((vertices(NPTS,0)-xdown)*xs) + pow2((vertices(NPTS,1)-ydown)*ys)) > out_radius + in_radius ) ||
+               ( (pow2((vertices(NPTS,0)-xdown)*xs) + pow2((vertices(NPTS,1)-ydown)*ys)) < out_radius - in_radius ), 0, 1);
+
+
     }
     break;
   default:

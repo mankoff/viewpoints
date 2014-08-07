@@ -413,7 +413,7 @@ void Brush::make_widgets( Brush *bw)
   paint->type( FL_TOGGLE_BUTTON);
   paint->tooltip( "dribble paint (do not erase) when dragging or shift-dragging");
 
-  selection_menu = new Fl_Choice(xpos, ypos+=20, 80, 20, "Selection Type");
+  selection_menu = new Fl_Choice(xpos, ypos+=20, 100, 20, "Region");
   selection_menu->align( FL_ALIGN_RIGHT);
   build_selection_type_menu();
   selection_menu->value(0);
@@ -421,7 +421,6 @@ void Brush::make_widgets( Brush *bw)
 
 void handle_selection_choice(Fl_Widget * in_w, Brush* in_v)
 {
-  std::cout << "Handling Callback" << std::endl;
   switch(((Fl_Choice*)in_w)->value())
   {
   case 0 :
@@ -432,6 +431,9 @@ void handle_selection_choice(Fl_Widget * in_w, Brush* in_v)
     return;
   case 2 :
     in_v->current_footprint = BRUSH_ELLIPSE;
+    return;
+  case 3:
+    in_v->current_footprint = BRUSH_ANNULUS;
     return;
   default :
     in_v->current_footprint = BRUSH_BOX;
@@ -444,6 +446,7 @@ void Brush::build_selection_type_menu()
   selection_menu->add("Rectangle", 0, (Fl_Callback*)&handle_selection_choice, (void *)this);
   selection_menu->add("Circle   ", 0, (Fl_Callback*)&handle_selection_choice, (void *)this);
   selection_menu->add("Ellipse  ", 0, (Fl_Callback*)&handle_selection_choice, (void *)this);
+  selection_menu->add("Annulus  ", 0, (Fl_Callback*)&handle_selection_choice, (void *)this);
 }
 
 //***************************************************************************
