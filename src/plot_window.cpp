@@ -763,7 +763,7 @@ void Plot_Window::draw()
     glEnableClientState(GL_VERTEX_ARRAY);
 
     // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    // glEnableClientState(GL_COLOR_ARRAY);
+     glEnableClientState(GL_COLOR_ARRAY);
 
     // this next idiom is necessary, per window, to map texture coordinate
     // values to [0..1] for texturing.
@@ -1374,7 +1374,7 @@ void Plot_Window::draw_selection_information()
 // Plot_Window::draw_data_points() -- If requested, draw the data
 void Plot_Window::draw_data_points()
 {
-  // cout << "pw[" << index << "]: draw_data_points() " << endl;
+  DEBUG_OUTPUT( std::cout << "pw[" << index << "]: draw_data_points() " << endl;);
   if ( !cp->show_points->value())
   {
     return;
@@ -2626,18 +2626,11 @@ void Plot_Window::initialize_sprites()
   make_sprite_textures();
   for (int i=0; i<NSYMBOLS; i++) {
 #ifdef ALPHA_TEXTURE
-    GLfloat rgb2rgba[16] = {
-      1, 0, 0, 1/3.0,
-      0, 1, 0, 1/3.0,
-      0, 0, 1, 1/3.0,
-      0, 0, 0, 0
-    };
-    glMatrixMode(GL_COLOR);
-    glLoadMatrixf(rgb2rgba);
     glMatrixMode(GL_MODELVIEW);
     glBindTexture( GL_TEXTURE_2D, spriteTextureID[i]);
-    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_INTENSITY, spriteWidth, spriteHeight, GL_RGB, GL_UNSIGNED_BYTE, spriteData[i]);
-#else // ALPHA_TEXTURE
+    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, spriteWidth, spriteHeight, GL_RGB, GL_UNSIGNED_BYTE, spriteData[i]);
+    CHECK_GL_ERROR( "initializing sprite texture mipmaps");
+#else // NOT ALPHA_TEXTURE
     glBindTexture( GL_TEXTURE_2D, spriteTextureID[i]);
     gluBuild2DMipmaps( GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, spriteWidth, spriteHeight, GL_RGB, GL_UNSIGNED_BYTE, spriteData[i]);
 #endif // ALPHA_TEXTURE
