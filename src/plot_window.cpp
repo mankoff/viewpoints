@@ -2802,7 +2802,7 @@ void Plot_Window::initialize_indexVBO(const int set)
   DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << set << " " << m_buffer[set] << std::endl;);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_buffer[set]);// a safe place ... this was not a safe place (MAXPLOTS + set + 1)
   CHECK_GL_ERROR("glBindBuffer(GL_ELEMENT_ARRAY_BUFFER)");
-  std::cout << "sizeof(GLuint) = " << sizeof(GLuint) << " ; npoints*sizeof(GLuint) = " << npoints*sizeof(GLuint) << std::endl;
+  DEBUG_OUTPUT(std::cout << "sizeof(GLuint) = " << sizeof(GLuint) << " ; npoints*sizeof(GLuint) = " << npoints*sizeof(GLuint) << std::endl;);
   glBufferData( GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr) (npoints*sizeof(GLuint)), nullptr, GL_STREAM_DRAW);
   CHECK_GL_ERROR("glBufferData(GL_ELEMENT_ARRAY_BUFFER)");
 }
@@ -2827,7 +2827,7 @@ void Plot_Window::initialize_indexVBOs()
 // Plot_Window::fill_indexVBO() -- Fill the index VBO
 void Plot_Window::fill_indexVBO(const int set)
 {
-  std::cout << "count = " << brushes[set]->count << std::endl;
+  DEBUG_OUTPUT( std::cout << "count = " << brushes[set]->count << std::endl; );
   if (brushes[set]->count > 0)
   {
     DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ELEMENT_ARRAY_BUFFER) " << (m_buffer[set]) << std::endl;);
