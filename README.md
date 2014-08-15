@@ -48,6 +48,13 @@ git submodule init
 git submodule update
 ```
 
+To do an update (assuming you are on the master branch):
+```
+git pull
+git submodule update
+```
+then re-run `make` within a build directory;
+
 Dependency
 ==========
 
