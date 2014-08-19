@@ -839,6 +839,8 @@ void Plot_Window::draw()
 
 			if (g_gl_major > 2)
 			{
+        //this protection is because nVidia drivers 304.xx on Ubuntu
+        //don't support these 3 enums
         glGetIntegerv(GL_MAJOR_VERSION,  &g_gl_major);
         glGetIntegerv(GL_MINOR_VERSION,  &g_gl_minor);
         glGetIntegerv(GL_NUM_EXTENSIONS, &g_gl_number_of_extensions);
@@ -848,11 +850,78 @@ void Plot_Window::draw()
       glGetBooleanv(GL_SHADER_COMPILER, &has_shader_compiler);
 			CHECK_GL_ERROR("GL_SHADER_COMPILER check");
 
-      //Return the i-th extension glGetStringi(GL_EXTENSIONS,i);
+      GLint red_bits, green_bits, blue_bits, alpha_bits;
+
+      // get number of color bits
+      glGetIntegerv(GL_RED_BITS, &red_bits);
+      glGetIntegerv(GL_GREEN_BITS, &green_bits);
+      glGetIntegerv(GL_BLUE_BITS, &blue_bits);
+      glGetIntegerv(GL_ALPHA_BITS, &alpha_bits);
+			CHECK_GL_ERROR("glGetIntegerv(GL_RGBA_BITS) calls");
+
+
+      GLint depth_bits;
+      // get depth bits
+      glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
+			CHECK_GL_ERROR("glGetIntegerv(GL_DEPTH_BITS) call");
+
+      GLint stencil_bits;
+      // get stecil bits
+      glGetIntegerv(GL_STENCIL_BITS, &stencil_bits);
+			CHECK_GL_ERROR("glGetIntegerv(GL_STENCIL_BITS) call");
+
+      GLint max_lights;
+      // get max number of lights allowed
+      glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
+			CHECK_GL_ERROR("glGetIntegerv(GL_MAX_LIGHTS) call");
+
+      GLint max_texture_size;
+      // get max texture resolution
+      glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
+			CHECK_GL_ERROR("glGetIntegerv(GL_MAX_TEXTURE_SIZE) call");
+
+      GLint max_clip_planes;
+      // get max number of clipping planes
+      glGetIntegerv(GL_MAX_CLIP_PLANES, &max_clip_planes);
+			CHECK_GL_ERROR("glGetIntegerv(GL_MAX_CLIP_PLANES) call");
+
+      GLint max_model_view_stack_depth, max_projection_stack_depth, max_attrib_stack_depth;
+
+      // get max modelview and projection matrix stacks
+      glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH,  &max_model_view_stack_depth);
+      glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &max_projection_stack_depth);
+      glGetIntegerv(GL_MAX_ATTRIB_STACK_DEPTH,     &max_attrib_stack_depth);
+
+      GLint max_texture_stack_depth;
+      // get max texture stacks
+      glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH,    &max_texture_stack_depth);
+
+      GLint max_vertex_attribs;
+      glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,         &max_vertex_attribs);
+			CHECK_GL_ERROR("GL_MAX_VERTEX_ATTRIBS call");
+      DEBUG_OUTPUT(cout << "GL_MAX_VERTEX_ATTRIBS = " << max_vertex_attribs << endl;);
 
       cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
 
+      //Return the i-th extension glGetStringi(GL_EXTENSIONS,i);
       //http://www.opengl.org/sdk/docs/man/html/glGet.xhtml
+
+      if (g_gl_major <= 2)//don't have access to g_gl_number_of_extensions
+      {
+        g_gl_extensions_string = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
+        istringstream iss(g_gl_extensions_string);
+        copy(istream_iterator<string>(iss), istream_iterator<string>(), ostream_iterator<string>(cout, "\n"));
+        vector<string> loc_tokens_gl_extensions;
+        copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(loc_tokens_gl_extensions));
+        BOOST_FOREACH( string in_name_of_extension, loc_tokens_gl_extensions )
+        {
+          DEBUG_OUTPUT(cout << in_name_of_extension << endl;);
+          if (in_name_of_extension == "GL_ARB_IMAGING")
+          {
+            g_gl_has_GL_ARB_imaging = true;
+          }
+        }
+      }
 
       std::string ARB("ARB");
       std::string NV("NV");
@@ -889,6 +958,8 @@ void Plot_Window::draw()
       extension_types.push_back(ANGLE);
       extension_types.push_back(OES);
 
+      //handle extensions list using g_gl_number_of_extensions
+      //Uses: glGetStringi(GL_EXTENSIONS,GLint);
       for(GLint extension_iter = 0; extension_iter < g_gl_number_of_extensions; ++extension_iter )
       {
 				CHECK_GL_ERROR("glGetStringi calls");
@@ -919,51 +990,6 @@ void Plot_Window::draw()
       {
         std::cout << "OpenGL DOES NOT have GL_ARB_imaging;" << std::endl;
       }
-			CHECK_GL_ERROR("glGetIntegerv calls");
-      GLint red_bits, green_bits, blue_bits, alpha_bits;
-
-      // get number of color bits
-      glGetIntegerv(GL_RED_BITS, &red_bits);
-      glGetIntegerv(GL_GREEN_BITS, &green_bits);
-      glGetIntegerv(GL_BLUE_BITS, &blue_bits);
-      glGetIntegerv(GL_ALPHA_BITS, &alpha_bits);
-
-      GLint depth_bits;
-      // get depth bits
-      glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
-
-      GLint stencil_bits;
-      // get stecil bits
-      glGetIntegerv(GL_STENCIL_BITS, &stencil_bits);
-
-      GLint max_lights;
-      // get max number of lights allowed
-      glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
-
-      GLint max_texture_size;
-      // get max texture resolution
-      glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
-
-      GLint max_clip_planes;
-      // get max number of clipping planes
-      glGetIntegerv(GL_MAX_CLIP_PLANES, &max_clip_planes);
-
-      GLint max_model_view_stack_depth, max_projection_stack_depth, max_attrib_stack_depth;
-
-      // get max modelview and projection matrix stacks
-      glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH,  &max_model_view_stack_depth);
-      glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &max_projection_stack_depth);
-      glGetIntegerv(GL_MAX_ATTRIB_STACK_DEPTH,     &max_attrib_stack_depth);
-
-      GLint max_texture_stack_depth;
-      // get max texture stacks
-      glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH,    &max_texture_stack_depth);
-
-      GLint max_vertex_attribs;
-			CHECK_GL_ERROR("Before GL_MAX_VERTEX_ATTRIBS call");
-      glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,         &max_vertex_attribs);
-			CHECK_GL_ERROR("GL_MAX_VERTEX_ATTRIBS call");
-      cout << "GL_MAX_VERTEX_ATTRIBS = " << max_vertex_attribs << endl;
     }
   }
 
