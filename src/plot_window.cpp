@@ -862,8 +862,8 @@ void Plot_Window::draw()
         copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(loc_tokens_gl_extensions));
         BOOST_FOREACH( string in_name_of_extension, loc_tokens_gl_extensions )
         {
-          DEBUG_OUTPUT(cout << in_name_of_extension << endl;);
-          if (in_name_of_extension == "GL_ARB_imaging")
+          //DEBUG_OUTPUT(cout << in_name_of_extension << endl;);
+          if (in_name_of_extension.find("GL_ARB_imaging") != std::string::npos)
           {
             g_gl_has_GL_ARB_imaging = true;
           }
@@ -876,8 +876,8 @@ void Plot_Window::draw()
       {
 				CHECK_GL_ERROR("glGetStringi calls");
         std::string extension = (const char*)glGetStringi(GL_EXTENSIONS, extension_iter);
-        DEBUG_OUTPUT(std::cout << glGetStringi(GL_EXTENSIONS, extension_iter) << std::endl;);
-        if (extension == "GL_ARB_imaging")
+        //DEBUG_OUTPUT(std::cout << glGetStringi(GL_EXTENSIONS, extension_iter) << std::endl;);
+        if (extension.find("GL_ARB_imaging") != std::string::npos)
         {
           //has GL_ARB_imaging
           g_gl_has_GL_ARB_imaging   = true;
