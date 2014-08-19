@@ -848,18 +848,19 @@ void Plot_Window::draw()
       GLboolean has_shader_compiler = GL_FALSE;
       glGetBooleanv(GL_SHADER_COMPILER, &has_shader_compiler);
 			CHECK_GL_ERROR("GL_SHADER_COMPILER check");
-      cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
 
       //Return the i-th extension glGetStringi(GL_EXTENSIONS,i);
       //http://www.opengl.org/sdk/docs/man/html/glGet.xhtml
 
       if (g_gl_major <= 2)//don't have access to g_gl_number_of_extensions
       {
-        g_gl_extensions_string = reinterpret_cast<const char *>(glGetString(GL_EXTENSIONS));
+        g_gl_extensions_string = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
         istringstream iss(g_gl_extensions_string);
-        copy(istream_iterator<string>(iss), istream_iterator<string>(), ostream_iterator<string>(cout, "\n"));
+
         vector<string> loc_tokens_gl_extensions;
+        //loc_tokens_gl_extensions{istream_iterator<string>(iss), istream_iterator<string>() };
         copy(istream_iterator<string>(iss), istream_iterator<string>(), back_inserter<vector<string> >(loc_tokens_gl_extensions));
+
         BOOST_FOREACH( string in_name_of_extension, loc_tokens_gl_extensions )
         {
           //DEBUG_OUTPUT(cout << in_name_of_extension << endl;);
