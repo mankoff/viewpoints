@@ -863,7 +863,7 @@ void Plot_Window::draw()
         BOOST_FOREACH( string in_name_of_extension, loc_tokens_gl_extensions )
         {
           DEBUG_OUTPUT(cout << in_name_of_extension << endl;);
-          if (in_name_of_extension == "GL_ARB_IMAGING")
+          if (in_name_of_extension == "GL_ARB_imaging")
           {
             g_gl_has_GL_ARB_imaging = true;
           }
