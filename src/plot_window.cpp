@@ -40,6 +40,10 @@
 #include "brush.h"
 #include "column_info.h"
 
+#include <thread>
+#include <mutex>
+//to gurantee single access to OpenGL logging info
+
 // experimental
 //#define ALPHA_TEXTURE
 
@@ -103,6 +107,30 @@ void fluctuation(
   blitz::Array<float,1> a, const blitz::Array<int,1> indices,
   const int half_width);
 double nicenum( const double xx, const double round);
+
+//Storage for OpenGL info
+std::multimap<std::string, std::string> g_gl_subtype_to_gl_extensions;
+std::vector<std::string> g_gl_extensions;
+
+std::string g_gl_vendor_string("");
+std::string g_gl_version_string("");
+std::string g_gl_renderer_string("");
+std::string g_gl_extensions_string("");
+std::string g_gl_shader_language_version_string("");
+
+int g_gl_major           = 0;
+int g_gl_minor           = 0;
+int g_gl_revision        = 0;
+int g_gl_shader_major    = 0;
+int g_gl_shader_minor    = 0;
+int g_gl_shader_revision = 0;
+
+GLint g_gl_number_of_extensions = 0;
+//
+std::mutex   mutex_information_logged;
+static bool  g_gl_information_logged   = false;
+//
+
 
 //***************************************************************************
 // Plot_Window::Plot_Window() -- Default constructor, used only in
@@ -178,7 +206,6 @@ void Plot_Window::initialize()
 
   indexVBOsinitialized = 0;
   sprites_initialized  = 0;
-
 }
 
 //***************************************************************************
@@ -751,6 +778,171 @@ void Plot_Window::reset_view()
 void Plot_Window::draw()
 {
   DEBUG (cout << "in draw: " << xcenter << " " << ycenter << " " << xscale << " " << yscale << " " << wmin[0] << " " << wmax[0] << endl);
+
+  if (!g_gl_information_logged)
+  {
+    //checks if the information is logged, if not it acquires the mutex
+    std::lock_guard<std::mutex> lock(mutex_information_logged);
+    if (!g_gl_information_logged)
+    {
+      g_gl_information_logged = true;
+      //rechecks the state of information logging (since this could have changed
+      //for a thread which was blocked and then acquired the mutex)
+
+      //in OpenGL version 2.1.2 (from nVidia) -> this returns 1;
+      if (!glGetString(GL_VENDOR))
+      {
+        //THIS will not work with out an active opengl context, so it has to be done after creating the Fl_Gl_Window
+        //__gking__
+        throw std::runtime_error("glGetString(GL_VENDOR) is 0. No OpenGL context. ");
+        //probably should create an exception from a standard exception
+        //and throw that. runtime_error should do;
+      }
+      else
+      {
+        cout << "GL_VENDOR = " << glGetString(GL_VENDOR) << endl;
+      }
+
+      //May not be portable.
+      g_gl_vendor_string   = reinterpret_cast<const char *> (glGetString(GL_VENDOR));
+      g_gl_renderer_string = reinterpret_cast<const char *> (glGetString(GL_RENDERER));
+      g_gl_version_string  = reinterpret_cast<const char *> (glGetString(GL_VERSION));
+      g_gl_shader_language_version_string = reinterpret_cast<const char *> (glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+      char * version = (char *) glGetString(GL_VERSION);
+      cout << version << endl;
+      cout << g_gl_shader_language_version_string << endl;
+//http://www.opengl.org/wiki/Detecting_the_Shader_Model
+
+      glGetIntegerv(GL_MAJOR_VERSION,  &g_gl_major);
+      glGetIntegerv(GL_MINOR_VERSION,  &g_gl_minor);
+      glGetIntegerv(GL_NUM_EXTENSIONS, &g_gl_number_of_extensions);
+
+      GLboolean has_shader_compiler = GL_FALSE;
+      glGetBooleanv(GL_SHADER_COMPILER, &has_shader_compiler);
+
+      //Return the i-th extension glGetStringi(GL_EXTENSIONS,i);
+
+      cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
+
+      //http://www.opengl.org/sdk/docs/man/html/glGet.xhtml
+
+      //// OLD MECHANISM for checking gl version (scanning through glGetString(GL_VERSION) );
+      //      if (sscanf(version, "%d.%d", &g_gl_major, &g_gl_minor) == 2)
+      //      {
+      //        cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
+      //      }
+      //      if (sscanf(version, "%d.%d.%d", &g_gl_major, &g_gl_minor, &g_gl_revision) == 3)
+      //      {
+      //        cout << "Major.Minor.Revision = " << g_gl_major << "." << g_gl_minor << "." << g_gl_revision << endl;
+      //      }
+      //The GL_VERSION and GL_SHADING_LANGUAGE_VERSION strings begin with a version number. The version number uses one of these forms:
+
+      //major_number.minor_number
+      // OR
+      //major_number.minor_number.release_number
+
+      //Vendor-specific information may follow the version number.
+      //Its format depends on the implementation, but a space always separates
+      //the version number and the vendor-specific information.
+
+      //All strings are null-terminated.
+
+      std::string ARB("ARB");
+      std::string NV("NV");
+      std::string SGI("SGI");
+      std::string EXT("EXT");
+      std::string ATI("ATI");
+      std::string AMD("AMD");
+      std::string S3("S3");
+      std::string IBM("IBM");
+      std::string KTX("KTX");
+      std::string SUN("SUN");
+      std::string KHR("KHR");
+      std::string MESA("MESA");
+      std::string INGR("INGR");
+      std::string APPLE("APPLE");
+      std::string ANGLE("ANGLE");
+      std::string OES("OES");
+
+      std::vector<std::string> extension_types;
+      extension_types.push_back(ARB);
+      extension_types.push_back(NV);
+      extension_types.push_back(SGI);
+      extension_types.push_back(EXT);
+      extension_types.push_back(ATI);
+      extension_types.push_back(AMD);
+      extension_types.push_back(S3);
+      extension_types.push_back(IBM);
+      extension_types.push_back(KTX);
+      extension_types.push_back(SUN);
+      extension_types.push_back(KHR);
+      extension_types.push_back(MESA);
+      extension_types.push_back(INGR);
+      extension_types.push_back(APPLE);
+      extension_types.push_back(ANGLE);
+      extension_types.push_back(OES);
+
+      for(GLint extension_iter = 0; extension_iter < g_gl_number_of_extensions; ++extension_iter )
+      {
+        std::string extension = (const char*)glGetStringi(GL_EXTENSIONS, extension_iter);
+        //
+        //DEBUG_OUTPUT(std::cout << glGetStringi(GL_EXTENSIONS, extension_iter) << std::endl;);
+        g_gl_extensions.push_back(extension);
+        for (std::vector<std::string>::iterator pos = extension_types.begin();
+             pos != extension_types.end();
+             ++pos)
+        {
+          if(std::string::npos != extension.find(*pos))
+          {
+            g_gl_subtype_to_gl_extensions.insert(std::make_pair(*pos, extension));
+          }
+        }
+      }
+      GLint red_bits, green_bits, blue_bits, alpha_bits;
+
+      // get number of color bits
+      glGetIntegerv(GL_RED_BITS, &red_bits);
+      glGetIntegerv(GL_GREEN_BITS, &green_bits);
+      glGetIntegerv(GL_BLUE_BITS, &blue_bits);
+      glGetIntegerv(GL_ALPHA_BITS, &alpha_bits);
+
+      GLint depth_bits;
+      // get depth bits
+      glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
+
+      GLint stencil_bits;
+      // get stecil bits
+      glGetIntegerv(GL_STENCIL_BITS, &stencil_bits);
+
+      GLint max_lights;
+      // get max number of lights allowed
+      glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
+
+      GLint max_texture_size;
+      // get max texture resolution
+      glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
+
+      GLint max_clip_planes;
+      // get max number of clipping planes
+      glGetIntegerv(GL_MAX_CLIP_PLANES, &max_clip_planes);
+
+      GLint max_model_view_stack_depth, max_projection_stack_depth, max_attrib_stack_depth;
+
+      // get max modelview and projection matrix stacks
+      glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH,  &max_model_view_stack_depth);
+      glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &max_projection_stack_depth);
+      glGetIntegerv(GL_MAX_ATTRIB_STACK_DEPTH,     &max_attrib_stack_depth);
+
+      GLint max_texture_stack_depth;
+      // get max texture stacks
+      glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH,    &max_texture_stack_depth);
+
+      GLint max_vertex_attribs;
+      glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,         &max_vertex_attribs);
+      cout << "GL_MAX_VERTEX_ATTRIBS = " << max_vertex_attribs << endl;
+    }
+  }
 
   // the valid() property can avoid reinitializing matrix for
   // each redraw:
