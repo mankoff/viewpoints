@@ -129,6 +129,7 @@ GLint g_gl_number_of_extensions = 0;
 //
 std::mutex   mutex_information_logged;
 static bool  g_gl_information_logged   = false;
+static bool  g_gl_has_GL_ARB_imaging   = false;
 //
 
 
@@ -886,8 +887,14 @@ void Plot_Window::draw()
       for(GLint extension_iter = 0; extension_iter < g_gl_number_of_extensions; ++extension_iter )
       {
         std::string extension = (const char*)glGetStringi(GL_EXTENSIONS, extension_iter);
-        //
         //DEBUG_OUTPUT(std::cout << glGetStringi(GL_EXTENSIONS, extension_iter) << std::endl;);
+        if (std::string::npos != extension.find("GL_ARB_imaging"))
+        {
+          //has GL_ARB_imaging
+          g_gl_has_GL_ARB_imaging   = true;
+        }
+
+
         g_gl_extensions.push_back(extension);
         for (std::vector<std::string>::iterator pos = extension_types.begin();
              pos != extension_types.end();
@@ -899,6 +906,15 @@ void Plot_Window::draw()
           }
         }
       }
+      if (g_gl_has_GL_ARB_imaging)
+      {
+        std::cout << "OpenGL has GL_ARB_imaging;" << std::endl;
+      }
+      else
+      {
+        std::cout << "OpenGL DOES NOT have GL_ARB_imaging;" << std::endl;
+      }
+
       GLint red_bits, green_bits, blue_bits, alpha_bits;
 
       // get number of color bits
@@ -2868,10 +2884,26 @@ void Plot_Window::initialize_sprites()
   make_sprite_textures();
   for (int i=0; i<NSYMBOLS; i++) {
 #ifdef ALPHA_TEXTURE
+    if(g_gl_has_GL_ARB_imaging)
+    {
+      DEBUG_OUTPUT( std::cout << "GL_ARB_imaging" << std::endl;);
+      GLfloat rgb2rgba[16] = { 1, 0, 0, 1/3.0,
+                               0, 1, 0, 1/3.0,
+                               0, 0, 1, 1/3.0,
+                               0, 0, 0, 0 };
+      glMatrixMode(GL_COLOR);
+      glLoadMatrixf(rgb2rgba);
+    }
     glMatrixMode(GL_MODELVIEW);
     glBindTexture( GL_TEXTURE_2D, spriteTextureID[i]);
-    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, spriteWidth, spriteHeight, GL_RGB, GL_UNSIGNED_BYTE, spriteData[i]);
-    CHECK_GL_ERROR( "initializing sprite texture mipmaps");
+    if (g_gl_has_GL_ARB_imaging)
+    {
+      gluBuild2DMipmaps( GL_TEXTURE_2D, GL_INTENSITY, spriteWidth, spriteHeight, GL_RGB, GL_UNSIGNED_BYTE, spriteData[i]);
+    }
+    else
+    {
+      gluBuild2DMipmaps( GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, spriteWidth, spriteHeight, GL_RGB, GL_UNSIGNED_BYTE, spriteData[i]);
+    }
 #else // NOT ALPHA_TEXTURE
     glBindTexture( GL_TEXTURE_2D, spriteTextureID[i]);
     gluBuild2DMipmaps( GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, spriteWidth, spriteHeight, GL_RGB, GL_UNSIGNED_BYTE, spriteData[i]);
