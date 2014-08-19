@@ -109,7 +109,6 @@ void fluctuation(
 double nicenum( const double xx, const double round);
 
 //Storage for OpenGL info
-std::multimap<std::string, std::string> g_gl_subtype_to_gl_extensions;
 std::vector<std::string> g_gl_extensions;
 
 std::string g_gl_vendor_string("");
@@ -849,58 +848,6 @@ void Plot_Window::draw()
       GLboolean has_shader_compiler = GL_FALSE;
       glGetBooleanv(GL_SHADER_COMPILER, &has_shader_compiler);
 			CHECK_GL_ERROR("GL_SHADER_COMPILER check");
-
-      GLint red_bits, green_bits, blue_bits, alpha_bits;
-
-      // get number of color bits
-      glGetIntegerv(GL_RED_BITS, &red_bits);
-      glGetIntegerv(GL_GREEN_BITS, &green_bits);
-      glGetIntegerv(GL_BLUE_BITS, &blue_bits);
-      glGetIntegerv(GL_ALPHA_BITS, &alpha_bits);
-			CHECK_GL_ERROR("glGetIntegerv(GL_RGBA_BITS) calls");
-
-
-      GLint depth_bits;
-      // get depth bits
-      glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
-			CHECK_GL_ERROR("glGetIntegerv(GL_DEPTH_BITS) call");
-
-      GLint stencil_bits;
-      // get stecil bits
-      glGetIntegerv(GL_STENCIL_BITS, &stencil_bits);
-			CHECK_GL_ERROR("glGetIntegerv(GL_STENCIL_BITS) call");
-
-      GLint max_lights;
-      // get max number of lights allowed
-      glGetIntegerv(GL_MAX_LIGHTS, &max_lights);
-			CHECK_GL_ERROR("glGetIntegerv(GL_MAX_LIGHTS) call");
-
-      GLint max_texture_size;
-      // get max texture resolution
-      glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
-			CHECK_GL_ERROR("glGetIntegerv(GL_MAX_TEXTURE_SIZE) call");
-
-      GLint max_clip_planes;
-      // get max number of clipping planes
-      glGetIntegerv(GL_MAX_CLIP_PLANES, &max_clip_planes);
-			CHECK_GL_ERROR("glGetIntegerv(GL_MAX_CLIP_PLANES) call");
-
-      GLint max_model_view_stack_depth, max_projection_stack_depth, max_attrib_stack_depth;
-
-      // get max modelview and projection matrix stacks
-      glGetIntegerv(GL_MAX_MODELVIEW_STACK_DEPTH,  &max_model_view_stack_depth);
-      glGetIntegerv(GL_MAX_PROJECTION_STACK_DEPTH, &max_projection_stack_depth);
-      glGetIntegerv(GL_MAX_ATTRIB_STACK_DEPTH,     &max_attrib_stack_depth);
-
-      GLint max_texture_stack_depth;
-      // get max texture stacks
-      glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH,    &max_texture_stack_depth);
-
-      GLint max_vertex_attribs;
-      glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,         &max_vertex_attribs);
-			CHECK_GL_ERROR("GL_MAX_VERTEX_ATTRIBS call");
-      DEBUG_OUTPUT(cout << "GL_MAX_VERTEX_ATTRIBS = " << max_vertex_attribs << endl;);
-
       cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
 
       //Return the i-th extension glGetStringi(GL_EXTENSIONS,i);
@@ -923,41 +870,6 @@ void Plot_Window::draw()
         }
       }
 
-      std::string ARB("ARB");
-      std::string NV("NV");
-      std::string SGI("SGI");
-      std::string EXT("EXT");
-      std::string ATI("ATI");
-      std::string AMD("AMD");
-      std::string S3("S3");
-      std::string IBM("IBM");
-      std::string KTX("KTX");
-      std::string SUN("SUN");
-      std::string KHR("KHR");
-      std::string MESA("MESA");
-      std::string INGR("INGR");
-      std::string APPLE("APPLE");
-      std::string ANGLE("ANGLE");
-      std::string OES("OES");
-
-      std::vector<std::string> extension_types;
-      extension_types.push_back(ARB);
-      extension_types.push_back(NV);
-      extension_types.push_back(SGI);
-      extension_types.push_back(EXT);
-      extension_types.push_back(ATI);
-      extension_types.push_back(AMD);
-      extension_types.push_back(S3);
-      extension_types.push_back(IBM);
-      extension_types.push_back(KTX);
-      extension_types.push_back(SUN);
-      extension_types.push_back(KHR);
-      extension_types.push_back(MESA);
-      extension_types.push_back(INGR);
-      extension_types.push_back(APPLE);
-      extension_types.push_back(ANGLE);
-      extension_types.push_back(OES);
-
       //handle extensions list using g_gl_number_of_extensions
       //Uses: glGetStringi(GL_EXTENSIONS,GLint);
       for(GLint extension_iter = 0; extension_iter < g_gl_number_of_extensions; ++extension_iter )
@@ -970,18 +882,9 @@ void Plot_Window::draw()
           //has GL_ARB_imaging
           g_gl_has_GL_ARB_imaging   = true;
         }
-
         g_gl_extensions.push_back(extension);
-        for (std::vector<std::string>::iterator pos = extension_types.begin();
-             pos != extension_types.end();
-             ++pos)
-        {
-          if(std::string::npos != extension.find(*pos))
-          {
-            g_gl_subtype_to_gl_extensions.insert(std::make_pair(*pos, extension));
-          }
-        }
       }
+
       if (g_gl_has_GL_ARB_imaging)
       {
         std::cout << "OpenGL has GL_ARB_imaging;" << std::endl;
