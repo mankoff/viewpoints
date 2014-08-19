@@ -813,30 +813,17 @@ void Plot_Window::draw()
       char * version = (char *) glGetString(GL_VERSION);
       cout << version << endl;
       cout << g_gl_shader_language_version_string << endl;
-//http://www.opengl.org/wiki/Detecting_the_Shader_Model
-
-      glGetIntegerv(GL_MAJOR_VERSION,  &g_gl_major);
-      glGetIntegerv(GL_MINOR_VERSION,  &g_gl_minor);
-      glGetIntegerv(GL_NUM_EXTENSIONS, &g_gl_number_of_extensions);
-
-      GLboolean has_shader_compiler = GL_FALSE;
-      glGetBooleanv(GL_SHADER_COMPILER, &has_shader_compiler);
-
-      //Return the i-th extension glGetStringi(GL_EXTENSIONS,i);
-
-      cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
-
-      //http://www.opengl.org/sdk/docs/man/html/glGet.xhtml
+			//http://www.opengl.org/wiki/Detecting_the_Shader_Model
 
       //// OLD MECHANISM for checking gl version (scanning through glGetString(GL_VERSION) );
-      //      if (sscanf(version, "%d.%d", &g_gl_major, &g_gl_minor) == 2)
-      //      {
-      //        cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
-      //      }
-      //      if (sscanf(version, "%d.%d.%d", &g_gl_major, &g_gl_minor, &g_gl_revision) == 3)
-      //      {
-      //        cout << "Major.Minor.Revision = " << g_gl_major << "." << g_gl_minor << "." << g_gl_revision << endl;
-      //      }
+      if (sscanf(version, "%d.%d", &g_gl_major, &g_gl_minor) == 2)
+      {
+        cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
+      }
+      if (sscanf(version, "%d.%d.%d", &g_gl_major, &g_gl_minor, &g_gl_revision) == 3)
+      {
+        cout << "Major.Minor.Revision = " << g_gl_major << "." << g_gl_minor << "." << g_gl_revision << endl;
+      }
       //The GL_VERSION and GL_SHADING_LANGUAGE_VERSION strings begin with a version number. The version number uses one of these forms:
 
       //major_number.minor_number
@@ -848,6 +835,24 @@ void Plot_Window::draw()
       //the version number and the vendor-specific information.
 
       //All strings are null-terminated.
+
+
+			if (g_gl_major > 2)
+			{
+        glGetIntegerv(GL_MAJOR_VERSION,  &g_gl_major);
+        glGetIntegerv(GL_MINOR_VERSION,  &g_gl_minor);
+        glGetIntegerv(GL_NUM_EXTENSIONS, &g_gl_number_of_extensions);
+			}
+
+      GLboolean has_shader_compiler = GL_FALSE;
+      glGetBooleanv(GL_SHADER_COMPILER, &has_shader_compiler);
+			CHECK_GL_ERROR("GL_SHADER_COMPILER check");
+
+      //Return the i-th extension glGetStringi(GL_EXTENSIONS,i);
+
+      cout << "Major.Minor = " << g_gl_major << "." << g_gl_minor << endl;
+
+      //http://www.opengl.org/sdk/docs/man/html/glGet.xhtml
 
       std::string ARB("ARB");
       std::string NV("NV");
@@ -886,14 +891,14 @@ void Plot_Window::draw()
 
       for(GLint extension_iter = 0; extension_iter < g_gl_number_of_extensions; ++extension_iter )
       {
+				CHECK_GL_ERROR("glGetStringi calls");
         std::string extension = (const char*)glGetStringi(GL_EXTENSIONS, extension_iter);
-        //DEBUG_OUTPUT(std::cout << glGetStringi(GL_EXTENSIONS, extension_iter) << std::endl;);
-        if (std::string::npos != extension.find("GL_ARB_imaging"))
+        DEBUG_OUTPUT(std::cout << glGetStringi(GL_EXTENSIONS, extension_iter) << std::endl;);
+        if (extension == "GL_ARB_imaging")
         {
           //has GL_ARB_imaging
           g_gl_has_GL_ARB_imaging   = true;
         }
-
 
         g_gl_extensions.push_back(extension);
         for (std::vector<std::string>::iterator pos = extension_types.begin();
@@ -914,7 +919,7 @@ void Plot_Window::draw()
       {
         std::cout << "OpenGL DOES NOT have GL_ARB_imaging;" << std::endl;
       }
-
+			CHECK_GL_ERROR("glGetIntegerv calls");
       GLint red_bits, green_bits, blue_bits, alpha_bits;
 
       // get number of color bits
@@ -955,7 +960,9 @@ void Plot_Window::draw()
       glGetIntegerv(GL_MAX_TEXTURE_STACK_DEPTH,    &max_texture_stack_depth);
 
       GLint max_vertex_attribs;
+			CHECK_GL_ERROR("Before GL_MAX_VERTEX_ATTRIBS call");
       glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,         &max_vertex_attribs);
+			CHECK_GL_ERROR("GL_MAX_VERTEX_ATTRIBS call");
       cout << "GL_MAX_VERTEX_ATTRIBS = " << max_vertex_attribs << endl;
     }
   }
@@ -965,6 +972,7 @@ void Plot_Window::draw()
   if( !valid()) {
     valid(1);
     glMatrixMode(GL_PROJECTION);
+		CHECK_GL_ERROR("GL_PROJECTION call");
     glLoadIdentity();
     glOrtho(-1, 1, -1, 1, 1000, -1000);
     glViewport(0, 0, w(), h());
@@ -997,6 +1005,7 @@ void Plot_Window::draw()
   magnification = sqrt(xscale*yscale) / initial_scale;
   glTranslatef (-xcenter, -ycenter, -zcenter);
   glTranslatef (-xzoomcenter, -yzoomcenter, -zzoomcenter);
+
 
   if( cp->dont_clear->value() == 0) {
     glClearColor(0.0, 0.0, 0.0, 0.0);
