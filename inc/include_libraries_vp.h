@@ -156,6 +156,7 @@
 #ifdef __APPLE__
   #include <OpenGL/glext.h>
   #include <OpenGL/glu.h>
+  #include <OpenGL/gl3.h>
 #endif // __APPLE__
 #ifdef __linux__
   #include <GL/glext.h>
