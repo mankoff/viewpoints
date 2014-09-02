@@ -3837,17 +3837,21 @@ int Data_File_Manager::read_tree_from_root_file()
     leaf_length[i_iter] = leaf->GetMaximum();
     leaf_len[i_iter]    = leaf->GetLen();
     size_leaf           = leaf->GetLeafCounter(count_value);
+    //value               = leaf->GetValue();
 
     cout << "===============" << endl;
     cout << leaf->GetName() << endl;
+    cout << leaf->GetTitle() << endl;
     cout << "===============" << endl;
+    cout << "n_data       = " << leaf->GetNData() << std::endl;
     cout << "leaf_length  = " << leaf_length[i_iter] << "\t";
     cout << "leaf_len     = " << leaf_len[i_iter] << "\t";
     cout << "count_value  = " << count_value << "\t" << "size_leaf   = ";
     if (size_leaf)
     {
       cout << size_leaf->GetName() << endl;
-      cout << size_leaf->GetMaximum() << endl;
+      cout << size_leaf->GetName()    << "; Max = ";
+      cout << size_leaf->GetMaximum() << " Min = ";
       cout << size_leaf->GetMinimum() << endl;
     }
     else
@@ -3933,6 +3937,32 @@ int Data_File_Manager::read_tree_from_root_file()
     {
       map_leaf_name_to_int_storage[leaf_name] = std::vector<int>(map_leaf_name_to_maximum_size[leaf_name], 0);
       a_tree->SetBranchAddress(leaf_name.c_str(), &(map_leaf_name_to_int_storage[leaf_name][0]), &(map_leaf_name_to_tbranch[leaf_name]));
+    }
+    else if (leaf->InheritsFrom(TLeafElement::Class()))
+    {
+      //
+      //std::cout << leaf->GetName() <<  " is derived from TLeafElement::Class()" << std::endl;
+      //std::cout << leaf->GetTitle() << " Title()" << std::endl;
+//      const std::string holding = static_cast<TBranchElement *>(leaf->GetBranch())->GetTargetClass()->GetName();
+//      if (holding == "vector<int>")
+//      {
+//        std::cout << "storing a vector<int>;" << std::endl;
+//        //currently unsure how to get size of the vector<int>;
+////        map_leaf_name_to_int_storage[leaf_name] = std::vector<int>(16,0);
+////        a_tree->SetBranchAddress(leaf_name.c_str(), &(map_leaf_name_to_int_storage[leaf_name][0]), &(map_leaf_name_to_tbranch[leaf_name]));
+//      }
+//      else if (holding == "vector<float>")
+//      {
+//        std::cout << "storing a vector<float>;" << std::endl;
+//      }
+//      else if (holding == "vector<double>")
+//      {
+//        std::cout << "storing a vector<double>;" << std::endl;
+//      }
+//      else
+//      {
+//        std::cout << "Unsure what this is is;" << std::endl;
+//      }
     }
   }
 
