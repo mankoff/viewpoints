@@ -11,10 +11,27 @@ Steps,
  
  [x] bring over changes including ROOT reading;
  
- [ ] attempt to build a simple JSON reader;
+ [ ] attempt to build a simple JSON reader; (later)
  
- [ ] run cppcheck on the entire source code; (still have soem errors to fix
- 
+ [ ] run cppcheck on the entire source code; (still have some errors to fix)
+         cppcheck --enable=all -I../inc -I../fl_flews -i/usr/include/root -i/usr/include
+     [x] large number errors (many due to not initializing variables within a
+                               a constructor)
+     [ ] large number of errors due to incomplete features (ascii based input)
+
+ [ ] Refactoring:
+
+     [ ] refactor external and internal interfaces
+     [ ] refactor large number of operational storage elements
+         into separate use case elements
+     [ ] change operations on a single element to be commands
+     [ ] rework update behaviour to be more observer 'like'
+         Why: (1) Histograms and plots are observer (or updated via mediator)
+              (2) Updates can propogate properly
+                  from [element(a)]->[change_type(a,shift?)]->[histogram(b|a)]
+                                                            ->[histogram(c|a)]
+         These update and queries should be able to be threaded/dispatched.
+         Roughly histogramming is MapReduce (similarly with plotting)
  [x] correct warnings from gcc and g++; (mostly); 
  
  [ ] correct warnings from clang and clang++ -Weverything 
@@ -28,6 +45,9 @@ Steps,
  [ ] start re-writing the code(?)
 
  [ ] Move sprite brushes to image files (TGA?)
+
+ [x] Added a check against GL_ARB_imaging
+     Allows for initialize_sprites() calls;
 Code removed from initialize_sprites() [plot_window.cpp]
 
     //GLfloat rgb2rgba[16] = {
@@ -62,6 +82,9 @@ What this code does:
 //THESE are deprecated in OpenGL v3
 //http://www.opengl.org/wiki/Texture#Swizzle_mask
 //Texture Swizzle Mask requires 3.3 (at least)
+
+
+Texture INFORMATION:
 
 idata_## is of size 12288 (note some are character string created :/)
 Meaning that there is \0 at the end; (size is thus 12289 :/)
