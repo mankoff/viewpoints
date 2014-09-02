@@ -62,6 +62,7 @@
 #include <TLeafI.h>
 #include <TLeafD.h>
 #include <TLeafB.h>
+#include <TLeafElement.h>
 
 #include <TKey.h>
 #include <TH1.h>
