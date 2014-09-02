@@ -1688,6 +1688,7 @@ int Data_File_Manager::read_binary_file_with_headers()
     cerr << " -WARNING, too many data columns, "
          << "restoring original data"
          << endl;
+    fclose( pInFile);
     return 1;
   }
   for( int j_iter=0; j_iter< nDataColumns_; j_iter++)
