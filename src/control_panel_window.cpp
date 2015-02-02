@@ -92,6 +92,7 @@ Control_Panel_Window::Control_Panel_Window() :
 	point_size_save_( 0.0),
   scale_points_save_( 0),
   transform_style_save_(0),
+  blend_style_save_(0),
   index(0)
 {}
 
@@ -124,6 +125,7 @@ void Control_Panel_Window::make_state()
   blend_style_save_ = blend_style_value();
 }
 
+//external interface?
 //***************************************************************************
 // Control_Panel_Window::copy_state( &cp) -- Copy state parameters from
 // another object.
@@ -146,6 +148,7 @@ void Control_Panel_Window::copy_state( Control_Panel_Window* cp)
   blend_style_save_ = cp->blend_style_save_;
 }
 
+//external interface?
 //***************************************************************************
 // Control_Panel_Window::load_state() -- Load state parameters into widgets.
 // WARNING: There is no protection against bad state parameters or the
@@ -167,6 +170,7 @@ void Control_Panel_Window::load_state()
   blend_style_value( blend_style_save_);
 }
 
+//external interface?
 //***************************************************************************
 // Control_Panel_Window::restrict_axis_indices( ivar_max, jvar_max, kvar_max)
 // restrict axes indices.
@@ -236,6 +240,7 @@ void Control_Panel_Window::blend_style_value( int blend_style_in)
   else blend_menu->value( 2);
 }
 
+//external interface?
 //***************************************************************************
 // Control_Panel_Window::broadcast_change (*master_widget) -- Broadcast an
 // interaction from the master panel to all (unlocked) panels.
@@ -344,6 +349,7 @@ void Control_Panel_Window::extract_and_redraw ()
   pw->extract_data_points();
 }
 
+//external interface?
 //***************************************************************************
 // Control_Panel_Window::make_widgets( cpw) -- Make widgets
 void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
@@ -360,7 +366,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
 
   // The following portion of the panel deals with axes and their properties
 
-  xpos = 50;
+//  xpos = 50;
   int subwidth=105;  // ~1/3 of (width - extra room)
 
   // one label for row of axis labels & axis lock buttons

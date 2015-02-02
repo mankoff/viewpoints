@@ -410,14 +410,16 @@ int Plot_Window::handle( int event)
     else if( Fl::event_state() == FL_BUTTON1)
     {
       // determine current and previous active plot windows
-      static Plot_Window *previous_plot, *current_plot = nullptr;
+      static Plot_Window *previous_plot = nullptr;
+      static Plot_Window *current_plot  = nullptr;
       previous_plot = current_plot;
-      current_plot = this;
+      current_plot  = this;
 
       // determine current and previous active brushes
-      static Brush *previous_brush, *current_brush = nullptr;
+      static Brush *previous_brush = nullptr;
+      static Brush *current_brush  = nullptr;
       previous_brush = current_brush;
-      current_brush =  dynamic_cast <Brush*> (brushes_tab->value());
+      current_brush  =  dynamic_cast <Brush*> (brushes_tab->value());
       assert (current_brush);
 
       newly_selected(blitz::Range(0,npoints-1)) = 0;
@@ -1001,7 +1003,6 @@ void Plot_Window::center_on_click( int in_x, int in_y)
 // Plot_Window::draw_resize_knob() -- Draw visual target (knob) for resize.
 void Plot_Window::draw_resize_knob()
 {
-#ifdef __APPLE__
   glDisable( GL_DEPTH_TEST);
   glEnable( GL_COLOR_LOGIC_OP);
   glLogicOp( GL_XOR);
@@ -1009,15 +1010,14 @@ void Plot_Window::draw_resize_knob()
   glColor4f( 0.5,0.5,0.5,1.0);
 
   // Character buffers to contain strings for (fltk OpenGL) printing.
-  char buf1[] = "_|";
+  const char * buf1 = "_|";
 
   // Print a widget in lower-right to show where lower corner of the window is
   gl_font( FL_HELVETICA_BOLD, 11);
   glWindowPos2i( (w()-(int)gl_width(buf1)) - 1, 3);
-  gl_draw( (const char *) buf1);
+  gl_draw( buf1);
 
   glDisable( GL_COLOR_LOGIC_OP);
-#endif // __APPLE__
 }
 
 //***************************************************************************
@@ -1354,18 +1354,25 @@ void Plot_Window::print_selection_stats ()
   // Print selection statistics, centered, near the top of the window
   // LR-centered, upper 95th percentile of the window
   snprintf( buf1, sizeof(buf1), "%8d (%5.2f%%) selected", nselected, 100.0*nselected/(float)npoints);
+  //
+//  std::stringstream oss_1;
+//  oss_1 << std::setw(8) << nselected << " (" << std::fixed << std::setprecision(2) << std::setw(5) << 100.0 * double(nselected)/double(npoints) << "%)";
+//  std::string buf_1 = oss_1.str();
+
   gl_font( FL_HELVETICA_BOLD, 11);
   glWindowPos2i( (w()-(int)gl_width(buf1))/2, 95*h()/100);
   gl_draw( (const char *) buf1);
 
   gl_font( FL_HELVETICA, 10);
 
+  //the buffers can be replaced by actually properly writing a C++ scoped string
   // Print ranges at right sides of selection box
-
   // first the left and right boundary values
   float xmin = min(xdown,xtracked);
   float xmax = max(xdown,xtracked);
   interval_to_strings(cp->varindex1->value(), xmin, xmax, buf1, buf2);
+  //this call uses sprintf
+  //on two buffers
   gl_draw( (const char *) buf1, xmin-2.25*gl_width(buf1)/(w()*xscale), ((ydown+ytracked)/2)-(0.5f*gl_height())/(h()*yscale));
   gl_draw( (const char *) buf2, xmax+4.0f/(w()*xscale), ((ydown+ytracked)/2)-(0.5f*gl_height())/(h()*yscale) );
 
@@ -1373,6 +1380,7 @@ void Plot_Window::print_selection_stats ()
   float ymin = min(ydown,ytracked);
   float ymax = max(ydown,ytracked);
   interval_to_strings(cp->varindex2->value(), ymin, ymax, buf1, buf2);
+  //this call uses sprintf
   gl_draw( (const char *) buf1, (xmin+xmax)/2-gl_width(buf1)/(w()*xscale), ymin-(2.0f*gl_height())/(h()*yscale) );
   gl_draw( (const char *) buf2, (xmin+xmax)/2-gl_width(buf2)/(w()*xscale), ymax+(0.5f*gl_height())/(h()*yscale) );
 

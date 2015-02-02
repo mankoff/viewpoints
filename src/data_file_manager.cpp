@@ -3843,7 +3843,7 @@ int Data_File_Manager::read_tree_from_root_file()
     cout << leaf->GetName() << endl;
     cout << leaf->GetTitle() << endl;
     cout << "===============" << endl;
-    cout << "n_data       = " << leaf->GetNData() << std::endl;
+    cout << "n_data       = " << leaf->GetNdata() << std::endl;
     cout << "leaf_length  = " << leaf_length[i_iter] << "\t";
     cout << "leaf_len     = " << leaf_len[i_iter] << "\t";
     cout << "count_value  = " << count_value << "\t" << "size_leaf   = ";
