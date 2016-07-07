@@ -945,12 +945,27 @@ void Plot_Window::draw()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
   }
 
-  if( use_VBOs ) {
-    if( !VBOinitialized) initialize_VBO();
-    if( !VBOfilled) fill_VBO();
-    if( !indexVBOsinitialized) initialize_indexVBOs();
-    if( !indexVBOsfilled) fill_indexVBOs();
-  }
+  if( use_VBOs )
+  {
+    if( !VBOinitialized)
+    {
+      initialize_VBO();
+    }
+    if( !VBOfilled)
+    {
+      fill_VBO();
+    }
+    if( !indexVBOsinitialized)
+    {
+        initialize_indexVBOs();
+    }
+    if( !indexVBOsfilled)
+    {
+      fill_indexVBOs();
+    }
+  }//this is bad design
+  //__TODO__ VBOs should be disable if they aren't being used any more
+  //
 
   draw_background ();
   draw_data_points();
@@ -1603,7 +1618,8 @@ void Plot_Window::draw_data_points()
   }
 
   // Tell the GPU where to find the vertices for this plot.
-  if (use_VBOs) {
+  if (use_VBOs)
+  {
     // bind VBO for vertex data
     CHECK_GL_ERROR("before glBindBuffer");
 //DEBUG_OUTPUT( std::cout << "glBindBuffer(GL_ARRAY_BUFFER) for " << m_buffer_one << std::endl; );
@@ -1620,7 +1636,8 @@ void Plot_Window::draw_data_points()
 
     glVertexPointer (3, GL_FLOAT, 0, BUFFER_OFFSET(0));
   }
-  else {
+  else
+  {
     glVertexPointer (3, GL_FLOAT, 0, (GLfloat *)vertices.data());
   }
 
@@ -2922,19 +2939,19 @@ void Plot_Window::disable_sprites()
 // Plot_Window::initialize_VBO() -- Initialize VBO for this window
 void Plot_Window::initialize_VBO()
 {
-  // Create a VBO. Index 0 is reserved.
   if (!VBOinitialized)
   {
+    // Create a VBO. Index 0 is reserved.
     glGenBuffers(1, &m_buffer_one);
     CHECK_GL_ERROR("glGenBuffers call");
 
-//    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to bind to a buffer " << m_buffer_one << std::endl;);
+    //    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to bind to a buffer " << m_buffer_one << std::endl;);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer_one);
     CHECK_GL_ERROR ("creating VBO");
 
     // Reserve enough space in openGL server memory VBO to hold all the
     // vertices, but do not initilize it.
-//    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to fill " << m_buffer_one << std::endl;);
+    //    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to fill " << m_buffer_one << std::endl;);
     glBufferData( GL_ARRAY_BUFFER, (GLsizeiptr) (npoints*3*sizeof(GLfloat)), nullptr, GL_DYNAMIC_DRAW);
 
     // Make sure we succeeded
@@ -2949,9 +2966,9 @@ void Plot_Window::initialize_VBO()
 void Plot_Window::fill_VBO()
 {
   if (!VBOfilled) {
-//    DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ARRAY_BUFFER) " << m_buffer_one << std::endl;);
+    //DEBUG_OUTPUT(std::cout << __PRETTY_FUNCTION__ << "\nAttempting to glBindBuffer(GL_ARRAY_BUFFER) " << m_buffer_one << std::endl;);
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer_one);
-//    DEBUG_OUTPUT(std::cout <<"glIsBuffer(" << m_buffer_one<< ")= " << std::boolalpha << (glIsBuffer(m_buffer_one) == GL_TRUE) << std::endl;);
+    //DEBUG_OUTPUT(std::cout <<"glIsBuffer(" << m_buffer_one<< ")= " << std::boolalpha << (glIsBuffer(m_buffer_one) == GL_TRUE) << std::endl;);
     CHECK_GL_ERROR("after glBindBuffer");
     void * vertexp = (void *) vertices.data();
     glBufferSubData( GL_ARRAY_BUFFER, (GLintptr) 0, (GLsizeiptr) (npoints*3*sizeof(GLfloat)), vertexp);

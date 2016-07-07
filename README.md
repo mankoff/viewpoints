@@ -76,7 +76,9 @@ sudo apt-get --install-suggests install libblitz0-dev libboost1.55-all-dev \
 libfltk1.3-dev root-system-bin libroot-tree-dev libcfitsio3-dev \
 libgsl0-dev g++-4.8 gfortran libxcb-xinerama0-dev libxinerama-dev \
 libgl-dev libgl1-mesa-dev libgl1-mesa-glx-dev libglu-dev libglu1-mesa-dev \
-libxft2-dev libgl1-mesa-dri-experimental freeglut3-dev cmake
+libxft2-dev libgl1-mesa-dri-experimental freeglut3-dev cmake \
+libroot-graf3d-g3d-dev libroot-math-physics-dev \
+libroot-graf2d-postscript-dev libroot-core-dev
 ```
 
 Mac OS X (10.9)

@@ -366,7 +366,7 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
 
   // The following portion of the panel deals with axes and their properties
 
-//  xpos = 50;
+  //  xpos = 50;
   int subwidth=105;  // ~1/3 of (width - extra room)
 
   // one label for row of axis labels & axis lock buttons
@@ -407,12 +407,11 @@ void Control_Panel_Window::make_widgets( Control_Panel_Window *cpw)
 
   // Dynamically build the variables (axes selection) menu(s).
   // cout << "starting axes menu build, nvars = " << nvars << endl;
-  for( long i=0; i<=nvars; i++) {
-    // cout << "label " << i
-    //      << " = " << (column_info[i].label).c_str() << endl;
-    // varindex_menu_items[i].label((const char *) ((column_info[i].label).c_str()));
-    varindex_menu_items[i].label(pdfm->column_label(i).c_str());
-    varindex_menu_items[i].user_data((void *)i);
+  for( long i = 0; i <= nvars; i++) {
+    //std::cout << pdfm->column_label(i).c_str() << std::endl;
+    // varindex_menu_items[i].label((const char * )pdfm->column_label(i).c_str());
+    //varindex_menu_items[i].user_data((void *)i);
+    varindex_menu_items[i].add((const char * )pdfm->column_label(i).c_str(), 0, 0, (void*) i);
   }
   varindex_menu_items[nvars+1].label(nullptr);
 
