@@ -1,0 +1,3 @@
+[submodule "fl_flews"]
+	path = fl_flews
+	url = https://github.com/kingtaurus/fl_flews

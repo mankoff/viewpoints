@@ -1,0 +1,107 @@
+cmake_minimum_required(VERSION 2.8)
+project(viewpoints)
+
+set (CPACK_INSTALL_PREFIX "/usr")
+set (${PROJECT_NAME}_VERSION_MAJOR 0)
+set (${PROJECT_NAME}_VERSION_MINOR 1)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+find_package(FLTK REQUIRED)
+find_package(GLUT REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GSL REQUIRED)
+find_package(Blitzpp REQUIRED)
+find_package(CFITSIO REQUIRED)
+find_package(ROOT REQUIRED)
+
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.46 COMPONENTS system serialization REQUIRED)
+
+SET (CMAKE_C_FLAGS                "-std=c99 -pedantic -Wall -W -fPIC")
+SET (CMAKE_C_FLAGS_DEBUG          "-O0 -g3")
+SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
+SET (CMAKE_C_FLAGS_RELEASE        "-O3 -DNDEBUG")
+SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g2")
+
+SET (CMAKE_CXX_FLAGS                "-std=c++11 -pedantic -Wall -Wextra -Wshadow -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings -fPIC")
+SET (CMAKE_CXX_FLAGS_DEBUG          "-O0 -g3")
+SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -g0 -DNDEBUG")
+SET (CMAKE_CXX_FLAGS_RELEASE        "-O3 -g0 -DNDEBUG")
+SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g2")
+
+IF(NOT CMAKE_BUILD_TYPE)
+	SET(CMAKE_BUILD_TYPE DEBUG
+		CACHE STRING "Choose the type of build : NONE DEBUG RELEASE RELWITHDEBINFO MINSIZEREL."
+    FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+IF(APPLE)
+#-v -stdlib=libc++
+  message(STATUS "Building for APPLE")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v -stdlib=libc++ -lc++")
+  SET(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
+ENDIF(APPLE)
+
+
+#IF(APPLE)
+#  SET(CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE} "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE} -stdlib=libstdc++")
+#ENDIF(APPLE)
+
+message("* Current build type is  : * ${CMAKE_BUILD_TYPE} *")
+message("** Build Warnings        : * ${CMAKE_CXX_FLAGS} *")
+message("** DEBUG                 : * ${CMAKE_CXX_FLAGS_DEBUG} *")
+message("** MINSIZEREL            : * ${CMAKE_CXX_FLAGS_MINSIZEREL} *")
+message("** RELEASE               : * ${CMAKE_CXX_FLAGS_RELEASE} *")
+message("** RELWITHDEBINFO        : * ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} *")
+
+#if(${CMAKE_BUILD_TYPE} MATCHES "NONE")
+#  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+#elseif (${CMAKE_BUILD_TYPE} MATCHES "DEBUG")
+#  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS_DEBUG}")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
+#elseif (${CMAKE_BUILD_TYPE} MATCHES "RELEASE")
+#  set(CMAKE_C_FLAGS   "-g0 ${CMAKE_C_FLAGS_RELEASE}")
+#  set(CMAKE_CXX_FLAGS "-g0 ${CMAKE_CXX_FLAGS_RELEASE}")
+#elseif (${CMAKE_BUILD_TYPE} MATCHES "RELWITHDEBINFO")
+#  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+#elseif (${CMAKE_BUILD_TYPE} MATCHES "MINSIZEREL")
+#  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS_MINSIZEREL}")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_MINSIZEREL}")
+#elseif ()
+#  message("Build type: ${CMAKE_BUILD_TYPE} is not known; defaulting to DEBUG")
+#  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS_DEBUG}")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
+#endif()
+
+#message("** C   FLAGS             : * ${CMAKE_C_FLAGS} *")
+#message("** CXX FLAGS             : * ${CMAKE_CXX_FLAGS} *")
+
+#configure_file (
+#  "${PROJECT_SOURCE_DIR}/inc/config.h.in"
+#  "${PROJECT_BINARY_DIR}/config.h"
+#)
+
+include_directories(${Blitz_INCLUDE_DIR}
+                    ${GSL_INCLUDE_DIR}
+                    ${Boost_INCLUDE_DIRS}
+                    ${OPENGL_INCLUDE_DIRS}
+                    ${GLUT_INCLUDE_DIRS}
+                    ${CFITSIO_INCLUDE_DIR}
+                    ${ROOT_INCLUDE_DIR})
+
+
+include_directories(${PROJECT_SOURCE_DIR}/inc)
+include_directories(${PROJECT_SOURCE_DIR}/fl_flews)
+include_directories(${PROJECT_BINARY_DIR})
+
+add_subdirectory(fl_flews)
+add_subdirectory(src)
+
+
+
+
